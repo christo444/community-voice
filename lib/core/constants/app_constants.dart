@@ -1,11 +1,11 @@
 /// Application-wide constants
 class AppConstants {
   // App Info
-  static const String appName = 'Aawaaz Plus';
+  static const String appName = 'Community Voice';
   static const String appVersion = '1.0.0';
   
   // Database
-  static const String databaseName = 'aawaaz_plus.db';
+  static const String databaseName = 'community_voice.db';
   static const int databaseVersion = 1;
   
   // Tables

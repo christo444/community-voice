@@ -1,4 +1,4 @@
-# 🎉 Aawaaz Plus MVP - Complete Implementation
+# 🎉 Community Voice MVP - Complete Implementation
 
 ## ✅ Implementation Status: **COMPLETE**
 

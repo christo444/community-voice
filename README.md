@@ -1,8 +1,8 @@
-# Aawaaz Plus - Voice-Driven Welfare Access App
+# Community Voice - Voice-Driven Welfare Access App
 
 ## Overview
 
-Aawaaz Plus is a production-ready MVP Flutter application designed for low-literacy users to check welfare scheme eligibility using voice prompts. The app follows clean architecture principles and is offline-first.
+Community Voice is a production-ready MVP Flutter application designed for low-literacy users to check welfare scheme eligibility using voice prompts. The app follows clean architecture principles and is offline-first.
 
 ## Architecture
 

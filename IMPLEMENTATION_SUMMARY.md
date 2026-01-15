@@ -1,4 +1,4 @@
-# Aawaaz Plus - Implementation Summary
+# Community Voice - Implementation Summary
 
 ## Project Structure
 

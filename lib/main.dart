@@ -25,11 +25,11 @@ import 'presentation/viewmodels/eligibility_viewmodel.dart';
 import 'presentation/screens/home_screen.dart';
 
 void main() {
-  runApp(const AawaazPlusApp());
+  runApp(const CommunityVoiceApp());
 }
 
-class AawaazPlusApp extends StatelessWidget {
-  const AawaazPlusApp({super.key});
+class CommunityVoiceApp extends StatelessWidget {
+  const CommunityVoiceApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +80,7 @@ class AawaazPlusApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'Aawaaz Plus',
+        title: 'Community Voice',
         theme: AppTheme.lightTheme,
         home: const HomeScreen(),
         debugShowCheckedModeBanner: false,

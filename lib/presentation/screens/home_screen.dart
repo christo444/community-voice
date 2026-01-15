@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Aawaaz Plus'),
+        title: const Text('Community Voice'),
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline),
@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 // Header
                 const Text(
-                  'Welcome to Aawaaz Plus',
+                  'Welcome to Community Voice',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -161,9 +161,9 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('About Aawaaz Plus'),
+        title: const Text('About Community Voice'),
         content: const Text(
-          'Aawaaz Plus helps you check eligibility for welfare schemes using voice prompts.\n\n'
+          'Community Voice helps you check eligibility for welfare schemes using voice prompts.\n\n'
           'Features:\n'
           '• Voice-based data collection\n'
           '• Offline-first\n'
