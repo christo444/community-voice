@@ -1,7 +1,7 @@
 name: community_voice
-description: "A new Flutter project."
+description: "Aawaaz Plus - Voice-Driven Welfare Access App MVP"
 publish_to: 'none'
-version: 0.1.0
+version: 1.0.0+1
 
 environment:
   sdk: ^3.9.2
@@ -9,6 +9,25 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  
+  # State Management
+  provider: ^6.1.2
+  
+  # Local Storage
+  sqflite: ^2.4.1
+  path_provider: ^2.1.5
+  path: ^1.9.0
+  
+  # Voice Services
+  speech_to_text: ^7.0.0
+  audioplayers: ^6.1.0
+  
+  # HTTP & JSON
+  http: ^1.2.2
+  
+  # Utilities
+  intl: ^0.19.0
+  equatable: ^2.0.7
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +36,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  
+  # Assets for audio prompts (to be added later)
+  # assets:
+  #   - assets/audio/
