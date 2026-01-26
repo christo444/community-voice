@@ -1,3 +1,4 @@
+import 'package:community_voice/features/app_features/presentation/pages/homepage/home_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -9,17 +10,8 @@ class CommunityVoice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  MaterialApp(
-      home: Scaffold(
-        backgroundColor: Colors.blue,
-        appBar: AppBar(
-          title: Text("Community Voice"),
-          backgroundColor: Colors.red,
-        ),
-        body: Center(
-          child: Text("Community Voice"),
-        ),
-      ),
-    );
+    return const MaterialApp(
+      home: HomePage(),
+      );
   }
 }
