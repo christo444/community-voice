@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// =================================================================
 /// SCHEME TILE WIDGET - UI DESIGNER'S FILE
@@ -38,24 +39,51 @@ class SchemeTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // ===== UI DESIGNER: CUSTOMIZE BELOW =====
-    return ListTile(
+    return GestureDetector(
       onTap: onTap,
-      title: Text(
-        name,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+        padding: contentPadding ?? const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: tileColor ?? Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 10,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: GoogleFonts.roboto(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    description,
+                    style: GoogleFonts.roboto(
+                      fontSize: 14,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (trailing != null) trailing!,
+          ],
         ),
       ),
-      subtitle: Text(
-        description,
-        style: const TextStyle(
-          fontSize: 14,
-        ),
-      ),
-      trailing: trailing,
-      tileColor: tileColor ?? Colors.white,
-      contentPadding: contentPadding ?? const EdgeInsets.all(16),
     );
     // ===== END CUSTOMIZATION ZONE =====
   }
