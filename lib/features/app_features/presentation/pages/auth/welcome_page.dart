@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../../../../domain/repository/auth_repository.dart';
 import 'phone_input_page.dart';
-import '../homepage/home_page.dart';
+import '../ocr_screens/aadhaar_test_launcher.dart';
 
 class WelcomePage extends StatelessWidget {
   final String phoneNumber;
@@ -139,13 +139,13 @@ class WelcomePage extends StatelessWidget {
               const SizedBox(height: 32),
               
               // Continue button (placeholder for main app)
-              // Continue to main app
+              // Continue to Aadhaar verification
 ElevatedButton(
   onPressed: () {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => const HomePage(),
+        builder: (context) => const AadhaarTestLauncher(),
       ),
     );
   },

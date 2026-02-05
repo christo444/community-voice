@@ -1,6 +1,5 @@
-import 'package:community_voice/features/app_features/presentation/pages/homepage/home_page.dart';
 import 'package:community_voice/features/app_features/presentation/pages/auth/phone_input_page.dart';
-import 'package:community_voice/features/app_features/presentation/pages/auth/welcome_page.dart';
+import 'package:community_voice/features/app_features/presentation/pages/ocr_screens/aadhaar_test_launcher.dart';
 import 'package:community_voice/domain/repository/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -65,11 +64,11 @@ class _SplashScreenState extends State<SplashScreen> {
       if (!mounted) return;
 
       if (user != null) {
-        // User is logged in - go to home page
+        // User is logged in - go to Aadhaar verification
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => const HomePage(), // Your existing home page
+            builder: (context) => const AadhaarTestLauncher(),
           ),
         );
       } else {
