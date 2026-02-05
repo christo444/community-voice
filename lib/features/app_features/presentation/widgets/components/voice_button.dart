@@ -34,15 +34,21 @@ class VoiceButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // ===== UI DESIGNER: CUSTOMIZE BELOW =====
-    return IconButton(
-      icon: Icon(
-        isSpeaking ? Icons.stop : Icons.volume_up,
-        color: iconColor ?? AppColors.maroon,
-        size: size,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.maroon.withValues(alpha: 0.1),
+        shape: BoxShape.circle,
       ),
-      onPressed: onPressed,
-      splashRadius: 24,
-      tooltip: isSpeaking ? 'Stop' : 'Listen',
+      child: IconButton(
+        icon: Icon(
+          isSpeaking ? Icons.stop_rounded : Icons.volume_up_rounded,
+          color: iconColor ?? AppColors.maroon,
+          size: size,
+        ),
+        onPressed: onPressed,
+        splashRadius: 22,
+        tooltip: isSpeaking ? 'Stop' : 'Listen',
+      ),
     );
     // ===== END CUSTOMIZATION ZONE =====
   }
@@ -71,21 +77,27 @@ class FloatingVoiceButton extends StatelessWidget {
     // ===== UI DESIGNER: CUSTOMIZE BELOW =====
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor ?? AppColors.maroon,
+        gradient: const LinearGradient(
+          colors: [
+            AppColors.maroon,
+            Color(0xFF4A0E1A),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
       child: IconButton(
         icon: Icon(
-          isSpeaking ? Icons.stop : Icons.volume_up,
-          color: iconColor ?? AppColors.white,
+          isSpeaking ? Icons.stop_rounded : Icons.volume_up_rounded,
+          color: iconColor ?? Colors.white,
           size: size,
         ),
         onPressed: onPressed,

@@ -1,6 +1,7 @@
-import 'package:community_voice/core/theme/colors.dart';
+import 'package:community_voice/features/app_features/presentation/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SchemeDetailPage extends StatefulWidget {
   final String name;
@@ -76,78 +77,88 @@ class _SchemeDetailPageState extends State<SchemeDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("പദ്ധതി വിശദാംശങ്ങൾ"),
-        backgroundColor: AppColors.maroon,
-        foregroundColor: AppColors.white,
-      ),
+      appBar: const CustomAppBar(title: "പദ്ധതി വിശദാംശങ്ങൾ"),
+      backgroundColor: const Color.fromARGB(255, 237, 233, 233),
       body: Stack(
         children: [
-          // Main content
-          Padding(
-            padding: const EdgeInsets.all(16.0),
+          // Main scrollable content
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Scheme Name
-                Text(
-                  widget.name,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.maroon,
+                // Scheme Name Card
+                Card(
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: DetailTitle(text: widget.name),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SectionSpacer(height: 20),
                 
                 // Description Section
-                const Text(
-                  "വിശദാംശങ്ങൾ:", // Details
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                const SectionHeading(text: "വിശദാംശങ്ങൾ:"),
+                const SectionSpacer(height: 12),
+                Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    // ===== UI DESIGNER: CUSTOMIZE DESCRIPTION TEXT BELOW =====
+                    child: Text(
+                      widget.description,
+                      style: GoogleFonts.openSans(
+                        fontSize: 16, // ✅ CUSTOMIZABLE: 15.5 → 16 (Larger)
+                        height: 1.6, // ✅ CUSTOMIZABLE: Line spacing
+                        color: Colors.black87, // ✅ CUSTOMIZABLE: Dark black
+                        fontWeight: FontWeight.w500, // ✅ CUSTOMIZABLE: Semi-bold
+                      ),
+                    ),
+                    // ===== END CUSTOMIZATION ZONE =====
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  widget.description,
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 20),
+                const SectionSpacer(height: 20),
                 
                 // How to Apply Section
-                const Text(
-                  "എങ്ങനെ അപേക്ഷിക്കാം:", // How to apply
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                const SectionHeading(text: "എങ്ങനെ അപേക്ഷിക്കാം:"),
+                const SectionSpacer(height: 12),
+                Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    // ===== UI DESIGNER: CUSTOMIZE HOW-TO-APPLY TEXT BELOW =====
+                    child: Text(
+                      widget.howToApply,
+                      style: GoogleFonts.openSans(
+                        fontSize: 16, // ✅ CUSTOMIZABLE: 15.5 → 16 (Larger)
+                        height: 1.7, // ✅ CUSTOMIZABLE: Line spacing
+                        color: Colors.black87, // ✅ CUSTOMIZABLE: Dark black
+                        fontWeight: FontWeight.w400, // ✅ CUSTOMIZABLE: Regular weight
+                      ),
+                    ),
+                    // ===== END CUSTOMIZATION ZONE =====
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  widget.howToApply,
-                  style: const TextStyle(fontSize: 16),
-                ),
+                const SectionSpacer(height: 32),
               ],
             ),
           ),
-          // Voice button at top right
+          // Floating Voice button at top right
           Positioned(
             top: 16,
             right: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.maroon,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: Icon(
-                  isSpeaking ? Icons.stop : Icons.volume_up,
-                  color: AppColors.white,
-                  size: 28,
-                ),
-                onPressed: _toggleSpeech,
-              ),
+            child: FloatingVoiceButton(
+              isSpeaking: isSpeaking,
+              onPressed: _toggleSpeech,
             ),
           ),
         ],

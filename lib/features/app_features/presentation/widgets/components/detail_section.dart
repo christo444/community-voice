@@ -1,5 +1,6 @@
 import 'package:community_voice/core/theme/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// =================================================================
 /// DETAIL SECTION WIDGETS - UI DESIGNER'S FILE
@@ -35,10 +36,11 @@ class DetailTitle extends StatelessWidget {
     // ===== UI DESIGNER: CUSTOMIZE BELOW =====
     return Text(
       text,
-      style: TextStyle(
+      style: GoogleFonts.merriweather(
         fontSize: fontSize ?? 24,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w700,
         color: color ?? AppColors.maroon,
+        letterSpacing: 0.3,
       ),
     );
     // ===== END CUSTOMIZATION ZONE =====
@@ -60,9 +62,10 @@ class SectionHeading extends StatelessWidget {
     // ===== UI DESIGNER: CUSTOMIZE BELOW =====
     return Text(
       text,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
+      style: GoogleFonts.lato(
+        fontSize: 17,
+        fontWeight: FontWeight.w600,
+        color: Colors.black87,
       ),
     );
     // ===== END CUSTOMIZATION ZONE =====
@@ -84,8 +87,10 @@ class SectionContent extends StatelessWidget {
     // ===== UI DESIGNER: CUSTOMIZE BELOW =====
     return Text(
       text,
-      style: const TextStyle(
-        fontSize: 16,
+      style: GoogleFonts.openSans(
+        fontSize: 15.5,
+        height: 1.5,
+        color: Colors.black54,
       ),
     );
     // ===== END CUSTOMIZATION ZONE =====
