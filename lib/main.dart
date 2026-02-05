@@ -1,89 +1,61 @@
+// ignore_for_file: prefer_const_constructors
+
+import 'package:community_voice/screen.dart/aadhaar_test_launcher.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 
-// Core
-import 'core/constants/app_theme.dart';
-import 'core/services/database_helper.dart';
-import 'core/services/eligibility_engine.dart';
-
-// Data Layer
-import 'data/datasources/scheme_local_datasource.dart';
-import 'data/datasources/scheme_remote_datasource.dart';
-import 'data/datasources/user_session_local_datasource.dart';
-import 'data/repositories/scheme_repository_impl.dart';
-import 'data/repositories/user_session_repository_impl.dart';
-
-// Domain Layer
-import 'domain/usecases/scheme_usecases.dart';
-import 'domain/usecases/user_session_usecases.dart';
-
-// Presentation Layer
-import 'presentation/viewmodels/scheme_viewmodel.dart';
-import 'presentation/viewmodels/voice_intake_viewmodel.dart';
-import 'presentation/viewmodels/eligibility_viewmodel.dart';
-import 'presentation/screens/home_screen.dart';
 
 void main() {
-  runApp(const CommunityVoiceApp());
+  runApp(const CommunityVoice());
 }
 
-class CommunityVoiceApp extends StatelessWidget {
-  const CommunityVoiceApp({super.key});
+class CommunityVoice extends StatelessWidget {
+  const CommunityVoice({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Initialize dependencies
-    final dbHelper = DatabaseHelper();
-    final httpClient = http.Client();
-    
-    // Data sources
-    final schemeLocalDataSource = SchemeLocalDataSource(dbHelper);
-    final schemeRemoteDataSource = SchemeRemoteDataSource(httpClient);
-    final userSessionLocalDataSource = UserSessionLocalDataSource(dbHelper);
-    
-    // Repositories
-    final schemeRepository = SchemeRepositoryImpl(
-      remoteDataSource: schemeRemoteDataSource,
-      localDataSource: schemeLocalDataSource,
-    );
-    final userSessionRepository = UserSessionRepositoryImpl(
-      localDataSource: userSessionLocalDataSource,
-    );
-    
-    // Use cases
-    final syncSchemes = SyncSchemes(schemeRepository);
-    final getActiveSchemes = GetActiveSchemes(schemeRepository);
-    final saveUserSession = SaveUserSession(userSessionRepository);
-    
-    // Services
-    final eligibilityEngine = EligibilityEngine();
-    
-    return MultiProvider(
-      providers: [
-        // ViewModels
-        ChangeNotifierProvider(
-          create: (_) => SchemeViewModel(
-            syncSchemes: syncSchemes,
-            getActiveSchemes: getActiveSchemes,
-          ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: const Color.fromARGB(255, 132, 192, 242),
+        appBar: AppBar(
+          title: const Text("Community Voice"),
+          backgroundColor: Colors.red,
         ),
-        ChangeNotifierProvider(
-          create: (_) => VoiceIntakeViewModel(
-            saveUserSession: saveUserSession,
-          ),
+
+        // ✅ IMPORTANT: Builder gives correct Navigator context
+        body: Builder(
+          builder: (context) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Community Voice",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AadhaarTestLauncher(),
+                        ),
+                      );
+
+                      debugPrint("Aadhaar Scan Result: $result");
+                    },
+                    child: const Text("TEST Aadhaar Scan"),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
-        ChangeNotifierProvider(
-          create: (_) => EligibilityViewModel(
-            eligibilityEngine: eligibilityEngine,
-          ),
-        ),
-      ],
-      child: MaterialApp(
-        title: 'Community Voice',
-        theme: AppTheme.lightTheme,
-        home: const HomeScreen(),
-        debugShowCheckedModeBanner: false,
       ),
     );
   }
