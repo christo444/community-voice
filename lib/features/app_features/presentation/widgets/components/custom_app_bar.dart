@@ -91,14 +91,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           if (logoPath != null)
             const SizedBox(width: 12),
           // Title Text
-          Text(
-            title,
-            style: GoogleFonts.poppins(
-              fontSize: 25,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.3,
-              color: const Color.fromARGB(255, 253, 240, 213),
-              fontStyle: FontStyle.italic
+          Expanded(
+            child: Text(
+              title,
+              style: GoogleFonts.poppins(
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.3,
+                color: const Color.fromARGB(255, 253, 240, 213),
+                fontStyle: FontStyle.italic
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
         ],

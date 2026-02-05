@@ -156,20 +156,14 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       // ===== APP BAR WITH MAROON GRADIENT =====
-      appBar: AppBar(
-        title: const Text(
-          "സർക്കാർ പദ്ധതികൾ",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: const Color(0xFF800000),
-        elevation: 0,
+      appBar: CustomAppBar(
+        title: "സർക്കാർ പദ്ധതികൾ",
+        logoPath: 'assets/images/logo.png',
+        logoSize: 50.0,
         actions: [
           // Logout button
           IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
+            icon: const Icon(Icons.logout, color: Color.fromARGB(255, 253, 240, 213)),
             tooltip: 'Logout',
             onPressed: _showLogoutDialog,
           ),

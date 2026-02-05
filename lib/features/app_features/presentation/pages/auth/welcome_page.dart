@@ -45,30 +45,33 @@ class WelcomePage extends StatelessWidget {
         ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Spacer(),
-              
-              // Welcome icon
-              Container(
-                height: 120,
-                width: 120,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF800000).withOpacity(0.1),
-                  shape: BoxShape.circle,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 40),
+                
+                // Welcome icon
+                Center(
+                  child: Container(
+                    height: 120,
+                    width: 120,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF800000).withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check_circle,
+                      size: 60,
+                      color: Color(0xFF800000),
+                    ),
+                  ),
                 ),
-                child: const Icon(
-                  Icons.check_circle,
-                  size: 60,
-                  color: Color(0xFF800000),
-                ),
-              ),
-              
-              const SizedBox(height: 32),
+                
+                const SizedBox(height: 32),
               
               // Welcome title
               const Text(
@@ -138,17 +141,16 @@ class WelcomePage extends StatelessWidget {
               
               const SizedBox(height: 32),
               
-              // Continue button (placeholder for main app)
-              // Continue to Aadhaar verification
-ElevatedButton(
-  onPressed: () {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const AadhaarTestLauncher(),
-      ),
-    );
-  },
+              // Continue button - Continue to Aadhaar verification
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AadhaarTestLauncher(),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF800000),
                   foregroundColor: Colors.white,
@@ -167,12 +169,12 @@ ElevatedButton(
                 ),
               ),
               
-              const Spacer(flex: 2),
+              const SizedBox(height: 60),
             ],
           ),
         ),
       ),
-    );
+    ));
   }
 
   void _showLogoutDialog(BuildContext context) {
