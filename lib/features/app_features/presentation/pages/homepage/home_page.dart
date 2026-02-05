@@ -1,7 +1,8 @@
 // ignore_for_file: prefer_const_constructors
 
-import 'package:community_voice/core/theme/colors.dart';
 import 'package:community_voice/features/app_features/presentation/widgets/widgets.dart';
+import 'package:community_voice/domain/repository/auth_repository.dart';
+import 'package:community_voice/features/app_features/presentation/pages/auth/phone_input_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'scheme_detail_page.dart';
@@ -82,6 +83,69 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Show logout confirmation dialog
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text(
+            'ലോഗ് ഔട്ട്',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF800000),
+            ),
+          ),
+          content: const Text(
+            'നിങ്ങൾക്ക് ലോഗ് ഔട്ട് ചെയ്യണമെന്ന് ഉറപ്പാണോ?',
+            style: TextStyle(fontSize: 16),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text(
+                'റദ്ദാക്കുക',
+                style: TextStyle(color: Colors.grey, fontSize: 16),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Close the dialog
+                Navigator.pop(dialogContext);
+                
+                // Perform logout
+                final authRepository = AuthRepository();
+                await authRepository.logout();
+                
+                if (!mounted) return;
+                
+                // Navigate to phone input page and remove all previous routes
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PhoneInputPage(),
+                  ),
+                  (route) => false,
+                );
+              },
+              child: const Text(
+                'ലോഗ് ഔട്ട്',
+                style: TextStyle(
+                  color: Color(0xFF800000),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     flutterTts.stop(); // Stop speech when widget is removed
@@ -92,11 +156,24 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       // ===== APP BAR WITH MAROON GRADIENT =====
-      appBar: CustomAppBar(
-        title: "സർക്കാർ പദ്ധതികൾ",
-        logoPath: 'assets/images/logo.png',
-        logoSize: 50.0,
-        // AppBar uses maroon gradient (from custom_app_bar.dart)
+      appBar: AppBar(
+        title: const Text(
+          "സർക്കാർ പദ്ധതികൾ",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: const Color(0xFF800000),
+        elevation: 0,
+        actions: [
+          // Logout button
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            tooltip: 'Logout',
+            onPressed: _showLogoutDialog,
+          ),
+        ],
       ),
       backgroundColor: const Color.fromARGB(255, 237, 233, 233), // ✅ USE COLOR CONSTANT
       body: Column(
