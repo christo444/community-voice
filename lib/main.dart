@@ -1,6 +1,8 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:community_voice/screen.dart/aadhaar_test_launcher.dart';
 import 'package:flutter/material.dart';
+
 
 void main() {
   runApp(const CommunityVoice());
@@ -11,15 +13,48 @@ class CommunityVoice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  MaterialApp(
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
-        backgroundColor: Colors.blue,
+        backgroundColor: const Color.fromARGB(255, 132, 192, 242),
         appBar: AppBar(
-          title: Text("Community Voice"),
+          title: const Text("Community Voice"),
           backgroundColor: Colors.red,
         ),
-        body: Center(
-          child: Text("Community Voice"),
+
+        // ✅ IMPORTANT: Builder gives correct Navigator context
+        body: Builder(
+          builder: (context) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Community Voice",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AadhaarTestLauncher(),
+                        ),
+                      );
+
+                      debugPrint("Aadhaar Scan Result: $result");
+                    },
+                    child: const Text("TEST Aadhaar Scan"),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
