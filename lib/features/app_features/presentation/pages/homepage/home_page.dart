@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:community_voice/core/theme/colors.dart';
+import 'package:community_voice/features/app_features/presentation/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'scheme_detail_page.dart';
@@ -24,6 +25,9 @@ final List<Map<String, String>> dummySchemes = [
     'howToApply': 'അടുത്തുള്ള ആരോഗ്യ കേന്ദ്രത്തിൽ പോയി രജിസ്റ്റർ ചെയ്യുക. കുടുംബത്തിലെ എല്ലാവരുടെയും ആധാർ കാർഡുകൾ കൊണ്ടുവരിക.',
   },
 ];
+
+// ===== UI DESIGNER: MAIN BACKGROUND COLOR =====
+const Color mainBackgroundColor = Color.fromARGB(255, 253, 240, 213);
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -87,32 +91,50 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("സർക്കാർ പദ്ധതികൾ"),
-        backgroundColor: AppColors.maroon,
-        foregroundColor: AppColors.white,
+      // ===== APP BAR WITH MAROON GRADIENT =====
+      appBar: CustomAppBar(
+        title: "സർക്കാർ പദ്ധതികൾ",
+        logoPath: 'assets/images/logo.png',
+        logoSize: 50.0,
+        // AppBar uses maroon gradient (from custom_app_bar.dart)
       ),
+      backgroundColor: const Color.fromARGB(255, 237, 233, 233), // ✅ USE COLOR CONSTANT
       body: Column(
         children: [
-          // Heading Section
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "നിങ്ങൾക്ക് അർഹതയുള്ള പദ്ധതികൾ",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppColors.maroon,
+          // ===== PAGE HEADING WITH SAME BACKGROUND COLOR =====
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Color.fromARGB(255, 237, 233, 233), // ✅ CHANGED: Gradient → Solid color
+            ),
+            // ===== UI DESIGNER: CUSTOMIZE HEADING TEXT COLOR BELOW =====
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+              child: Text(
+                "നിങ്ങൾക്ക്  അർഹതയുള്ള  പദ്ധതികൾ",
+                style: const TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w900,
+                  color: Color.fromARGB(255, 109, 7, 7),
+                  letterSpacing: 0.5,
+                ),
               ),
             ),
+            // ===== END CUSTOMIZATION ZONE =====
           ),
-          // List of Schemes
+          // List of Schemes with updated SchemeTile
           Expanded(
             child: ListView.builder(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 12,
+              ),
               itemCount: dummySchemes.length,
               itemBuilder: (context, index) {
                 final scheme = dummySchemes[index];
-                return ListTile(
+                return SchemeTile(
+                  name: scheme['name']!,
+                  description: scheme['description']!,
                   onTap: () {
                     // Navigate to detail page
                     Navigator.push(
@@ -126,27 +148,13 @@ class _HomePageState extends State<HomePage> {
                       ),
                     );
                   },
-                  title: Text(
-                    scheme['name']!,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  subtitle: Text(scheme['description']!),
-                  trailing: IconButton(
-                    icon: Icon(
-                      speakingIndex == index ? Icons.stop : Icons.volume_up,
-                      color: AppColors.maroon,
-                      size: 30,
-                    ),
+                  trailing: VoiceButton(
+                    isSpeaking: speakingIndex == index,
                     onPressed: () {
                       // Toggle speech for this scheme
                       _toggleSpeak(index, scheme['name']!, scheme['description']!);
                     },
                   ),
-                  tileColor: AppColors.white,
-                  contentPadding: EdgeInsets.all(16),
                 );
               },
             ),

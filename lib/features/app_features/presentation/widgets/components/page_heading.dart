@@ -1,5 +1,5 @@
-import 'package:community_voice/core/theme/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// =================================================================
 /// PAGE HEADING WIDGET - UI DESIGNER'S FILE
@@ -32,13 +32,14 @@ class PageHeading extends StatelessWidget {
   Widget build(BuildContext context) {
     // ===== UI DESIGNER: CUSTOMIZE BELOW =====
     return Padding(
-      padding: padding ?? const EdgeInsets.all(16.0),
+      padding: padding ?? const EdgeInsets.fromLTRB(20, 24, 20, 16),
       child: Text(
         text,
-        style: const TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-          color: AppColors.maroon,
+        style: GoogleFonts.raleway(
+          fontSize: 24,
+          fontWeight: FontWeight.w500,
+          color: Colors.white,
+          letterSpacing: 0.5,
         ),
       ),
     );

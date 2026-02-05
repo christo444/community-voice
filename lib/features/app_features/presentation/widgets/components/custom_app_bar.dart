@@ -1,5 +1,6 @@
 import 'package:community_voice/core/theme/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// =================================================================
 /// CUSTOM APP BAR WIDGET - UI DESIGNER'S FILE
@@ -24,6 +25,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final Widget? leading;
   final bool automaticallyImplyLeading;
+  final String? logoPath;
+  final double logoSize;
 
   const CustomAppBar({
     super.key,
@@ -31,30 +34,79 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.leading,
     this.automaticallyImplyLeading = true,
+    this.logoPath,
+    this.logoSize = 50.0,
   });
 
   @override
   Widget build(BuildContext context) {
     // ===== UI DESIGNER: CUSTOMIZE BELOW =====
     return AppBar(
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
+      automaticallyImplyLeading: automaticallyImplyLeading,
+      leading: leading,
+      actions: actions,
+      centerTitle: false,
+      elevation: 0,
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.maroon,
+              Color(0xFF4A0E1A), // darker maroon
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
       ),
-      backgroundColor: AppColors.maroon,
-      foregroundColor: AppColors.white,
-      elevation: 4,
-      centerTitle: false,
-      actions: actions,
-      leading: leading,
-      automaticallyImplyLeading: automaticallyImplyLeading,
+      title: Row(
+        children: [
+          // Circular Logo
+          if (logoPath != null)
+            Container(
+              width: logoSize,
+              height: logoSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color.fromARGB(255, 253, 240, 213),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ClipOval(
+                child: Image.asset(
+                  logoPath!,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          // Spacing between logo and title
+          if (logoPath != null)
+            const SizedBox(width: 12),
+          // Title Text
+          Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontSize: 25,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.3,
+              color: const Color.fromARGB(255, 253, 240, 213),
+              fontStyle: FontStyle.italic
+            ),
+          ),
+        ],
+      ),
     );
     // ===== END CUSTOMIZATION ZONE =====
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(60);
 }
