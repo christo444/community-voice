@@ -1,6 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
-import 'package:community_voice/features/app_features/presentation/pages/screen.dart/aadhaar_test_launcher.dart';
+import 'package:community_voice/features/app_features/presentation/pages/ocr_screens/aadhaar_test_launcher.dart' show AadhaarTestLauncher;
 import 'package:flutter/material.dart';
 
 
