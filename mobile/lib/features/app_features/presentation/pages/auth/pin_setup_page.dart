@@ -7,7 +7,7 @@ import 'welcome_page.dart';
 
 class PinSetupPage extends StatefulWidget {
   final String phoneNumber;
-  
+
   const PinSetupPage({super.key, required this.phoneNumber});
 
   @override
@@ -19,6 +19,15 @@ class _PinSetupPageState extends State<PinSetupPage> {
   final TextEditingController _confirmPinController = TextEditingController();
   final AuthRepository _authRepository = AuthRepository();
   bool _isLoading = false;
+
+  final LinearGradient _maroonGradient = const LinearGradient(
+    colors: [
+      Color(0xFF8B3A3A),
+      Color(0xFF4A0E1A),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 
   @override
   void dispose() {
@@ -44,7 +53,8 @@ class _PinSetupPageState extends State<PinSetupPage> {
     setState(() => _isLoading = true);
 
     try {
-      final user = await _authRepository.registerUser(widget.phoneNumber, pin);
+      final user =
+          await _authRepository.registerUser(widget.phoneNumber, pin);
 
       if (!mounted) return;
 
@@ -52,7 +62,8 @@ class _PinSetupPageState extends State<PinSetupPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => WelcomePage(phoneNumber: widget.phoneNumber),
+            builder: (context) =>
+                WelcomePage(phoneNumber: widget.phoneNumber),
           ),
         );
       } else {
@@ -62,9 +73,7 @@ class _PinSetupPageState extends State<PinSetupPage> {
       if (!mounted) return;
       _showError('Error: $e');
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -72,7 +81,7 @@ class _PinSetupPageState extends State<PinSetupPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red,
+        backgroundColor: const Color.fromARGB(255, 255, 17, 0),
       ),
     );
   }
@@ -96,8 +105,7 @@ class _PinSetupPageState extends State<PinSetupPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 24),
-              
-              // Title
+
               const Text(
                 'Create Your PIN',
                 style: TextStyle(
@@ -106,9 +114,9 @@ class _PinSetupPageState extends State<PinSetupPage> {
                   color: Color(0xFF800000),
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               Text(
                 'For phone number: ${widget.phoneNumber}',
                 style: const TextStyle(
@@ -116,9 +124,9 @@ class _PinSetupPageState extends State<PinSetupPage> {
                   color: Colors.grey,
                 ),
               ),
-              
+
               const SizedBox(height: 48),
-              
+
               // PIN input
               TextField(
                 controller: _pinController,
@@ -130,25 +138,31 @@ class _PinSetupPageState extends State<PinSetupPage> {
                 ],
                 decoration: InputDecoration(
                   labelText: 'Enter 4-digit PIN',
-                  labelStyle: const TextStyle(color: Color(0xFF800000)),
-                  prefixIcon: const Icon(Icons.lock, color: Color(0xFF800000)),
+                  labelStyle:
+                      const TextStyle(color: Color(0xFF800000)),
+                  prefixIcon:
+                      const Icon(Icons.lock, color: Color(0xFF800000)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide:
+                        BorderSide(color: Colors.grey.shade300),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF800000), width: 2),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF800000),
+                      width: 2,
+                    ),
                   ),
                   counterText: '',
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Confirm PIN input
               TextField(
                 controller: _confirmPinController,
@@ -160,54 +174,64 @@ class _PinSetupPageState extends State<PinSetupPage> {
                 ],
                 decoration: InputDecoration(
                   labelText: 'Confirm PIN',
-                  labelStyle: const TextStyle(color: Color(0xFF800000)),
-                  prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF800000)),
+                  labelStyle:
+                      const TextStyle(color: Color(0xFF800000)),
+                  prefixIcon: const Icon(Icons.lock_outline,
+                      color: Color(0xFF800000)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide:
+                        BorderSide(color: Colors.grey.shade300),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF800000), width: 2),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF800000),
+                      width: 2,
+                    ),
                   ),
                   counterText: '',
                 ),
                 onSubmitted: (_) => _handleSetupPin(),
               ),
-              
+
               const SizedBox(height: 32),
-              
-              // Create PIN button
-              ElevatedButton(
-                onPressed: _isLoading ? null : _handleSetupPin,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF800000),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
+
+              // ===== GRADIENT CREATE PIN BUTTON =====
+              InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: _isLoading ? null : _handleSetupPin,
+                child: Container(
+                  height: 52,
+                  decoration: BoxDecoration(
+                    gradient: _maroonGradient,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  elevation: 0,
+                  child: Center(
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                            ),
+                          )
+                        : const Text(
+                            'Create PIN',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
                 ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : const Text(
-                        'Create PIN',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
               ),
             ],
           ),

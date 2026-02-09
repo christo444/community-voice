@@ -60,7 +60,7 @@ class WelcomePage extends StatelessWidget {
                     height: 120,
                     width: 120,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF800000).withOpacity(0.1),
+                      color: const Color(0xFF800000).withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -103,10 +103,10 @@ class WelcomePage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF800000).withOpacity(0.05),
+                  color: const Color(0xFF800000).withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: const Color(0xFF800000).withOpacity(0.2),
+                    color: const Color(0xFF800000).withValues(alpha: 0.2),
                   ),
                 ),
                 child: const Column(
@@ -131,7 +131,7 @@ class WelcomePage extends StatelessWidget {
                       'You will remain logged in until you manually logout',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.black54,
+                        color: Color.fromARGB(136, 143, 10, 10),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -153,7 +153,7 @@ class WelcomePage extends StatelessWidget {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF800000),
-                  foregroundColor: Colors.white,
+                  foregroundColor: const Color.fromARGB(255, 255, 255, 255),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
