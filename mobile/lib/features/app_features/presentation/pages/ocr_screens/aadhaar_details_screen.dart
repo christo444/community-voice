@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:community_voice/features/app_features/presentation/pages/homepage/home_page.dart';
 
+// ✅ ONLY NEW IMPORTS (added, nothing removed)
+import '../../../../../domain/repository/profile_repository.dart';
+import '../../../../../domain/repository/auth_repository.dart';
+
 class AadhaarDetailsScreen extends StatefulWidget {
   final String ocrText;
 
@@ -151,7 +155,47 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
     addressCtrl.text = addressLines.join('\n');
   }
 
-  // =================== UPDATED TEXTFIELD DESIGN ===================
+  // ================= NEW: SAVE PROFILE + NAVIGATE =================
+  Future<void> _saveProfileAndContinue() async {
+    final authRepository = AuthRepository();
+    final phoneNumber = await authRepository.getStoredPhoneNumber();
+
+    if (phoneNumber == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Phone number not found. Please login again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    int? ageInt;
+    if (ageCtrl.text.isNotEmpty) {
+      ageInt = int.tryParse(ageCtrl.text.replaceAll(RegExp(r'[^0-9]'), ''));
+    }
+
+    final profileRepository = ProfileRepository();
+
+    await profileRepository.saveOcrData(
+      phoneNumber: phoneNumber,
+      name: nameCtrl.text.isNotEmpty ? nameCtrl.text : null,
+      dateOfBirth: dobCtrl.text.isNotEmpty ? dobCtrl.text : null,
+      age: ageInt,
+      gender: genderCtrl.text.isNotEmpty ? genderCtrl.text : null,
+      address: addressCtrl.text.isNotEmpty ? addressCtrl.text : null,
+    );
+
+    if (!mounted) return;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomePage()),
+    );
+  }
+
+  // =================== TEXTFIELD DESIGN ===================
   Widget _field(String label, TextEditingController c, {int max = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
@@ -227,13 +271,9 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
+                // ✅ ONLY CHANGE: button now saves + navigates
+                onPressed: _saveProfileAndContinue,
                 child: const Text("Confirm & Continue"),
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const HomePage()),
-                  );
-                },
               ),
             ),
           ],
