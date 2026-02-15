@@ -65,7 +65,7 @@ class _PinLoginPageState extends State<PinLoginPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: const Color.fromARGB(255, 255, 17, 0),
+        backgroundColor: Colors.red,
       ),
     );
   }

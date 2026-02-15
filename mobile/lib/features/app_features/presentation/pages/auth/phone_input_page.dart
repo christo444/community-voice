@@ -18,15 +18,6 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
   final AuthRepository _authRepository = AuthRepository();
   bool _isLoading = false;
 
-  final LinearGradient _maroonGradient = const LinearGradient(
-    colors: [
-      Color(0xFF8B3A3A),
-      Color(0xFF4A0E1A),
-    ],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
   @override
   void dispose() {
     _phoneController.dispose();
@@ -40,7 +31,7 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please enter a valid 10-digit phone number'),
-          backgroundColor: Color.fromARGB(255, 255, 17, 0),
+          backgroundColor: Colors.red,
         ),
       );
       return;
@@ -49,25 +40,25 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
     setState(() => _isLoading = true);
 
     try {
-      final existingUser =
-          await _authRepository.checkUserExists(phoneNumber);
+      // Check if user exists
+      final existingUser = await _authRepository.checkUserExists(phoneNumber);
 
       if (!mounted) return;
 
       if (existingUser != null) {
+        // User exists - go to PIN login
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                PinLoginPage(phoneNumber: phoneNumber),
+            builder: (context) => PinLoginPage(phoneNumber: phoneNumber),
           ),
         );
       } else {
+        // New user - go to PIN setup
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                PinSetupPage(phoneNumber: phoneNumber),
+            builder: (context) => PinSetupPage(phoneNumber: phoneNumber),
           ),
         );
       }
@@ -80,7 +71,9 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
         ),
       );
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -96,13 +89,13 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Spacer(),
-
-              // ===== GRADIENT LOGO =====
+              
+              // Logo/Icon
               Container(
                 height: 100,
                 width: 100,
                 decoration: BoxDecoration(
-                  gradient: _maroonGradient,
+                  color: const Color(0xFF800000), // Maroon
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Icon(
@@ -111,9 +104,10 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
                   color: Colors.white,
                 ),
               ),
-
+              
               const SizedBox(height: 32),
-
+              
+              // Title
               const Text(
                 'Welcome',
                 style: TextStyle(
@@ -123,20 +117,20 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
                 ),
                 textAlign: TextAlign.center,
               ),
-
+              
               const SizedBox(height: 8),
-
+              
               const Text(
                 'Enter your phone number to continue',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Color.fromARGB(255, 82, 82, 82),
+                  color: Colors.grey,
                 ),
                 textAlign: TextAlign.center,
               ),
-
+              
               const SizedBox(height: 48),
-
+              
               // Phone input field
               TextField(
                 controller: _phoneController,
@@ -147,65 +141,56 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
                 ],
                 decoration: InputDecoration(
                   labelText: 'Phone Number',
-                  labelStyle:
-                      const TextStyle(color: Color(0xFF800000)),
-                  prefixIcon: const Icon(Icons.phone,
-                      color: Color(0xFF800000)),
+                  labelStyle: const TextStyle(color: Color(0xFF800000)),
+                  prefixIcon: const Icon(Icons.phone, color: Color(0xFF800000)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFF800000)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide:
-                        BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFF800000),
-                      width: 2,
-                    ),
+                    borderSide: const BorderSide(color: Color(0xFF800000), width: 2),
                   ),
                   counterText: '',
                 ),
               ),
-
+              
               const SizedBox(height: 24),
-
-              // ===== GRADIENT CONTINUE BUTTON =====
-              InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: _isLoading ? null : _handleContinue,
-                child: Container(
-                  height: 52,
-                  decoration: BoxDecoration(
-                    gradient: _maroonGradient,
+              
+              // Continue button
+              ElevatedButton(
+                onPressed: _isLoading ? null : _handleContinue,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF800000),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Center(
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(
-                                      Colors.white),
-                            ),
-                          )
-                        : const Text(
-                            'Continue',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                  ),
+                  elevation: 0,
                 ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text(
+                        'Continue',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
-
+              
               const Spacer(flex: 2),
             ],
           ),

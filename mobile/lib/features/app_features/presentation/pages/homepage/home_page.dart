@@ -219,7 +219,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     );
                   },
-                  trailing: FloatingVoiceButton(
+                  trailing: VoiceButton(
                     isSpeaking: speakingIndex == index,
                     onPressed: () {
                       // Toggle speech for this scheme

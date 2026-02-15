@@ -8,10 +8,10 @@ class AadhaarScanControllerScreen extends StatefulWidget {
   final AadhaarData aadhaarData;
 
   const AadhaarScanControllerScreen({
-    super.key,
+    Key? key,
     required this.ocrText,
     required this.aadhaarData,
-  });
+  }) : super(key: key);
 
   @override
   State<AadhaarScanControllerScreen> createState() =>
