@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:community_voice/features/app_features/presentation/pages/homepage/home_page.dart';
+import 'package:community_voice/features/app_features/presentation/pages/interview/questions.dart';
 
 class AadhaarDetailsScreen extends StatefulWidget {
   final String ocrText;
 
-  const AadhaarDetailsScreen({Key? key, required this.ocrText})
-      : super(key: key);
+  const AadhaarDetailsScreen({super.key, required this.ocrText});
 
   @override
   State<AadhaarDetailsScreen> createState() => _AadhaarDetailsScreenState();
@@ -39,16 +38,24 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
     for (final line in lines) {
       final l = line.toLowerCase();
 
-      if (l == 'to') continue;
+      if (l == 'to') {
+        continue;
+      }
       if (l.contains('government') ||
           l.contains('unique') ||
           l.contains('authority') ||
           l.contains('aadhaar') ||
           l.contains('uidai') ||
-          l.contains('enrollment')) continue;
+          l.contains('enrollment')) {
+        continue;
+      }
 
-      if (!RegExp(r'^[A-Za-z .]+$').hasMatch(line)) continue;
-      if (line.split(' ').length < 2) continue;
+      if (!RegExp(r'^[A-Za-z .]+$').hasMatch(line)) {
+        continue;
+      }
+      if (line.split(' ').length < 2) {
+        continue;
+      }
 
       nameCtrl.text = line;
       break;
@@ -151,7 +158,7 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
     addressCtrl.text = addressLines.join('\n');
   }
 
-  // =================== UPDATED TEXTFIELD DESIGN ===================
+  // ================= FIELD =================
   Widget _field(String label, TextEditingController c, {int max = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
@@ -160,24 +167,16 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
         enabled: isEditing,
         maxLines: max,
         cursorColor: maroon,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-          color: Colors.black,
-        ),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(
-            color: maroon,
-            fontWeight: FontWeight.w600,
-          ),
+          labelStyle: TextStyle(color: maroon, fontWeight: FontWeight.w600),
           filled: true,
           fillColor: Colors.white,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: maroon.withOpacity(0.5), width: 1.4),
+            borderSide: BorderSide(color: maroon.withValues(alpha: 0.5)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
@@ -185,7 +184,7 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
           ),
           disabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: maroon.withOpacity(0.3), width: 1.2),
+            borderSide: BorderSide(color: maroon.withValues(alpha: 0.3)),
           ),
         ),
       ),
@@ -195,18 +194,37 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // ===== GRADIENT APP BAR =====
       appBar: AppBar(
-        title: const Text("User Details"),
+        title: const Text(
+          "User Details",
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color.fromARGB(255, 139, 58, 58),
+                Color.fromARGB(255, 74, 14, 26),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => setState(() => isEditing = !isEditing),
             child: Text(
               isEditing ? "Done" : "Edit",
-              style: const TextStyle(color: Colors.black),
+              style: const TextStyle(color: Colors.white),
             ),
           )
         ],
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -224,16 +242,45 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
                 ),
               ),
             ),
+
+            // ===== GRADIENT CONFIRM BUTTON =====
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                child: const Text("Confirm & Continue"),
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const HomePage()),
-                  );
-                },
+              height: 52,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color.fromARGB(255, 139, 58, 58),
+                      Color.fromARGB(255, 74, 14, 26),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text(
+                    "Confirm & Continue",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const QuestionnairePage(),
+    ),
+  );
+},
+                ),
               ),
             ),
           ],

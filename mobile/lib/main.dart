@@ -10,7 +10,8 @@ Future<void> main() async {
   // Initialize Supabase
   await Supabase.initialize(
     url: 'https://wzpfhmngcfwrbgzcdymv.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6cGZobW5nY2Z3cmJnemNkeW12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyNjA5NjgsImV4cCI6MjA4NTgzNjk2OH0.x_ivRdyK1HPT43vJq8B0p0D2jcZXO0dunnipMAPcP7E',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6cGZobW5nY2Z3cmJnemNkeW12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyNjA5NjgsImV4cCI6MjA4NTgzNjk2OH0.x_ivRdyK1HPT43vJq8B0p0D2jcZXO0dunnipMAPcP7E',
   );
 
   runApp(const CommunityVoice());
@@ -25,7 +26,7 @@ class CommunityVoice extends StatelessWidget {
       title: 'Community Voice',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: const Color(0xFF800000), // Maroon
+        primaryColor: const Color(0xFF800000),
         scaffoldBackgroundColor: Colors.white,
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF800000),
@@ -55,8 +56,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkLoginStatus() async {
-    // Show splash for at least 1 second
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 2));
 
     try {
       final user = await _authRepository.autoLogin();
@@ -64,7 +64,6 @@ class _SplashScreenState extends State<SplashScreen> {
       if (!mounted) return;
 
       if (user != null) {
-        // User is logged in - go to Aadhaar verification
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -72,7 +71,6 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
         );
       } else {
-        // User not logged in - go to phone input
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -81,7 +79,6 @@ class _SplashScreenState extends State<SplashScreen> {
         );
       }
     } catch (e) {
-      // On error, go to phone input
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
@@ -92,49 +89,71 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
+  // ===== UI CHANGED ONLY HERE =====
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF800000),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              height: 100,
-              width: 100,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF8B3A3A),
+              Color(0xFF4A0E1A),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                height: 100,
+                width: 100,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.voice_chat,
+                  size: 50,
+                  color: Color(0xFF4A0E1A),
+                ),
               ),
-              child: const Icon(
-                Icons.voice_chat,
-                size: 50,
-                color: Color(0xFF800000),
+              const SizedBox(height: 24),
+              const Text(
+                'Community Voice',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Community Voice',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+              const SizedBox(height: 8),
+              const Text(
+                'Inclusive Welfare Access',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white70,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Inclusive Welfare Access',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white70,
+              const SizedBox(height: 32),
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                strokeWidth: 3,
               ),
-            ),
-            const SizedBox(height: 32),
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

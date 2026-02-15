@@ -1,5 +1,6 @@
 // lib/data/datasources/auth_datasource.dart
 
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/config/supabase_config.dart';
 import '../../domain/model/user.dart' as model;
@@ -19,7 +20,7 @@ class AuthDatasource {
       if (response == null) return null;
       return model.User.fromJson(response);
     } catch (e) {
-      print('Error getting user: $e');
+      debugPrint('Error getting user: $e');
       return null;
     }
   }
@@ -43,7 +44,7 @@ class AuthDatasource {
 
       return model.User.fromJson(response);
     } catch (e) {
-      print('Error creating user: $e');
+      debugPrint('Error creating user: $e');
       return null;
     }
   }
@@ -68,7 +69,7 @@ class AuthDatasource {
       }
       return false;
     } catch (e) {
-      print('Error verifying PIN: $e');
+      debugPrint('Error verifying PIN: $e');
       return false;
     }
   }
@@ -81,7 +82,7 @@ class AuthDatasource {
           .update({'last_login_at': DateTime.now().toIso8601String()})
           .eq('phone_number', phoneNumber);
     } catch (e) {
-      print('Error updating last login: $e');
+      debugPrint('Error updating last login: $e');
     }
   }
 }

@@ -89,6 +89,7 @@ class _SchemeDetailPageState extends State<SchemeDetailPage> {
               children: [
                 // Scheme Name Card
                 Card(
+                  color: Colors.white,
                   elevation: 3,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -104,6 +105,7 @@ class _SchemeDetailPageState extends State<SchemeDetailPage> {
                 const SectionHeading(text: "വിശദാംശങ്ങൾ:"),
                 const SectionSpacer(height: 12),
                 Card(
+                  color: Colors.white,
                   elevation: 2,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -129,6 +131,7 @@ class _SchemeDetailPageState extends State<SchemeDetailPage> {
                 const SectionHeading(text: "എങ്ങനെ അപേക്ഷിക്കാം:"),
                 const SectionSpacer(height: 12),
                 Card(
+                  color: Colors.white,
                   elevation: 2,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
