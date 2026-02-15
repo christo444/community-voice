@@ -10,7 +10,7 @@ import 'aadhaar_data.dart';
 class AadhaarScanScreen extends StatefulWidget {
   final AadhaarData? aadhaarData;
 
-  const AadhaarScanScreen({super.key, this.aadhaarData});
+  const AadhaarScanScreen({Key? key, this.aadhaarData}) : super(key: key);
 
   @override
   State<AadhaarScanScreen> createState() => _AadhaarScanScreenState();
@@ -56,7 +56,7 @@ class _AadhaarScanScreenState extends State<AadhaarScanScreen> {
       MaterialPageRoute(
         builder: (_) => AadhaarScanControllerScreen(
           ocrText: result.text,
-          aadhaarData: _data,
+          aadhaarData: _data, // ✅ SAME OBJECT PASSED EVERY TIME
         ),
       ),
     );
@@ -70,7 +70,8 @@ class _AadhaarScanScreenState extends State<AadhaarScanScreen> {
   }
 
   Future<void> _pickFromGallery() async {
-    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final picked =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (picked != null) {
       await _processImage(File(picked.path));
     }
@@ -82,67 +83,10 @@ class _AadhaarScanScreenState extends State<AadhaarScanScreen> {
     super.dispose();
   }
 
-  // ===== Gradient Button Widget (Reusable) =====
-  Widget _gradientButton({
-    required IconData icon,
-    required String text,
-    required VoidCallback onPressed,
-  }) {
-    return Container(
-      height: 50,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color.fromARGB(255, 139, 58, 58),
-            Color.fromARGB(255, 74, 14, 26),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ElevatedButton.icon(
-        icon: Icon(icon, color: Colors.white),
-        label: Text(text),
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          foregroundColor: Colors.white,
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ===== Gradient AppBar =====
-      appBar: AppBar(
-        title: const Text(
-          "Scan Aadhaar",
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color.fromARGB(255, 139, 58, 58),
-                Color.fromARGB(255, 74, 14, 26),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-      ),
-
+      appBar: AppBar(title: const Text("Scan Aadhaar")),
       body: !_isReady
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -150,29 +94,27 @@ class _AadhaarScanScreenState extends State<AadhaarScanScreen> {
                 Expanded(
                   child: CameraPreview(_cameraController!),
                 ),
-
                 if (_isProcessing)
                   const Padding(
                     padding: EdgeInsets.all(12),
                     child: CircularProgressIndicator(),
                   ),
-
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
                       Expanded(
-                        child: _gradientButton(
-                          icon: Icons.camera_alt,
-                          text: "Scan",
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.camera_alt),
+                          label: const Text("Scan"),
                           onPressed: _captureFromCamera,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: _gradientButton(
-                          icon: Icons.photo,
-                          text: "Gallery",
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.photo),
+                          label: const Text("Gallery"),
                           onPressed: _pickFromGallery,
                         ),
                       ),

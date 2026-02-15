@@ -3,37 +3,15 @@ import 'package:community_voice/features/app_features/presentation/pages/homepag
 import 'aadhaar_scan_screen.dart';
 
 class AadhaarTestLauncher extends StatelessWidget {
-  const AadhaarTestLauncher({super.key});
+  const AadhaarTestLauncher({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ===== GRADIENT APP BAR =====
       appBar: AppBar(
-        title: const Text(
-          "Aadhaar Verification",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFF8B3A3A),
-                Color(0xFF4A0E1A),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        title: const Text("Aadhaar Verification"),
+        backgroundColor: const Color.fromARGB(255, 109, 7, 7),
       ),
-
-      // ===== BODY =====
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -44,7 +22,6 @@ class AadhaarTestLauncher extends StatelessWidget {
               color: Color.fromARGB(255, 109, 7, 7),
             ),
             const SizedBox(height: 30),
-
             const Text(
               "Welcome to Community Voice",
               style: TextStyle(
@@ -52,9 +29,7 @@ class AadhaarTestLauncher extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 10),
-
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 40),
               child: Text(
@@ -62,17 +37,13 @@ class AadhaarTestLauncher extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
-                  color: Color.fromARGB(255, 68, 67, 67),
+                  color: Colors.grey,
                 ),
               ),
             ),
-
             const SizedBox(height: 40),
-
-            // ===== GRADIENT START AADHAAR SCAN BUTTON =====
-            InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () async {
+            ElevatedButton.icon(
+              onPressed: () async {
                 final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -80,6 +51,7 @@ class AadhaarTestLauncher extends StatelessWidget {
                   ),
                 );
 
+                // If user confirmed scan, navigate to HomePage
                 if (result != null) {
                   if (!context.mounted) return;
                   Navigator.pushReplacement(
@@ -90,44 +62,16 @@ class AadhaarTestLauncher extends StatelessWidget {
                   );
                 }
               },
-              child: Container(
+              icon: const Icon(Icons.camera_alt),
+              label: const Text("Start Aadhaar Scan"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 109, 7, 7),
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 30,
                   vertical: 15,
                 ),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF8B3A3A),
-                      Color(0xFF4A0E1A),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.25),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.camera_alt, color: Colors.white),
-                    SizedBox(width: 10),
-                    Text(
-                      "Start Aadhaar Scan",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+                textStyle: const TextStyle(fontSize: 18),
               ),
             ),
           ],
