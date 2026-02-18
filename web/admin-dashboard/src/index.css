@@ -61,6 +61,77 @@ h1 {
   cursor: pointer;
 }
 
+.url-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+  color: #999;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.url-divider::before,
+.url-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #ddd;
+}
+
+.url-divider span {
+  padding: 0 10px;
+}
+
+.url-section {
+  margin-top: 15px;
+}
+
+.url-section h4 {
+  color: #555;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.url-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.url-input {
+  flex: 1;
+  min-width: 300px;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.url-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.url-input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #218838;
+}
+
+.btn-secondary:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
 .btn {
   padding: 10px 20px;
   border: none;

@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from services.pdf_parser import extract_scheme_from_pdf
+from services.pdf_parser import extract_scheme_from_pdf, extract_scheme_from_url
 from services.storage import save_scheme, get_all_schemes, get_scheme_by_id, delete_scheme
 import os
 import uuid
@@ -42,6 +42,41 @@ def upload_scheme():
         return jsonify({
             'success': True,
             'message': 'Scheme uploaded and processed successfully',
+            'data': saved_scheme
+        }), 201
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@schemes_bp.route('/extract-url', methods=['POST'])
+def extract_from_url():
+    """Extract scheme details from a website URL"""
+    try:
+        # Get URL from request body
+        data = request.get_json()
+        
+        if not data or 'url' not in data:
+            return jsonify({'error': 'No URL provided'}), 400
+        
+        url = data['url'].strip()
+        
+        if not url.startswith('http'):
+            return jsonify({'error': 'Invalid URL format. Must start with http:// or https://'}), 400
+        
+        # Extract data from URL using Gemini
+        scheme_data = extract_scheme_from_url(url)
+        
+        # Add metadata
+        scheme_data['id'] = str(uuid.uuid4())
+        scheme_data['sourceUrl'] = url
+        
+        # Save to JSON storage
+        saved_scheme = save_scheme(scheme_data)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Scheme extracted from URL successfully',
             'data': saved_scheme
         }), 201
         

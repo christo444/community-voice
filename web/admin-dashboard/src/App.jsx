@@ -6,7 +6,9 @@ const API_URL = 'http://localhost:5000/api/schemes';
 function App() {
   const [schemes, setSchemes] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [schemeUrl, setSchemeUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [isExtracting, setIsExtracting] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -81,6 +83,43 @@ function App() {
     }
   };
 
+  // Handle URL extraction
+  const handleExtractUrl = async () => {
+    if (!schemeUrl.trim()) {
+      setMessage({ text: 'Please enter a website URL', type: 'error' });
+      return;
+    }
+
+    if (!schemeUrl.startsWith('http')) {
+      setMessage({ text: 'URL must start with http:// or https://', type: 'error' });
+      return;
+    }
+
+    try {
+      setIsExtracting(true);
+      setMessage({ text: '', type: '' });
+
+      const response = await axios.post(`${API_URL}/extract-url`, {
+        url: schemeUrl
+      });
+
+      setMessage({ text: 'Scheme extracted from URL successfully!', type: 'success' });
+      setSchemeUrl('');
+      
+      // Refresh schemes list
+      fetchSchemes();
+      
+      setIsExtracting(false);
+    } catch (error) {
+      console.error('Error extracting from URL:', error);
+      setMessage({ 
+        text: error.response?.data?.error || 'Error extracting from URL', 
+        type: 'error' 
+      });
+      setIsExtracting(false);
+    }
+  };
+
   // Handle delete scheme
   const handleDelete = async (schemeId) => {
     if (!window.confirm('Are you sure you want to delete this scheme?')) {
@@ -114,16 +153,42 @@ function App() {
             accept=".pdf"
             onChange={handleFileChange}
             className="file-input"
-            disabled={isUploading}
+            disabled={isUploading || isExtracting}
           />
           <button
             onClick={handleUpload}
-            disabled={!selectedFile || isUploading}
+            disabled={!selectedFile || isUploading || isExtracting}
             className="btn btn-primary"
           >
             {isUploading ? 'Uploading...' : 'Upload PDF'}
           </button>
         </div>
+
+        {/* URL Extraction Section */}
+        <div className="url-divider">
+          <span>OR</span>
+        </div>
+        <div className="url-section">
+          <h4>Extract from Website URL</h4>
+          <div className="url-form">
+            <input
+              type="text"
+              value={schemeUrl}
+              onChange={(e) => setSchemeUrl(e.target.value)}
+              placeholder="https://www.myscheme.gov.in/schemes/..."
+              className="url-input"
+              disabled={isUploading || isExtracting}
+            />
+            <button
+              onClick={handleExtractUrl}
+              disabled={!schemeUrl.trim() || isUploading || isExtracting}
+              className="btn btn-secondary"
+            >
+              {isExtracting ? 'Extracting...' : 'Extract from URL'}
+            </button>
+          </div>
+        </div>
+
         {message.text && (
           <div className={`message ${message.type}`}>
             {message.text}
