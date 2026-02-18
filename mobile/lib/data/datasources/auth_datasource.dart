@@ -84,4 +84,27 @@ class AuthDatasource {
       print('Error updating last login: $e');
     }
   }
+
+  // Update PIN for existing user
+  Future<bool> updatePin(String phoneNumber, String newPin) async {
+    try {
+      final normalizedPhone = phoneNumber.trim();
+      final response = await _client
+          .from('users')
+          .update({
+            'pin': newPin,
+          })
+          .eq('phone_number', normalizedPhone)
+          .select('phone_number')
+          .maybeSingle();
+
+      if (response != null) return true;
+
+      final user = await getUserByPhone(normalizedPhone);
+      return user?.pin == newPin;
+    } catch (e) {
+      print('Error updating PIN: $e');
+      return false;
+    }
+  }
 }

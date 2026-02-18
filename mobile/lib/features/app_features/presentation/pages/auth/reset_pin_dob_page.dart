@@ -1,57 +1,71 @@
-// lib/features/app_features/presentation/pages/auth/pin_login_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../../../domain/repository/auth_repository.dart';
-import 'welcome_page.dart';
-import 'reset_pin_dob_page.dart';
+import '../../../../../domain/repository/profile_repository.dart';
+import 'reset_pin_page.dart';
 
-class PinLoginPage extends StatefulWidget {
+class ResetPinDobPage extends StatefulWidget {
   final String phoneNumber;
-  
-  const PinLoginPage({super.key, required this.phoneNumber});
+
+  const ResetPinDobPage({super.key, required this.phoneNumber});
 
   @override
-  State<PinLoginPage> createState() => _PinLoginPageState();
+  State<ResetPinDobPage> createState() => _ResetPinDobPageState();
 }
 
-class _PinLoginPageState extends State<PinLoginPage> {
-  final TextEditingController _pinController = TextEditingController();
-  final AuthRepository _authRepository = AuthRepository();
+class _ResetPinDobPageState extends State<ResetPinDobPage> {
+  final TextEditingController _dobController = TextEditingController();
+  final ProfileRepository _profileRepository = ProfileRepository();
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _pinController.dispose();
+    _dobController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
-    final pin = _pinController.text.trim();
+  String _normalizeDob(String value) {
+    return value.replaceAll(RegExp(r'[^0-9]'), '');
+  }
 
-    if (pin.isEmpty || pin.length != 4) {
-      _showError('Please enter your 4-digit PIN');
+  Future<void> _handleVerifyDob() async {
+    final inputDob = _dobController.text.trim();
+
+    if (inputDob.isEmpty) {
+      _showError('Please enter your date of birth');
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      final isValid = await _authRepository.loginUser(widget.phoneNumber, pin);
+      final profile = await _profileRepository.getProfile(widget.phoneNumber);
 
       if (!mounted) return;
 
-      if (isValid) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => WelcomePage(phoneNumber: widget.phoneNumber),
-          ),
-        );
-      } else {
-        _showError('Incorrect PIN. Please try again.');
-        _pinController.clear();
+      final storedDob = profile?.dateOfBirth?.trim();
+      if (storedDob == null || storedDob.isEmpty) {
+        _showError('Date of birth not found. Please complete Aadhaar scan.');
+        return;
       }
+
+      final normalizedInput = _normalizeDob(inputDob);
+      final normalizedStored = _normalizeDob(storedDob);
+
+      final isMatch = normalizedStored.length == 4
+          ? normalizedInput.endsWith(normalizedStored)
+          : normalizedInput == normalizedStored;
+
+      if (!isMatch) {
+        _showError('Date of birth does not match our records');
+        return;
+      }
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ResetPinPage(phoneNumber: widget.phoneNumber),
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       _showError('Error: $e');
@@ -90,44 +104,35 @@ class _PinLoginPageState extends State<PinLoginPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 24),
-              
-              // Title
               const Text(
-                'Welcome Back!',
+                'Verify Date of Birth',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF800000),
                 ),
               ),
-              
               const SizedBox(height: 8),
-              
-              Text(
-                'Enter PIN for: ${widget.phoneNumber}',
-                style: const TextStyle(
+              const Text(
+                'Enter the date of birth from your Aadhaar',
+                style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey,
                 ),
               ),
-              
-              const SizedBox(height: 48),
-              
-              // PIN input
+              const SizedBox(height: 40),
               TextField(
-                controller: _pinController,
-                keyboardType: TextInputType.number,
-                maxLength: 4,
-                obscureText: true,
-                autofocus: true,
+                controller: _dobController,
+                keyboardType: TextInputType.datetime,
                 inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(4),
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9/\-]')),
+                  LengthLimitingTextInputFormatter(10),
                 ],
                 decoration: InputDecoration(
-                  labelText: 'Enter your PIN',
+                  labelText: 'Date of Birth (DD/MM/YYYY)',
                   labelStyle: const TextStyle(color: Color(0xFF800000)),
-                  prefixIcon: const Icon(Icons.lock, color: Color(0xFF800000)),
+                  prefixIcon:
+                      const Icon(Icons.calendar_today, color: Color(0xFF800000)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -137,37 +142,14 @@ class _PinLoginPageState extends State<PinLoginPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF800000), width: 2),
+                    borderSide:
+                        const BorderSide(color: Color(0xFF800000), width: 2),
                   ),
-                  counterText: '',
                 ),
-                onSubmitted: (_) => _handleLogin(),
               ),
-              
               const SizedBox(height: 32),
-
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ResetPinDobPage(phoneNumber: widget.phoneNumber),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    'Forgot PIN?',
-                    style: TextStyle(color: Color(0xFF800000)),
-                  ),
-                ),
-              ),
-
-              // Login button
               ElevatedButton(
-                onPressed: _isLoading ? null : _handleLogin,
+                onPressed: _isLoading ? null : _handleVerifyDob,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF800000),
                   foregroundColor: Colors.white,
@@ -183,11 +165,12 @@ class _PinLoginPageState extends State<PinLoginPage> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : const Text(
-                        'Login',
+                        'Verify',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
