@@ -1,6 +1,8 @@
 import 'package:community_voice/features/app_features/presentation/pages/auth/phone_input_page.dart';
 import 'package:community_voice/features/app_features/presentation/pages/ocr_screens/aadhaar_test_launcher.dart';
+import 'package:community_voice/features/app_features/presentation/pages/homepage/home_page.dart';
 import 'package:community_voice/domain/repository/auth_repository.dart';
+import 'package:community_voice/domain/repository/profile_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -10,7 +12,8 @@ Future<void> main() async {
   // Initialize Supabase
   await Supabase.initialize(
     url: 'https://wzpfhmngcfwrbgzcdymv.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6cGZobW5nY2Z3cmJnemNkeW12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyNjA5NjgsImV4cCI6MjA4NTgzNjk2OH0.x_ivRdyK1HPT43vJq8B0p0D2jcZXO0dunnipMAPcP7E',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6cGZobW5nY2Z3cmJnemNkeW12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyNjA5NjgsImV4cCI6MjA4NTgzNjk2OH0.x_ivRdyK1HPT43vJq8B0p0D2jcZXO0dunnipMAPcP7E',
   );
 
   runApp(const CommunityVoice());
@@ -47,6 +50,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   final AuthRepository _authRepository = AuthRepository();
+  final ProfileRepository _profileRepository = ProfileRepository();
 
   @override
   void initState() {
@@ -64,13 +68,37 @@ class _SplashScreenState extends State<SplashScreen> {
       if (!mounted) return;
 
       if (user != null) {
-        // User is logged in - go to Aadhaar verification
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const AadhaarTestLauncher(),
-          ),
-        );
+        // User is logged in - check if they have completed their profile
+        final phoneNumber = await _authRepository.getStoredPhoneNumber();
+        if (phoneNumber != null) {
+          final profile = await _profileRepository.getProfile(phoneNumber);
+
+          if (profile != null) {
+            // Profile exists - go to home page
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const HomePage(),
+              ),
+            );
+          } else {
+            // No profile - go to Aadhaar verification
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AadhaarTestLauncher(),
+              ),
+            );
+          }
+        } else {
+          // No phone number stored - go to phone input
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const PhoneInputPage(),
+            ),
+          );
+        }
       } else {
         // User not logged in - go to phone input
         Navigator.pushReplacement(

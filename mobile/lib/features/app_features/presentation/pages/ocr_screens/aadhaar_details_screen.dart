@@ -117,13 +117,15 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
           l.startsWith('w/o')) {
         startCapture = true;
 
-        String cleaned = line.replaceFirst(
-          RegExp(
-            r'^(c/o|s/o|d/o|w/o)\s*[:\-]?\s*[A-Za-z .]+,?',
-            caseSensitive: false,
-          ),
-          '',
-        ).trim();
+        String cleaned = line
+            .replaceFirst(
+              RegExp(
+                r'^(c/o|s/o|d/o|w/o)\s*[:\-]?\s*[A-Za-z .]+,?',
+                caseSensitive: false,
+              ),
+              '',
+            )
+            .trim();
 
         if (cleaned.isNotEmpty) {
           addressLines.add(cleaned);
@@ -142,8 +144,7 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
         continue;
       }
 
-      final cleanedLine =
-          line.replaceFirst(RegExp(r'^[A-Z]\s+'), '');
+      final cleanedLine = line.replaceFirst(RegExp(r'^[A-Z]\s+'), '');
 
       addressLines.add(cleanedLine);
 
@@ -178,7 +179,7 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
 
     final profileRepository = ProfileRepository();
 
-    await profileRepository.saveOcrData(
+    final result = await profileRepository.saveOcrData(
       phoneNumber: phoneNumber,
       name: nameCtrl.text.isNotEmpty ? nameCtrl.text : null,
       dateOfBirth: dobCtrl.text.isNotEmpty ? dobCtrl.text : null,
@@ -188,6 +189,16 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
     );
 
     if (!mounted) return;
+
+    if (result == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to save profile. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     Navigator.pushReplacement(
       context,

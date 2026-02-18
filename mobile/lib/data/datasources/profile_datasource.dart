@@ -39,6 +39,7 @@ class ProfileDatasource {
         'age': age,
         'gender': gender,
         'address': address,
+        'created_at': now.toIso8601String(),
         'updated_at': now.toIso8601String(),
       };
 
