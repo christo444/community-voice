@@ -1,5 +1,3 @@
-// lib/features/app_features/presentation/pages/auth/pin_login_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../../domain/repository/auth_repository.dart';
@@ -89,8 +87,7 @@ class _PinLoginPageState extends State<PinLoginPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 24),
-              
-              // Title
+
               const Text(
                 'Welcome Back!',
                 style: TextStyle(
@@ -99,9 +96,9 @@ class _PinLoginPageState extends State<PinLoginPage> {
                   color: Color(0xFF800000),
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               Text(
                 'Enter PIN for: ${widget.phoneNumber}',
                 style: const TextStyle(
@@ -109,10 +106,9 @@ class _PinLoginPageState extends State<PinLoginPage> {
                   color: Colors.grey,
                 ),
               ),
-              
+
               const SizedBox(height: 48),
-              
-              // PIN input
+
               TextField(
                 controller: _pinController,
                 keyboardType: TextInputType.number,
@@ -141,37 +137,51 @@ class _PinLoginPageState extends State<PinLoginPage> {
                 ),
                 onSubmitted: (_) => _handleLogin(),
               ),
-              
+
               const SizedBox(height: 32),
-              
-              // Login button
-              ElevatedButton(
-                onPressed: _isLoading ? null : _handleLogin,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF800000),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+
+              // Gradient Login Button
+              Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF800000),
+                      Color(0xFF4A0E1A),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  elevation: 0,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _handleLogin,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          'Login',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      )
-                    : const Text(
-                        'Login',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                ),
               ),
             ],
           ),

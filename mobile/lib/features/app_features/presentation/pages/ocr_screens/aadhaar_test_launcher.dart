@@ -5,13 +5,35 @@ import 'aadhaar_scan_screen.dart';
 class AadhaarTestLauncher extends StatelessWidget {
   const AadhaarTestLauncher({Key? key}) : super(key: key);
 
+  /// SAME GLOBAL GRADIENT
+  static const LinearGradient maroonGradient = LinearGradient(
+    colors: [
+      Color.fromARGB(255, 139, 58, 58),
+      Color.fromARGB(255, 74, 14, 26),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const Color maroon = Color.fromARGB(255, 139, 58, 58);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // ✅ ADDED — fixes black background
+
       appBar: AppBar(
-        title: const Text("Aadhaar Verification"),
-        backgroundColor: const Color.fromARGB(255, 109, 7, 7),
+        title: const Text(
+          "Aadhaar Verification",
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(gradient: maroonGradient),
+        ),
       ),
+
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -19,7 +41,7 @@ class AadhaarTestLauncher extends StatelessWidget {
             const Icon(
               Icons.credit_card,
               size: 80,
-              color: Color.fromARGB(255, 109, 7, 7),
+              color: maroon,
             ),
             const SizedBox(height: 30),
             const Text(
@@ -42,36 +64,47 @@ class AadhaarTestLauncher extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
-            ElevatedButton.icon(
-              onPressed: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const AadhaarScanScreen(),
-                  ),
-                );
 
-                // If user confirmed scan, navigate to HomePage
-                if (result != null) {
-                  if (!context.mounted) return;
-                  Navigator.pushReplacement(
+            /// GRADIENT BUTTON
+            Container(
+              decoration: BoxDecoration(
+                gradient: maroonGradient,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const HomePage(),
+                      builder: (_) => const AadhaarScanScreen(),
                     ),
                   );
-                }
-              },
-              icon: const Icon(Icons.camera_alt),
-              label: const Text("Start Aadhaar Scan"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 109, 7, 7),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 30,
-                  vertical: 15,
+
+                  if (result != null) {
+                    if (!context.mounted) return;
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const HomePage(),
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.camera_alt, color: Colors.white),
+                label: const Text("Start Aadhaar Scan"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 30,
+                    vertical: 15,
+                  ),
+                  textStyle: const TextStyle(fontSize: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
-                textStyle: const TextStyle(fontSize: 18),
               ),
             ),
           ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:community_voice/features/app_features/presentation/pages/homepage/home_page.dart';
+import 'package:community_voice/features/app_features/presentation/pages/quest/interview.dart';
 
 // ✅ ONLY NEW IMPORTS (added, nothing removed)
 import '../../../../../domain/repository/profile_repository.dart';
@@ -24,7 +25,17 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
   final genderCtrl = TextEditingController();
   final addressCtrl = TextEditingController();
 
-  final Color maroon = const Color(0xFF800000);
+  /// SAME GLOBAL COLORS
+  static const Color maroon = Color.fromARGB(255, 139, 58, 58);
+
+  static const LinearGradient maroonGradient = LinearGradient(
+    colors: [
+      Color.fromARGB(255, 139, 58, 58),
+      Color.fromARGB(255, 74, 14, 26),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 
   @override
   void initState() {
@@ -39,7 +50,6 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
         .where((e) => e.isNotEmpty)
         .toList();
 
-    // ================= NAME =================
     for (final line in lines) {
       final l = line.toLowerCase();
 
@@ -58,7 +68,6 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
       break;
     }
 
-    // ================= DOB =================
     for (final line in lines) {
       final l = line.toLowerCase();
 
@@ -82,7 +91,6 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
       }
     }
 
-    // -------- Fallback: YOB --------
     if (dobCtrl.text.isEmpty) {
       final yobMatch = RegExp(
         r'year\s*of\s*birth[:\s]*(\d{4})',
@@ -96,7 +104,6 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
       }
     }
 
-    // ================= GENDER =================
     final lowerText = text.toLowerCase();
     if (RegExp(r'\bfemale\b').hasMatch(lowerText)) {
       genderCtrl.text = 'Female';
@@ -104,7 +111,6 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
       genderCtrl.text = 'Male';
     }
 
-    // ================= ADDRESS =================
     List<String> addressLines = [];
     bool startCapture = false;
 
@@ -156,7 +162,6 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
     addressCtrl.text = addressLines.join('\n');
   }
 
-  // ================= NEW: SAVE PROFILE + NAVIGATE =================
   Future<void> _saveProfileAndContinue() async {
     final authRepository = AuthRepository();
     final phoneNumber = await authRepository.getStoredPhoneNumber();
@@ -202,11 +207,10 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const HomePage()),
+      MaterialPageRoute(builder: (_) => const InterviewQuestionsPage()),
     );
   }
 
-  // =================== TEXTFIELD DESIGN ===================
   Widget _field(String label, TextEditingController c, {int max = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
@@ -215,14 +219,9 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
         enabled: isEditing,
         maxLines: max,
         cursorColor: maroon,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-          color: Colors.black,
-        ),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(
+          labelStyle: const TextStyle(
             color: maroon,
             fontWeight: FontWeight.w600,
           ),
@@ -232,15 +231,15 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
               const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: maroon.withOpacity(0.5), width: 1.4),
+            borderSide: BorderSide(color: maroon.withOpacity(0.5)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: maroon, width: 2),
+            borderSide: const BorderSide(color: maroon, width: 2),
           ),
           disabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: maroon.withOpacity(0.3), width: 1.2),
+            borderSide: BorderSide(color: maroon.withOpacity(0.3)),
           ),
         ),
       ),
@@ -250,14 +249,22 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // ✅ ONLY CHANGE
+
       appBar: AppBar(
-        title: const Text("User Details"),
+        title: const Text("User Details",
+            style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(gradient: maroonGradient),
+        ),
         actions: [
           TextButton(
             onPressed: () => setState(() => isEditing = !isEditing),
             child: Text(
               isEditing ? "Done" : "Edit",
-              style: const TextStyle(color: Colors.black),
+              style: const TextStyle(color: Colors.white),
             ),
           )
         ],
@@ -279,12 +286,29 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
                 ),
               ),
             ),
-            SizedBox(
+
+            /// GRADIENT BUTTON
+            Container(
               width: double.infinity,
+              height: 52,
+              decoration: BoxDecoration(
+                gradient: maroonGradient,
+                borderRadius: BorderRadius.circular(14),
+              ),
               child: ElevatedButton(
-                // ✅ ONLY CHANGE: button now saves + navigates
                 onPressed: _saveProfileAndContinue,
-                child: const Text("Confirm & Continue"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text(
+                  "Confirm & Continue",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],

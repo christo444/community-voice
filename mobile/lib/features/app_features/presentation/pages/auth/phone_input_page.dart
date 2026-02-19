@@ -1,5 +1,3 @@
-// lib/features/app_features/presentation/pages/auth/phone_input_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../../domain/repository/auth_repository.dart';
@@ -40,13 +38,11 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
     setState(() => _isLoading = true);
 
     try {
-      // Check if user exists
       final existingUser = await _authRepository.checkUserExists(phoneNumber);
 
       if (!mounted) return;
 
       if (existingUser != null) {
-        // User exists - go to PIN login
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -54,7 +50,6 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
           ),
         );
       } else {
-        // New user - go to PIN setup
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -89,13 +84,20 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Spacer(),
-              
-              // Logo/Icon
+
+              // Logo/Icon with gradient
               Container(
                 height: 100,
                 width: 100,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF800000), // Maroon
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF800000),
+                      Color(0xFF4A0E1A),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Icon(
@@ -104,10 +106,9 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
                   color: Colors.white,
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
-              // Title
+
               const Text(
                 'Welcome',
                 style: TextStyle(
@@ -117,9 +118,9 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               const Text(
                 'Enter your phone number to continue',
                 style: TextStyle(
@@ -128,9 +129,9 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              
+
               const SizedBox(height: 48),
-              
+
               // Phone input field
               TextField(
                 controller: _phoneController,
@@ -158,39 +159,53 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
                   counterText: '',
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
-              // Continue button
-              ElevatedButton(
-                onPressed: _isLoading ? null : _handleContinue,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF800000),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+
+              // Continue button with gradient
+              Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF800000),
+                      Color(0xFF4A0E1A),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  elevation: 0,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _handleContinue,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          'Continue',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      )
-                    : const Text(
-                        'Continue',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                ),
               ),
-              
+
               const Spacer(flex: 2),
             ],
           ),

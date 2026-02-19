@@ -23,6 +23,18 @@ class _AadhaarScanScreenState extends State<AadhaarScanScreen> {
 
   late AadhaarData _data;
 
+  /// SAME GRADIENT AS DETAILS SCREEN
+  static const LinearGradient maroonGradient = LinearGradient(
+    colors: [
+      Color.fromARGB(255, 139, 58, 58),
+      Color.fromARGB(255, 74, 14, 26),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const Color maroon = Color.fromARGB(255, 139, 58, 58);
+
   @override
   void initState() {
     super.initState();
@@ -56,7 +68,7 @@ class _AadhaarScanScreenState extends State<AadhaarScanScreen> {
       MaterialPageRoute(
         builder: (_) => AadhaarScanControllerScreen(
           ocrText: result.text,
-          aadhaarData: _data, // ✅ SAME OBJECT PASSED EVERY TIME
+          aadhaarData: _data,
         ),
       ),
     );
@@ -86,36 +98,95 @@ class _AadhaarScanScreenState extends State<AadhaarScanScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Scan Aadhaar")),
+      backgroundColor: Colors.white, // ✅ UI CHANGE: Background set to white
+
+      appBar: AppBar(
+        title: const Text(
+          "Scan Aadhaar",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(gradient: maroonGradient),
+        ),
+      ),
+
       body: !_isReady
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(maroon),
+              ),
+            )
           : Column(
               children: [
                 Expanded(
                   child: CameraPreview(_cameraController!),
                 ),
+
                 if (_isProcessing)
                   const Padding(
                     padding: EdgeInsets.all(12),
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(maroon),
+                    ),
                   ),
+
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
+                      /// SCAN BUTTON
                       Expanded(
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.camera_alt),
-                          label: const Text("Scan"),
-                          onPressed: _captureFromCamera,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: maroonGradient,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.camera_alt,
+                                color: Colors.white),
+                            label: const Text(
+                              "Scan",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: _captureFromCamera,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
+
                       const SizedBox(width: 12),
+
+                      /// GALLERY BUTTON
                       Expanded(
                         child: OutlinedButton.icon(
-                          icon: const Icon(Icons.photo),
-                          label: const Text("Gallery"),
+                          icon: const Icon(Icons.photo, color: maroon),
+                          label: const Text(
+                            "Gallery",
+                            style: TextStyle(
+                                color: maroon,
+                                fontWeight: FontWeight.w600),
+                          ),
                           onPressed: _pickFromGallery,
+                          style: OutlinedButton.styleFrom(
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 14),
+                            side: const BorderSide(color: maroon),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                         ),
                       ),
                     ],
