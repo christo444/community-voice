@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:community_voice/features/app_features/presentation/pages/homepage/home_page.dart';
+import 'package:community_voice/core/localization/language_provider.dart';
+import 'package:community_voice/core/widgets/language_toggle_button.dart';
 import 'aadhaar_scan_screen.dart';
 
 class AadhaarTestLauncher extends StatelessWidget {
@@ -7,10 +10,21 @@ class AadhaarTestLauncher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Aadhaar Verification"),
+        title: Text(lang.translate('aadhaarVerification')),
         backgroundColor: const Color.fromARGB(255, 109, 7, 7),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: LanguageToggleButton(
+              backgroundColor: Colors.white,
+              foregroundColor: Color(0xFF800000),
+            ),
+          ),
+        ],
       ),
       body: Center(
         child: Column(
@@ -23,19 +37,19 @@ class AadhaarTestLauncher extends StatelessWidget {
             ),
             const SizedBox(height: 30),
             const Text(
-              "Welcome to Community Voice",
+              "Community Voice",
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 10),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 40),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
               child: Text(
                 "Please verify your identity with Aadhaar to access government schemes",
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   color: Colors.grey,
                 ),
@@ -63,7 +77,7 @@ class AadhaarTestLauncher extends StatelessWidget {
                 }
               },
               icon: const Icon(Icons.camera_alt),
-              label: const Text("Start Aadhaar Scan"),
+              label: Text(lang.translate('camera')),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 109, 7, 7),
                 foregroundColor: Colors.white,

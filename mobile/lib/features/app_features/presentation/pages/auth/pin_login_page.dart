@@ -2,7 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import '../../../../../domain/repository/auth_repository.dart';
+import '../../../../../core/localization/language_provider.dart';
+import '../../../../../core/widgets/language_toggle_button.dart';
 import 'welcome_page.dart';
 import 'reset_pin_dob_page.dart';
 
@@ -28,9 +31,10 @@ class _PinLoginPageState extends State<PinLoginPage> {
 
   Future<void> _handleLogin() async {
     final pin = _pinController.text.trim();
+    final lang = Provider.of<LanguageProvider>(context, listen: false);
 
     if (pin.isEmpty || pin.length != 4) {
-      _showError('Please enter your 4-digit PIN');
+      _showError(lang.translate('enterYourPin'));
       return;
     }
 
@@ -49,12 +53,12 @@ class _PinLoginPageState extends State<PinLoginPage> {
           ),
         );
       } else {
-        _showError('Incorrect PIN. Please try again.');
+        _showError(lang.translate('invalidPin'));
         _pinController.clear();
       }
     } catch (e) {
       if (!mounted) return;
-      _showError('Error: $e');
+      _showError('${lang.translate('error')}: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -73,6 +77,8 @@ class _PinLoginPageState extends State<PinLoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -82,6 +88,12 @@ class _PinLoginPageState extends State<PinLoginPage> {
           icon: const Icon(Icons.arrow_back, color: Color(0xFF800000)),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: LanguageToggleButton(),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -125,7 +137,7 @@ class _PinLoginPageState extends State<PinLoginPage> {
                   LengthLimitingTextInputFormatter(4),
                 ],
                 decoration: InputDecoration(
-                  labelText: 'Enter your PIN',
+                  labelText: lang.translate('enterYourPin'),
                   labelStyle: const TextStyle(color: Color(0xFF800000)),
                   prefixIcon: const Icon(Icons.lock, color: Color(0xFF800000)),
                   border: OutlineInputBorder(
@@ -186,9 +198,9 @@ class _PinLoginPageState extends State<PinLoginPage> {
                           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : const Text(
-                        'Login',
-                        style: TextStyle(
+                    : Text(
+                        lang.translate('loginWithPin'),
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
