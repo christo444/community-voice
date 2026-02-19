@@ -51,7 +51,7 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
 
       if (existingUser != null) {
         // User exists - go to PIN login
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => PinLoginPage(phoneNumber: phoneNumber),
@@ -59,7 +59,7 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
         );
       } else {
         // New user - go to PIN setup
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => PinSetupPage(phoneNumber: phoneNumber),
@@ -155,6 +155,7 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
                 maxLength: 10,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(10),
                 ],
                 decoration: InputDecoration(
                   labelText: lang.translate('phoneNumber'),

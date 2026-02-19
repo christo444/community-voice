@@ -139,6 +139,7 @@ class _PinSetupPageState extends State<PinSetupPage> {
                 obscureText: true,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(4),
                 ],
                 decoration: InputDecoration(
                   labelText: lang.translate('enterPin'),
@@ -169,6 +170,7 @@ class _PinSetupPageState extends State<PinSetupPage> {
                 obscureText: true,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(4),
                 ],
                 decoration: InputDecoration(
                   labelText: lang.translate('confirmPin'),

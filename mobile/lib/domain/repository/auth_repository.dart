@@ -69,4 +69,9 @@ class AuthRepository {
 
     return await _authDatasource.getUserByPhone(phoneNumber);
   }
+
+  // Reset PIN for existing user
+  Future<bool> updatePin(String phoneNumber, String newPin) async {
+    return await _authDatasource.updatePin(phoneNumber, newPin);
+  }
 }

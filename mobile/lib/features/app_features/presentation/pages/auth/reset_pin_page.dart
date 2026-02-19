@@ -1,64 +1,71 @@
-// lib/features/app_features/presentation/pages/auth/pin_login_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import '../../../../../domain/repository/auth_repository.dart';
-import '../../../../../core/localization/language_provider.dart';
-import '../../../../../core/widgets/language_toggle_button.dart';
-import 'welcome_page.dart';
-import 'reset_pin_dob_page.dart';
+import 'pin_login_page.dart';
 
-class PinLoginPage extends StatefulWidget {
+class ResetPinPage extends StatefulWidget {
   final String phoneNumber;
-  
-  const PinLoginPage({super.key, required this.phoneNumber});
+
+  const ResetPinPage({super.key, required this.phoneNumber});
 
   @override
-  State<PinLoginPage> createState() => _PinLoginPageState();
+  State<ResetPinPage> createState() => _ResetPinPageState();
 }
 
-class _PinLoginPageState extends State<PinLoginPage> {
+class _ResetPinPageState extends State<ResetPinPage> {
   final TextEditingController _pinController = TextEditingController();
+  final TextEditingController _confirmPinController = TextEditingController();
   final AuthRepository _authRepository = AuthRepository();
   bool _isLoading = false;
 
   @override
   void dispose() {
     _pinController.dispose();
+    _confirmPinController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
+  Future<void> _handleResetPin() async {
     final pin = _pinController.text.trim();
-    final lang = Provider.of<LanguageProvider>(context, listen: false);
+    final confirmPin = _confirmPinController.text.trim();
 
     if (pin.isEmpty || pin.length != 4) {
-      _showError(lang.translate('enterYourPin'));
+      _showError('Please enter a 4-digit PIN');
+      return;
+    }
+
+    if (pin != confirmPin) {
+      _showError('PINs do not match');
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      final isValid = await _authRepository.loginUser(widget.phoneNumber, pin);
+      final success = await _authRepository.updatePin(widget.phoneNumber, pin);
 
       if (!mounted) return;
 
-      if (isValid) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('PIN updated successfully. Please login again.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => WelcomePage(phoneNumber: widget.phoneNumber),
+            builder: (context) => PinLoginPage(phoneNumber: widget.phoneNumber),
           ),
         );
       } else {
-        _showError(lang.translate('invalidPin'));
-        _pinController.clear();
+        _showError('Failed to update PIN. Please try again.');
       }
     } catch (e) {
       if (!mounted) return;
-      _showError('${lang.translate('error')}: $e');
+      _showError('Error: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -77,8 +84,6 @@ class _PinLoginPageState extends State<PinLoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final lang = Provider.of<LanguageProvider>(context);
-    
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -88,12 +93,6 @@ class _PinLoginPageState extends State<PinLoginPage> {
           icon: const Icon(Icons.arrow_back, color: Color(0xFF800000)),
           onPressed: () => Navigator.pop(context),
         ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: LanguageToggleButton(),
-          ),
-        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -102,42 +101,34 @@ class _PinLoginPageState extends State<PinLoginPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 24),
-              
-              // Title
               const Text(
-                'Welcome Back!',
+                'Create New PIN',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF800000),
                 ),
               ),
-              
               const SizedBox(height: 8),
-              
-              Text(
-                'Enter PIN for: ${widget.phoneNumber}',
-                style: const TextStyle(
+              const Text(
+                'Set a new 4-digit PIN for your account',
+                style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey,
                 ),
               ),
-              
-              const SizedBox(height: 48),
-              
-              // PIN input
+              const SizedBox(height: 40),
               TextField(
                 controller: _pinController,
                 keyboardType: TextInputType.number,
                 maxLength: 4,
                 obscureText: true,
-                autofocus: true,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(4),
                 ],
                 decoration: InputDecoration(
-                  labelText: lang.translate('enterYourPin'),
+                  labelText: 'Enter new PIN',
                   labelStyle: const TextStyle(color: Color(0xFF800000)),
                   prefixIcon: const Icon(Icons.lock, color: Color(0xFF800000)),
                   border: OutlineInputBorder(
@@ -149,37 +140,46 @@ class _PinLoginPageState extends State<PinLoginPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF800000), width: 2),
+                    borderSide:
+                        const BorderSide(color: Color(0xFF800000), width: 2),
                   ),
                   counterText: '',
                 ),
-                onSubmitted: (_) => _handleLogin(),
               ),
-              
-              const SizedBox(height: 32),
-
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ResetPinDobPage(phoneNumber: widget.phoneNumber),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    'Forgot PIN?',
-                    style: TextStyle(color: Color(0xFF800000)),
+              const SizedBox(height: 24),
+              TextField(
+                controller: _confirmPinController,
+                keyboardType: TextInputType.number,
+                maxLength: 4,
+                obscureText: true,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(4),
+                ],
+                decoration: InputDecoration(
+                  labelText: 'Confirm new PIN',
+                  labelStyle: const TextStyle(color: Color(0xFF800000)),
+                  prefixIcon:
+                      const Icon(Icons.lock_outline, color: Color(0xFF800000)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide:
+                        const BorderSide(color: Color(0xFF800000), width: 2),
+                  ),
+                  counterText: '',
                 ),
+                onSubmitted: (_) => _handleResetPin(),
               ),
-
-              // Login button
+              const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: _isLoading ? null : _handleLogin,
+                onPressed: _isLoading ? null : _handleResetPin,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF800000),
                   foregroundColor: Colors.white,
@@ -195,12 +195,13 @@ class _PinLoginPageState extends State<PinLoginPage> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : Text(
-                        lang.translate('loginWithPin'),
-                        style: const TextStyle(
+                    : const Text(
+                        'Update PIN',
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),

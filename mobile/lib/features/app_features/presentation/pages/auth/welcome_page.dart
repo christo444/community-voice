@@ -5,13 +5,22 @@ import 'package:provider/provider.dart';
 import '../../../../../domain/repository/auth_repository.dart';
 import '../../../../../core/localization/language_provider.dart';
 import '../../../../../core/widgets/language_toggle_button.dart';
+import '../../../../../domain/repository/profile_repository.dart';
+import '../homepage/home_page.dart';
 import 'phone_input_page.dart';
 import '../ocr_screens/aadhaar_test_launcher.dart';
 
-class WelcomePage extends StatelessWidget {
+class WelcomePage extends StatefulWidget {
   final String phoneNumber;
   
   const WelcomePage({super.key, required this.phoneNumber});
+
+  @override
+  State<WelcomePage> createState() => _WelcomePageState();
+}
+
+class _WelcomePageState extends State<WelcomePage> {
+  bool _isLoading = false;
 
   Future<void> _handleLogout(BuildContext context) async {
     final authRepository = AuthRepository();
@@ -24,6 +33,45 @@ class WelcomePage extends StatelessWidget {
       MaterialPageRoute(builder: (context) => const PhoneInputPage()),
       (route) => false,
     );
+  }
+
+  Future<void> _handleContinue(BuildContext context) async {
+    setState(() => _isLoading = true);
+
+    try {
+      final profileRepository = ProfileRepository();
+      final profile = await profileRepository.getProfile(widget.phoneNumber);
+
+      if (!mounted) return;
+
+      if (profile != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomePage(),
+          ),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AadhaarTestLauncher(),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -100,7 +148,7 @@ class WelcomePage extends StatelessWidget {
               
               // Phone number display
               Text(
-                phoneNumber,
+                widget.phoneNumber,
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
@@ -155,14 +203,7 @@ class WelcomePage extends StatelessWidget {
               
               // Continue button - Continue to Aadhaar verification
               ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AadhaarTestLauncher(),
-                    ),
-                  );
-                },
+                onPressed: _isLoading ? null : () => _handleContinue(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF800000),
                   foregroundColor: Colors.white,
@@ -172,13 +213,23 @@ class WelcomePage extends StatelessWidget {
                   ),
                   elevation: 0,
                 ),
-                child: Text(
-                  lang.translate('continue'),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : Text(
+                        lang.translate('continue'),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
               
               const SizedBox(height: 60),
