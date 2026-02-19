@@ -3,7 +3,9 @@ import 'package:community_voice/features/app_features/presentation/pages/ocr_scr
 import 'package:community_voice/features/app_features/presentation/pages/homepage/home_page.dart';
 import 'package:community_voice/domain/repository/auth_repository.dart';
 import 'package:community_voice/domain/repository/profile_repository.dart';
+import 'package:community_voice/core/localization/language_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
@@ -24,19 +26,24 @@ class CommunityVoice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Community Voice',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: const Color(0xFF800000), // Maroon
-        scaffoldBackgroundColor: Colors.white,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF800000),
-          primary: const Color(0xFF800000),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
+      ],
+      child: MaterialApp(
+        title: 'Community Voice',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primaryColor: const Color(0xFF800000), // Maroon
+          scaffoldBackgroundColor: Colors.white,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF800000),
+            primary: const Color(0xFF800000),
+          ),
+          useMaterial3: true,
         ),
-        useMaterial3: true,
+        home: const SplashScreen(),
       ),
-      home: const SplashScreen(),
     );
   }
 }

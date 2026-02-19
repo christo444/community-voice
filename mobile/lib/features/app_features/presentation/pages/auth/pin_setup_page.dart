@@ -2,7 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import '../../../../../domain/repository/auth_repository.dart';
+import '../../../../../core/localization/language_provider.dart';
+import '../../../../../core/widgets/language_toggle_button.dart';
 import 'welcome_page.dart';
 
 class PinSetupPage extends StatefulWidget {
@@ -30,14 +33,15 @@ class _PinSetupPageState extends State<PinSetupPage> {
   Future<void> _handleSetupPin() async {
     final pin = _pinController.text.trim();
     final confirmPin = _confirmPinController.text.trim();
+    final lang = Provider.of<LanguageProvider>(context, listen: false);
 
     if (pin.isEmpty || pin.length != 4) {
-      _showError('Please enter a 4-digit PIN');
+      _showError(lang.translate('enterPin'));
       return;
     }
 
     if (pin != confirmPin) {
-      _showError('PINs do not match');
+      _showError(lang.translate('pinMismatch'));
       return;
     }
 
@@ -56,11 +60,11 @@ class _PinSetupPageState extends State<PinSetupPage> {
           ),
         );
       } else {
-        _showError('Failed to create account. Please try again.');
+        _showError(lang.translate('error'));
       }
     } catch (e) {
       if (!mounted) return;
-      _showError('Error: $e');
+      _showError('${lang.translate('error')}: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -79,6 +83,8 @@ class _PinSetupPageState extends State<PinSetupPage> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -88,6 +94,12 @@ class _PinSetupPageState extends State<PinSetupPage> {
           icon: const Icon(Icons.arrow_back, color: Color(0xFF800000)),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: LanguageToggleButton(),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -98,9 +110,9 @@ class _PinSetupPageState extends State<PinSetupPage> {
               const SizedBox(height: 24),
               
               // Title
-              const Text(
-                'Create Your PIN',
-                style: TextStyle(
+              Text(
+                lang.translate('pinSetup'),
+                style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF800000),
@@ -129,7 +141,7 @@ class _PinSetupPageState extends State<PinSetupPage> {
                   FilteringTextInputFormatter.digitsOnly,
                 ],
                 decoration: InputDecoration(
-                  labelText: 'Enter 4-digit PIN',
+                  labelText: lang.translate('enterPin'),
                   labelStyle: const TextStyle(color: Color(0xFF800000)),
                   prefixIcon: const Icon(Icons.lock, color: Color(0xFF800000)),
                   border: OutlineInputBorder(
@@ -159,7 +171,7 @@ class _PinSetupPageState extends State<PinSetupPage> {
                   FilteringTextInputFormatter.digitsOnly,
                 ],
                 decoration: InputDecoration(
-                  labelText: 'Confirm PIN',
+                  labelText: lang.translate('confirmPin'),
                   labelStyle: const TextStyle(color: Color(0xFF800000)),
                   prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF800000)),
                   border: OutlineInputBorder(
@@ -201,9 +213,9 @@ class _PinSetupPageState extends State<PinSetupPage> {
                           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : const Text(
-                        'Create PIN',
-                        style: TextStyle(
+                    : Text(
+                        lang.translate('setupPin'),
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),

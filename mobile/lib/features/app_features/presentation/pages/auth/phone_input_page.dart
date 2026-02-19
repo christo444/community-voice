@@ -2,7 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import '../../../../../domain/repository/auth_repository.dart';
+import '../../../../../core/localization/language_provider.dart';
+import '../../../../../core/widgets/language_toggle_button.dart';
 import 'pin_setup_page.dart';
 import 'pin_login_page.dart';
 
@@ -28,9 +31,10 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
     final phoneNumber = _phoneController.text.trim();
 
     if (phoneNumber.isEmpty || phoneNumber.length != 10) {
+      final lang = Provider.of<LanguageProvider>(context, listen: false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a valid 10-digit phone number'),
+        SnackBar(
+          content: Text(lang.translate('pleaseEnterValidPhoneNumber')),
           backgroundColor: Colors.red,
         ),
       );
@@ -64,9 +68,10 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
       }
     } catch (e) {
       if (!mounted) return;
+      final lang = Provider.of<LanguageProvider>(context, listen: false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: $e'),
+          content: Text('${lang.translate('error')}: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -79,8 +84,20 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: LanguageToggleButton(),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -108,9 +125,9 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
               const SizedBox(height: 32),
               
               // Title
-              const Text(
-                'Welcome',
-                style: TextStyle(
+              Text(
+                lang.translate('welcome'),
+                style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF800000),
@@ -120,9 +137,9 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
               
               const SizedBox(height: 8),
               
-              const Text(
-                'Enter your phone number to continue',
-                style: TextStyle(
+              Text(
+                lang.translate('enterPhone'),
+                style: const TextStyle(
                   fontSize: 16,
                   color: Colors.grey,
                 ),
@@ -140,7 +157,7 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
                   FilteringTextInputFormatter.digitsOnly,
                 ],
                 decoration: InputDecoration(
-                  labelText: 'Phone Number',
+                  labelText: lang.translate('phoneNumber'),
                   labelStyle: const TextStyle(color: Color(0xFF800000)),
                   prefixIcon: const Icon(Icons.phone, color: Color(0xFF800000)),
                   border: OutlineInputBorder(
@@ -182,9 +199,9 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
                           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : const Text(
-                        'Continue',
-                        style: TextStyle(
+                    : Text(
+                        lang.translate('continue'),
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),

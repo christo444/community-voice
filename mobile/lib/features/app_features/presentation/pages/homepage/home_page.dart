@@ -3,8 +3,11 @@
 import 'package:community_voice/features/app_features/presentation/widgets/widgets.dart';
 import 'package:community_voice/domain/repository/auth_repository.dart';
 import 'package:community_voice/features/app_features/presentation/pages/auth/phone_input_page.dart';
+import 'package:community_voice/core/localization/language_provider.dart';
+import 'package:community_voice/core/widgets/language_toggle_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:provider/provider.dart';
 import 'scheme_detail_page.dart';
 
 // Dummy data - temporary list of schemes for testing
@@ -84,21 +87,21 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Show logout confirmation dialog
-  void _showLogoutDialog() {
+  void _showLogoutDialog(LanguageProvider lang) {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text(
-            'ലോഗ് ഔട്ട്',
-            style: TextStyle(
+          title: Text(
+            lang.translate('logout'),
+            style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Color(0xFF800000),
             ),
           ),
-          content: const Text(
-            'നിങ്ങൾക്ക് ലോഗ് ഔട്ട് ചെയ്യണമെന്ന് ഉറപ്പാണോ?',
-            style: TextStyle(fontSize: 16),
+          content: Text(
+            lang.translate('logoutConfirmMessage'),
+            style: const TextStyle(fontSize: 16),
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -106,9 +109,9 @@ class _HomePageState extends State<HomePage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text(
-                'റദ്ദാക്കുക',
-                style: TextStyle(color: Colors.grey, fontSize: 16),
+              child: Text(
+                lang.translate('cancel'),
+                style: const TextStyle(color: Colors.grey, fontSize: 16),
               ),
             ),
             TextButton(
@@ -131,9 +134,9 @@ class _HomePageState extends State<HomePage> {
                   (route) => false,
                 );
               },
-              child: const Text(
-                'ലോഗ് ഔട്ട്',
-                style: TextStyle(
+              child: Text(
+                lang.translate('logout'),
+                style: const TextStyle(
                   color: Color(0xFF800000),
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -154,18 +157,28 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    
     return Scaffold(
       // ===== APP BAR WITH MAROON GRADIENT =====
       appBar: CustomAppBar(
-        title: "സർക്കാർ പദ്ധതികൾ",
+        title: lang.translate('governmentSchemes'),
         logoPath: 'assets/images/logo.png',
         logoSize: 50.0,
         actions: [
+          // Language button
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: LanguageToggleButton(
+              backgroundColor: Colors.white,
+              foregroundColor: Color(0xFF800000),
+            ),
+          ),
           // Logout button
           IconButton(
             icon: const Icon(Icons.logout, color: Color.fromARGB(255, 253, 240, 213)),
-            tooltip: 'Logout',
-            onPressed: _showLogoutDialog,
+            tooltip: lang.translate('logout'),
+            onPressed: () => _showLogoutDialog(lang),
           ),
         ],
       ),
@@ -182,7 +195,7 @@ class _HomePageState extends State<HomePage> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
               child: Text(
-                "നിങ്ങൾക്ക്  അർഹതയുള്ള  പദ്ധതികൾ",
+                lang.translate('eligibleSchemes'),
                 style: const TextStyle(
                   fontSize: 25,
                   fontWeight: FontWeight.w900,

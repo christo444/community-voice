@@ -1,7 +1,10 @@
 // lib/features/app_features/presentation/pages/auth/welcome_page.dart
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../../../domain/repository/auth_repository.dart';
+import '../../../../../core/localization/language_provider.dart';
+import '../../../../../core/widgets/language_toggle_button.dart';
 import 'phone_input_page.dart';
 import '../ocr_screens/aadhaar_test_launcher.dart';
 
@@ -25,6 +28,8 @@ class WelcomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -38,9 +43,16 @@ class WelcomePage extends StatelessWidget {
           ),
         ),
         actions: [
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: LanguageToggleButton(
+              backgroundColor: Colors.white,
+              foregroundColor: Color(0xFF800000),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () => _showLogoutDialog(context),
+            onPressed: () => _showLogoutDialog(context, lang),
           ),
         ],
       ),
@@ -74,9 +86,9 @@ class WelcomePage extends StatelessWidget {
                 const SizedBox(height: 32),
               
               // Welcome title
-              const Text(
-                'Welcome!',
-                style: TextStyle(
+              Text(
+                lang.translate('welcome'),
+                style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF800000),
@@ -109,25 +121,25 @@ class WelcomePage extends StatelessWidget {
                     color: const Color(0xFF800000).withOpacity(0.2),
                   ),
                 ),
-                child: const Column(
+                child: Column(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.info_outline,
                       color: Color(0xFF800000),
                       size: 40,
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
-                      'You are now logged in',
-                      style: TextStyle(
+                      lang.translate('welcome'),
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF800000),
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: 8),
-                    Text(
+                    const SizedBox(height: 8),
+                    const Text(
                       'You will remain logged in until you manually logout',
                       style: TextStyle(
                         fontSize: 14,
@@ -160,9 +172,9 @@ class WelcomePage extends StatelessWidget {
                   ),
                   elevation: 0,
                 ),
-                child: const Text(
-                  'Continue',
-                  style: TextStyle(
+                child: Text(
+                  lang.translate('continue'),
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -177,12 +189,12 @@ class WelcomePage extends StatelessWidget {
     ));
   }
 
-  void _showLogoutDialog(BuildContext context) {
+  void _showLogoutDialog(BuildContext context, LanguageProvider lang) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Logout'),
+          title: Text(lang.translate('logout')),
           content: const Text('Are you sure you want to logout?'),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -190,9 +202,9 @@ class WelcomePage extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: Colors.grey),
+              child: Text(
+                lang.translate('cancel'),
+                style: const TextStyle(color: Colors.grey),
               ),
             ),
             TextButton(
@@ -200,9 +212,9 @@ class WelcomePage extends StatelessWidget {
                 Navigator.pop(context);
                 _handleLogout(context);
               },
-              child: const Text(
-                'Logout',
-                style: TextStyle(color: Color(0xFF800000)),
+              child: Text(
+                lang.translate('logout'),
+                style: const TextStyle(color: Color(0xFF800000)),
               ),
             ),
           ],
