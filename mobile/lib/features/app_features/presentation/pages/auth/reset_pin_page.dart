@@ -1,20 +1,18 @@
-// lib/features/app_features/presentation/pages/auth/pin_setup_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../../domain/repository/auth_repository.dart';
-import 'welcome_page.dart';
+import 'pin_login_page.dart';
 
-class PinSetupPage extends StatefulWidget {
+class ResetPinPage extends StatefulWidget {
   final String phoneNumber;
-  
-  const PinSetupPage({super.key, required this.phoneNumber});
+
+  const ResetPinPage({super.key, required this.phoneNumber});
 
   @override
-  State<PinSetupPage> createState() => _PinSetupPageState();
+  State<ResetPinPage> createState() => _ResetPinPageState();
 }
 
-class _PinSetupPageState extends State<PinSetupPage> {
+class _ResetPinPageState extends State<ResetPinPage> {
   final TextEditingController _pinController = TextEditingController();
   final TextEditingController _confirmPinController = TextEditingController();
   final AuthRepository _authRepository = AuthRepository();
@@ -27,7 +25,7 @@ class _PinSetupPageState extends State<PinSetupPage> {
     super.dispose();
   }
 
-  Future<void> _handleSetupPin() async {
+  Future<void> _handleResetPin() async {
     final pin = _pinController.text.trim();
     final confirmPin = _confirmPinController.text.trim();
 
@@ -44,19 +42,26 @@ class _PinSetupPageState extends State<PinSetupPage> {
     setState(() => _isLoading = true);
 
     try {
-      final user = await _authRepository.registerUser(widget.phoneNumber, pin);
+      final success = await _authRepository.updatePin(widget.phoneNumber, pin);
 
       if (!mounted) return;
 
-      if (user != null) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('PIN updated successfully. Please login again.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => WelcomePage(phoneNumber: widget.phoneNumber),
+            builder: (context) => PinLoginPage(phoneNumber: widget.phoneNumber),
           ),
         );
       } else {
-        _showError('Failed to create account. Please try again.');
+        _showError('Failed to update PIN. Please try again.');
       }
     } catch (e) {
       if (!mounted) return;
@@ -96,30 +101,23 @@ class _PinSetupPageState extends State<PinSetupPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 24),
-              
-              // Title
               const Text(
-                'Create Your PIN',
+                'Create New PIN',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF800000),
                 ),
               ),
-              
               const SizedBox(height: 8),
-              
-              Text(
-                'For phone number: ${widget.phoneNumber}',
-                style: const TextStyle(
+              const Text(
+                'Set a new 4-digit PIN for your account',
+                style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey,
                 ),
               ),
-              
-              const SizedBox(height: 48),
-              
-              // PIN input
+              const SizedBox(height: 40),
               TextField(
                 controller: _pinController,
                 keyboardType: TextInputType.number,
@@ -130,7 +128,7 @@ class _PinSetupPageState extends State<PinSetupPage> {
                   LengthLimitingTextInputFormatter(4),
                 ],
                 decoration: InputDecoration(
-                  labelText: 'Enter 4-digit PIN',
+                  labelText: 'Enter new PIN',
                   labelStyle: const TextStyle(color: Color(0xFF800000)),
                   prefixIcon: const Icon(Icons.lock, color: Color(0xFF800000)),
                   border: OutlineInputBorder(
@@ -142,15 +140,13 @@ class _PinSetupPageState extends State<PinSetupPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF800000), width: 2),
+                    borderSide:
+                        const BorderSide(color: Color(0xFF800000), width: 2),
                   ),
                   counterText: '',
                 ),
               ),
-              
               const SizedBox(height: 24),
-              
-              // Confirm PIN input
               TextField(
                 controller: _confirmPinController,
                 keyboardType: TextInputType.number,
@@ -161,9 +157,10 @@ class _PinSetupPageState extends State<PinSetupPage> {
                   LengthLimitingTextInputFormatter(4),
                 ],
                 decoration: InputDecoration(
-                  labelText: 'Confirm PIN',
+                  labelText: 'Confirm new PIN',
                   labelStyle: const TextStyle(color: Color(0xFF800000)),
-                  prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF800000)),
+                  prefixIcon:
+                      const Icon(Icons.lock_outline, color: Color(0xFF800000)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -173,18 +170,16 @@ class _PinSetupPageState extends State<PinSetupPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF800000), width: 2),
+                    borderSide:
+                        const BorderSide(color: Color(0xFF800000), width: 2),
                   ),
                   counterText: '',
                 ),
-                onSubmitted: (_) => _handleSetupPin(),
+                onSubmitted: (_) => _handleResetPin(),
               ),
-              
               const SizedBox(height: 32),
-              
-              // Create PIN button
               ElevatedButton(
-                onPressed: _isLoading ? null : _handleSetupPin,
+                onPressed: _isLoading ? null : _handleResetPin,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF800000),
                   foregroundColor: Colors.white,
@@ -200,11 +195,12 @@ class _PinSetupPageState extends State<PinSetupPage> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : const Text(
-                        'Create PIN',
+                        'Update PIN',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import ParalegalTab from './components/ParalegalTab';
 
 const API_URL = 'http://localhost:5000/api/schemes';
 
 function App() {
+  const [activeTab, setActiveTab] = useState('schemes');
   const [schemes, setSchemes] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [schemeUrl, setSchemeUrl] = useState('');
@@ -139,10 +141,29 @@ function App() {
   return (
     <div className="container">
       <h1>Admin Dashboard</h1>
-      <p className="subtitle">Manage Government Schemes</p>
+      <p className="subtitle">Community Voice Management Portal</p>
 
-      {/* Upload Section */}
-      <div className="upload-section">
+      {/* Tab Navigation */}
+      <div className="main-tabs">
+        <button 
+          className={activeTab === 'schemes' ? 'tab-btn active' : 'tab-btn'}
+          onClick={() => setActiveTab('schemes')}
+        >
+          📄 Schemes
+        </button>
+        <button 
+          className={activeTab === 'paralegals' ? 'tab-btn active' : 'tab-btn'}
+          onClick={() => setActiveTab('paralegals')}
+        >
+          🏛️ Paralegals
+        </button>
+      </div>
+
+      {/* Schemes Tab Content */}
+      {activeTab === 'schemes' && (
+        <div className="tab-content">
+          {/* Upload Section */}
+          <div className="upload-section">
         <div className="upload-header">
           <h3>Add New Scheme</h3>
         </div>
@@ -302,6 +323,15 @@ function App() {
           </>
         )}
       </div>
+        </div>
+      )}
+
+      {/* Paralegals Tab Content */}
+      {activeTab === 'paralegals' && (
+        <div className="tab-content">
+          <ParalegalTab />
+        </div>
+      )}
     </div>
   );
 }
