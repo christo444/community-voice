@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:community_voice/features/app_features/presentation/pages/homepage/home_page.dart';
+import 'package:community_voice/features/app_features/presentation/pages/quest/interview.dart';
 
 // ✅ ONLY NEW IMPORTS (added, nothing removed)
 import '../../../../../domain/repository/profile_repository.dart';
@@ -202,7 +202,7 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const HomePage()),
+      MaterialPageRoute(builder: (_) => const InterviewQuestionsPage()),
     );
   }
 
