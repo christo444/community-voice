@@ -28,6 +28,17 @@ class ProfileRepository {
     );
   }
 
+  // Save interview answers
+  Future<Profile?> saveInterviewAnswers({
+    required String phoneNumber,
+    required Map<String, String?> answers,
+  }) async {
+    return await _profileDatasource.updateInterviewAnswers(
+      phoneNumber: phoneNumber,
+      answers: answers,
+    );
+  }
+
   // Delete profile
   Future<bool> deleteProfile(String phoneNumber) async {
     return await _profileDatasource.deleteProfile(phoneNumber);
