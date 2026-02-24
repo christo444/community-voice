@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ParalegalTab from './components/ParalegalTab';
+import Login from './components/Login';
 
 const API_URL = 'http://localhost:5000/api/schemes';
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [admin, setAdmin] = useState(null);
   const [activeTab, setActiveTab] = useState('schemes');
   const [schemes, setSchemes] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -14,10 +17,27 @@ function App() {
   const [message, setMessage] = useState({ text: '', type: '' });
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch schemes on component mount
+  // Check for existing admin session on mount
   useEffect(() => {
-    fetchSchemes();
+    const storedAdmin = localStorage.getItem('admin');
+    if (storedAdmin) {
+      try {
+        const adminData = JSON.parse(storedAdmin);
+        setAdmin(adminData);
+        setIsAuthenticated(true);
+      } catch (err) {
+        console.error('Error parsing stored admin data:', err);
+        localStorage.removeItem('admin');
+      }
+    }
   }, []);
+
+  // Fetch schemes on component mount (only when authenticated)
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchSchemes();
+    }
+  }, [isAuthenticated]);
 
   // Fetch all schemes from API
   const fetchSchemes = async () => {
@@ -138,10 +158,39 @@ function App() {
     }
   };
 
+  // Handle login success
+  const handleLoginSuccess = (adminData) => {
+    setAdmin(adminData);
+    setIsAuthenticated(true);
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('admin');
+    setAdmin(null);
+    setIsAuthenticated(false);
+    setActiveTab('schemes');
+  };
+
+  // Show login page if not authenticated
+  if (!isAuthenticated) {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div className="container">
-      <h1>Admin Dashboard</h1>
-      <p className="subtitle">Community Voice Management Portal</p>
+      <div className="dashboard-header">
+        <div>
+          <h1>Admin Dashboard</h1>
+          <p className="subtitle">Community Voice Management Portal</p>
+        </div>
+        <div className="admin-info">
+          <span className="admin-name">👤 {admin?.full_name || 'Admin'}</span>
+          <button onClick={handleLogout} className="btn btn-logout">
+            Logout
+          </button>
+        </div>
+      </div>
 
       {/* Tab Navigation */}
       <div className="main-tabs">
