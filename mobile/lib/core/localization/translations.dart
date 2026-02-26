@@ -57,6 +57,11 @@ class Translations {
       'q12': 'Do you have an Aadhaar-linked bank account?(yes / no)',
       'q13': 'Do you have a ration card?(yes / no)',
       'q14': 'Do you have a caste or community certificate?(yes / no)',
+      'q15': 'Do you belong to a minority community?(Muslim / Christian / Sikh / Buddhist / Jain / Parsi / No)',
+      'q16': 'Do you have an EWS (Economically Weaker Section) certificate?(yes / no)',
+      'q17': 'Which state and district do you permanently reside in?',
+      'q18': 'Is your house made of temporary materials like mud,thatch etc?(yes / no)',
+      'q19': 'Are you pregnant or have you given birth within the last year?(yes / no)',
     },
     'ml': {
       'welcome': 'സ്വാഗതം',
@@ -115,6 +120,11 @@ class Translations {
       'q12': 'ആധാറുമായി ലിങ്ക് ചെയ്ത ബാങ്ക് അക്കൗണ്ട് നിങ്ങൾക്കുണ്ടോ?(ഉണ്ട് / ഇല്ല)',
       'q13': 'നിങ്ങൾക്ക് റേഷൻ കാർഡുണ്ടോ?(ഉണ്ട് / ഇല്ല)',
       'q14': 'നിങ്ങളുടെ കൈവശം ജാതി അല്ലെങ്കിൽ സമുദായ സർട്ടിഫിക്കറ്റ് ഉണ്ടോ?(ഉണ്ട് / ഇല്ല)',
+      'q15': 'നിങ്ങൾ ന്യൂനപക്ഷ സമുദായത്തില്പെടുന്നുണ്ടോ?(മുസ്ലിം / ക്രിസ്ത്യൻ / സിഖ് / ബുദ്ധ / ജൈന / പാർസി / ഇല്ല)',
+      'q16': 'നിങ്ങൾക്ക് EWS (Economic Weaker Section) സർട്ടിഫിക്കറ്റ് ഉണ്ടോ?(അതെ / ഇല്ല)',
+      'q17': 'നിങ്ങൾ സ്ഥിരമായി താമസിക്കുന്ന സംസ്ഥാനവും ജില്ലയും ഏതാണ്?',
+      'q18': 'നിങ്ങളുടെ വീട് ചെളി, ഓട് തുടങ്ങിയ താൽക്കാലിക വസ്തുക്കൾ കൊണ്ടാണോ നിർമ്മിച്ചിരിക്കുന്നത്? (അതെ / ഇല്ല)',
+      'q19': 'നിങ്ങൾ ഗർഭിണിയാണോ അല്ലെങ്കിൽ കഴിഞ്ഞ ഒരു വർഷത്തിനുള്ളിൽ കുട്ടിക്ക് ജന്മം നൽകിയിട്ടുണ്ടോ?(അതെ / ഇല്ല)',
     },
   };
 
