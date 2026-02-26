@@ -69,4 +69,42 @@ class ProfileDatasource {
       return false;
     }
   }
+
+  // Update interview answers
+  Future<Profile?> updateInterviewAnswers({
+    required String phoneNumber,
+    required Map<String, String?> answers,
+  }) async {
+    try {
+      final updateData = {
+        'occupation': answers['occupation'],
+        'organised_unorganised_sector': answers['organisedUnorganisedSector'],
+        'income_below': answers['incomeBelow'],
+        'income_certificate': answers['incomeCertificate'],
+        'agriculture_involved': answers['agricultureInvolved'],
+        'land_ownership': answers['landOwnership'],
+        'msme_status': answers['msmeStatus'],
+        'education': answers['education'],
+        'disability': answers['disability'],
+        'special_category': answers['specialCategory'],
+        'pension': answers['pension'],
+        'aadhaar_linked_account': answers['aadhaarLinkedAccount'],
+        'ration_card': answers['rationCard'],
+        'caste_certificate': answers['casteCertificate'],
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      final response = await _client
+          .from('profile_details')
+          .update(updateData)
+          .eq('phone_number', phoneNumber)
+          .select()
+          .single();
+
+      return Profile.fromJson(response);
+    } catch (e) {
+      print('Error updating interview answers: $e');
+      return null;
+    }
+  }
 }

@@ -18,6 +18,8 @@ dependencies:
   image_picker: ^1.2.1
   provider: ^6.1.5+1
   shared_preferences: ^2.2.0
+  speech_to_text: ^7.0.0
+  translator: ^1.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
