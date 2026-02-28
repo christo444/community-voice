@@ -2,6 +2,7 @@
 
 import 'package:community_voice/features/app_features/presentation/widgets/widgets.dart';
 import 'package:community_voice/domain/repository/auth_repository.dart';
+import 'package:community_voice/domain/repository/profile_repository.dart';
 import 'package:community_voice/features/app_features/presentation/pages/auth/phone_input_page.dart';
 import 'package:community_voice/core/localization/language_provider.dart';
 import 'package:community_voice/core/widgets/language_toggle_button.dart';
@@ -84,6 +85,122 @@ class _HomePageState extends State<HomePage> {
       });
       await flutterTts.speak(textToSpeak);
     }
+  }
+
+  // Show profile dialog with Aadhaar details
+  void _showProfileDialog() async {
+    final authRepository = AuthRepository();
+    final profileRepository = ProfileRepository();
+    final phoneNumber = await authRepository.getStoredPhoneNumber();
+    
+    print('Debug: Phone number from storage: $phoneNumber'); // Debug log
+    
+    if (phoneNumber == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Phone number not found. Please login again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    try {
+      final profile = await profileRepository.getProfile(phoneNumber);
+      print('Debug: Profile retrieved: $profile'); // Debug log
+      
+      if (!mounted) return;
+
+      showDialog(
+        context: context,
+        builder: (BuildContext dialogContext) {
+          return AlertDialog(
+            title: const Text(
+              'Profile Details',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF800000),
+              ),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (profile != null) ...[
+                    _buildProfileField('Name', profile.name),
+                    _buildProfileField('Phone', profile.phoneNumber),
+                    _buildProfileField('Date of Birth', profile.dateOfBirth),
+                    _buildProfileField('Age', profile.age?.toString()),
+                    _buildProfileField('Gender', profile.gender),
+                    _buildProfileField('Address', profile.address),
+                  ] else ...[
+                    Text(
+                      'No profile data found for phone: $phoneNumber\n\nPlease complete your Aadhaar verification process first.',
+                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text(
+                  'Close',
+                  style: TextStyle(
+                    color: Color(0xFF800000),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      print('Debug: Error retrieving profile: $e'); // Debug log
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error retrieving profile: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  // Helper method to build profile field widgets
+  Widget _buildProfileField(String label, String? value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF800000),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value ?? 'Not provided',
+            style: TextStyle(
+              fontSize: 16,
+              color: value != null ? Colors.black87 : Colors.grey,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // Show logout confirmation dialog
@@ -173,6 +290,12 @@ class _HomePageState extends State<HomePage> {
               backgroundColor: Colors.white,
               foregroundColor: Color(0xFF800000),
             ),
+          ),
+          // Profile button
+          IconButton(
+            icon: const Icon(Icons.person, color: Color.fromARGB(255, 253, 240, 213)),
+            tooltip: 'Profile',
+            onPressed: _showProfileDialog,
           ),
           // Logout button
           IconButton(
