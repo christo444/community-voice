@@ -23,6 +23,11 @@ class Profile {
   final String? aadhaarLinkedAccount;
   final String? rationCard;
   final String? casteCertificate;
+  final String? minorityCommunity;
+  final String? ewsCertificate;
+  final String? stateDistrict;
+  final String? kutchaHouse;
+  final String? pregnantOrLactating;
 
   Profile({
     required this.phoneNumber,
@@ -47,6 +52,11 @@ class Profile {
     this.aadhaarLinkedAccount,
     this.rationCard,
     this.casteCertificate,
+    this.minorityCommunity,
+    this.ewsCertificate,
+    this.stateDistrict,
+    this.kutchaHouse,
+    this.pregnantOrLactating,
   });
 
   factory Profile.fromJson(Map<String, dynamic> json) {
@@ -73,6 +83,11 @@ class Profile {
       aadhaarLinkedAccount: json['aadhaar_linked_account'] as String?,
       rationCard: json['ration_card'] as String?,
       casteCertificate: json['caste_certificate'] as String?,
+      minorityCommunity: json['minority_community'] as String?,
+      ewsCertificate: json['ews_certificate'] as String?,
+      stateDistrict: json['state_district'] as String?,
+      kutchaHouse: json['kutcha_house'] as String?,
+      pregnantOrLactating: json['pregnant_or_lactating'] as String?,
     );
   }
 
@@ -100,6 +115,11 @@ class Profile {
       'aadhaar_linked_account': aadhaarLinkedAccount,
       'ration_card': rationCard,
       'caste_certificate': casteCertificate,
+      'minority_community': minorityCommunity,
+      'ews_certificate': ewsCertificate,
+      'state_district': stateDistrict,
+      'kutcha_house': kutchaHouse,
+      'pregnant_or_lactating': pregnantOrLactating,
     };
   }
 
@@ -126,6 +146,11 @@ class Profile {
     String? aadhaarLinkedAccount,
     String? rationCard,
     String? casteCertificate,
+    String? minorityCommunity,
+    String? ewsCertificate,
+    String? stateDistrict,
+    String? kutchaHouse,
+    String? pregnantOrLactating,
   }) {
     return Profile(
       phoneNumber: phoneNumber ?? this.phoneNumber,
@@ -150,6 +175,11 @@ class Profile {
       aadhaarLinkedAccount: aadhaarLinkedAccount ?? this.aadhaarLinkedAccount,
       rationCard: rationCard ?? this.rationCard,
       casteCertificate: casteCertificate ?? this.casteCertificate,
+      minorityCommunity: minorityCommunity ?? this.minorityCommunity,
+      ewsCertificate: ewsCertificate ?? this.ewsCertificate,
+      stateDistrict: stateDistrict ?? this.stateDistrict,
+      kutchaHouse: kutchaHouse ?? this.kutchaHouse,
+      pregnantOrLactating: pregnantOrLactating ?? this.pregnantOrLactating,
     );
   }
 }

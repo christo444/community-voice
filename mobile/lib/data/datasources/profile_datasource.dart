@@ -91,6 +91,11 @@ class ProfileDatasource {
         'aadhaar_linked_account': answers['aadhaarLinkedAccount'],
         'ration_card': answers['rationCard'],
         'caste_certificate': answers['casteCertificate'],
+        'minority_community': answers['minorityCommunity'],
+        'ews_certificate': answers['ewsCertificate'],
+        'state_district': answers['stateDistrict'],
+        'kutcha_house': answers['kutchaHouse'],
+        'pregnant_or_lactating': answers['pregnantOrLactating'],
         'updated_at': DateTime.now().toIso8601String(),
       };
 

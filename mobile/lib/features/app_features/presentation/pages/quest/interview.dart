@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:translator/translator.dart';
@@ -16,10 +17,11 @@ class InterviewQuestionsPage extends StatefulWidget {
 }
 
 class _InterviewQuestionsPageState extends State<InterviewQuestionsPage> {
-  final List<TextEditingController> _controllers = List.generate(14, (_) => TextEditingController());
+  final List<TextEditingController> _controllers = List.generate(19, (_) => TextEditingController());
   final List<String> _questionKeys = [
     'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 
-    'q8', 'q9', 'q10', 'q11', 'q12', 'q13', 'q14'
+    'q8', 'q9', 'q10', 'q11', 'q12', 'q13', 'q14',
+    'q15', 'q16', 'q17', 'q18', 'q19'
   ];
   
   late stt.SpeechToText _speech;
@@ -54,10 +56,22 @@ class _InterviewQuestionsPageState extends State<InterviewQuestionsPage> {
   }
 
   Future<void> _startListening(int index) async {
+    // Play mic click sound
+    SystemSound.play(SystemSoundType.click);
+    
     final lang = Provider.of<LanguageProvider>(context, listen: false);
     bool available = await _speech.initialize(
       onError: (error) => print('Speech recognition error: $error'),
-      onStatus: (status) => print('Speech recognition status: $status'),
+      onStatus: (status) {
+        print('Speech recognition status: $status');
+        // Automatically stop when speech recognition ends
+        if (status == 'done' || status == 'notListening') {
+          setState(() {
+            _isListening = false;
+            _currentListeningIndex = null;
+          });
+        }
+      },
     );
 
     if (available) {
@@ -74,8 +88,15 @@ class _InterviewQuestionsPageState extends State<InterviewQuestionsPage> {
           setState(() {
             _controllers[index].text = result.recognizedWords;
           });
+          // Automatically stop after final result
+          if (result.finalResult) {
+            _stopListening();
+          }
         },
         localeId: localeId,
+        listenFor: const Duration(seconds: 30), // Maximum listening duration
+        pauseFor: const Duration(seconds: 3), // Stop after 3 seconds of silence
+        cancelOnError: true,
       );
     } else {
       print('Speech recognition not available');
@@ -83,6 +104,9 @@ class _InterviewQuestionsPageState extends State<InterviewQuestionsPage> {
   }
 
   void _stopListening() {
+    // Play sound when stopping
+    SystemSound.play(SystemSoundType.click);
+    
     _speech.stop();
     setState(() {
       _isListening = false;
@@ -154,6 +178,11 @@ class _InterviewQuestionsPageState extends State<InterviewQuestionsPage> {
         'aadhaarLinkedAccount',
         'rationCard',
         'casteCertificate',
+        'minorityCommunity',
+        'ewsCertificate',
+        'stateDistrict',
+        'kutchaHouse',
+        'pregnantOrLactating',
       ];
 
       for (int i = 0; i < _controllers.length; i++) {
