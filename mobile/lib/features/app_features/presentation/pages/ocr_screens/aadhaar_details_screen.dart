@@ -17,6 +17,7 @@ class AadhaarDetailsScreen extends StatefulWidget {
 
 class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
   bool isEditing = false;
+  bool _isSaving = false;
 
   final nameCtrl = TextEditingController();
   final dobCtrl = TextEditingController();
@@ -158,6 +159,10 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
 
   // ================= NEW: SAVE PROFILE + NAVIGATE =================
   Future<void> _saveProfileAndContinue() async {
+    if (_isSaving) return;
+
+    setState(() => _isSaving = true);
+
     final authRepository = AuthRepository();
     final phoneNumber = await authRepository.getStoredPhoneNumber();
 
@@ -179,31 +184,41 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
 
     final profileRepository = ProfileRepository();
 
-    final result = await profileRepository.saveOcrData(
-      phoneNumber: phoneNumber,
-      name: nameCtrl.text.isNotEmpty ? nameCtrl.text : null,
-      dateOfBirth: dobCtrl.text.isNotEmpty ? dobCtrl.text : null,
-      age: ageInt,
-      gender: genderCtrl.text.isNotEmpty ? genderCtrl.text : null,
-      address: addressCtrl.text.isNotEmpty ? addressCtrl.text : null,
-    );
+    // Retry saving up to 3 times on transient failures
+    var result;
+    for (int attempt = 1; attempt <= 3; attempt++) {
+      result = await profileRepository.saveOcrData(
+        phoneNumber: phoneNumber,
+        name: nameCtrl.text.isNotEmpty ? nameCtrl.text : null,
+        dateOfBirth: dobCtrl.text.isNotEmpty ? dobCtrl.text : null,
+        age: ageInt,
+        gender: genderCtrl.text.isNotEmpty ? genderCtrl.text : null,
+        address: addressCtrl.text.isNotEmpty ? addressCtrl.text : null,
+      );
+      if (result != null) break;
+      await Future.delayed(const Duration(seconds: 1));
+    }
 
     if (!mounted) return;
 
     if (result == null) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Failed to save profile. Please try again.'),
           backgroundColor: Colors.red,
         ),
       );
+      setState(() => _isSaving = false);
       return;
     }
 
+    if (!mounted) return;
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const InterviewQuestionsPage()),
     );
+    setState(() => _isSaving = false);
   }
 
   // =================== TEXTFIELD DESIGN ===================
@@ -282,9 +297,17 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                // ✅ ONLY CHANGE: button now saves + navigates
-                onPressed: _saveProfileAndContinue,
-                child: const Text("Confirm & Continue"),
+                onPressed: _isSaving ? null : _saveProfileAndContinue,
+                child: _isSaving
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text("Confirm & Continue"),
               ),
             ),
           ],

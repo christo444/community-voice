@@ -29,6 +29,8 @@ class _InterviewQuestionsPageState extends State<InterviewQuestionsPage> {
   int? _currentListeningIndex;
   final translator = GoogleTranslator();
   bool _isSaving = false;
+  // max retry attempts for network calls
+  static const int _maxSaveAttempts = 3;
 
   static const LinearGradient maroonGradient = LinearGradient(
     colors: [
@@ -94,8 +96,8 @@ class _InterviewQuestionsPageState extends State<InterviewQuestionsPage> {
           }
         },
         localeId: localeId,
-        listenFor: const Duration(seconds: 30), // Maximum listening duration
-        pauseFor: const Duration(seconds: 3), // Stop after 3 seconds of silence
+        listenFor: const Duration(seconds: 60), // Maximum listening duration (increased)
+        pauseFor: const Duration(seconds: 8), // Stop after 8 seconds of silence (increased)
         cancelOnError: true,
       );
     } else {
@@ -194,12 +196,18 @@ class _InterviewQuestionsPageState extends State<InterviewQuestionsPage> {
         }
       }
 
-      // Save to database
+      // Save to database with retry logic
       final profileRepository = ProfileRepository();
-      final result = await profileRepository.saveInterviewAnswers(
-        phoneNumber: phoneNumber,
-        answers: translatedAnswers,
-      );
+      var result;
+      for (int attempt = 1; attempt <= _maxSaveAttempts; attempt++) {
+        result = await profileRepository.saveInterviewAnswers(
+          phoneNumber: phoneNumber,
+          answers: translatedAnswers,
+        );
+        if (result != null) break;
+        // small delay before retrying
+        await Future.delayed(const Duration(seconds: 1));
+      }
 
       if (!mounted) return;
 
