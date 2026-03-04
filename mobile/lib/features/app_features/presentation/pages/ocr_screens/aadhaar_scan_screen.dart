@@ -23,6 +23,15 @@ class _AadhaarScanScreenState extends State<AadhaarScanScreen> {
 
   late AadhaarData _data;
 
+  static const LinearGradient maroonGradient = LinearGradient(
+    colors: [
+      Color.fromARGB(255, 139, 58, 58),
+      Color.fromARGB(255, 74, 14, 26),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
   @override
   void initState() {
     super.initState();
@@ -56,7 +65,7 @@ class _AadhaarScanScreenState extends State<AadhaarScanScreen> {
       MaterialPageRoute(
         builder: (_) => AadhaarScanControllerScreen(
           ocrText: result.text,
-          aadhaarData: _data, // ✅ SAME OBJECT PASSED EVERY TIME
+          aadhaarData: _data,
         ),
       ),
     );
@@ -86,36 +95,97 @@ class _AadhaarScanScreenState extends State<AadhaarScanScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Scan Aadhaar")),
+      backgroundColor: Colors.white,
+
+      // ✅ GRADIENT APPBAR (MATCHES OTHER SCREENS)
+      appBar: AppBar(
+        title: const Text(
+          "Scan Aadhaar",
+          style: TextStyle(color: Colors.white),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(gradient: maroonGradient),
+        ),
+      ),
+
       body: !_isReady
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 Expanded(
-                  child: CameraPreview(_cameraController!),
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(20),
+                    ),
+                    child: CameraPreview(_cameraController!),
+                  ),
                 ),
+
                 if (_isProcessing)
                   const Padding(
                     padding: EdgeInsets.all(12),
                     child: CircularProgressIndicator(),
                   ),
+
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
+                      // ✅ GRADIENT SCAN BUTTON
                       Expanded(
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.camera_alt),
-                          label: const Text("Scan"),
-                          onPressed: _captureFromCamera,
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            gradient: maroonGradient,
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(14)),
+                          ),
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.camera_alt,
+                                color: Colors.white),
+                            label: const Text(
+                              "Scan",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            onPressed: _captureFromCamera,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
+
                       const SizedBox(width: 12),
+
+                      // ✅ OUTLINED GALLERY BUTTON (MAROON BORDER)
                       Expanded(
                         child: OutlinedButton.icon(
-                          icon: const Icon(Icons.photo),
-                          label: const Text("Gallery"),
+                          icon: const Icon(Icons.photo,
+                              color: Color.fromARGB(255, 139, 58, 58)),
+                          label: const Text(
+                            "Gallery",
+                            style: TextStyle(
+                                color:
+                                    Color.fromARGB(255, 139, 58, 58)),
+                          ),
                           onPressed: _pickFromGallery,
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(
+                                color: Color.fromARGB(255, 139, 58, 58),
+                                width: 2),
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
                         ),
                       ),
                     ],
