@@ -31,7 +31,8 @@ class SchemeDatasource {
       print('📡 RESPONSE RECEIVED');
       print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       print('Status Code: ${response.statusCode}');
-      print('Response Body: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}...');
+      print(
+          'Response Body: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}...');
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);

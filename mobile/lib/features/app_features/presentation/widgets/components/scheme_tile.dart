@@ -4,13 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 /// =================================================================
 /// SCHEME TILE WIDGET - UI DESIGNER'S FILE
 /// =================================================================
-/// 
+///
 /// UI DESIGNER: You can customize the look and feel of scheme tiles
 /// - Change tile design, spacing, borders
 /// - Modify text styles, colors, fonts
 /// - Add shadows, gradients, decorations
 /// - Customize the layout structure
-/// 
+///
 /// DEVELOPER: Only modify the parameters and callback functions
 /// - Do NOT change the widget parameters
 /// - Pass your data and logic through constructor

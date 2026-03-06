@@ -75,7 +75,7 @@ class _SchemeDetailPageState extends State<SchemeDetailPage> {
     await flutterTts.setSpeechRate(0.5);
     await flutterTts.setVolume(1.0);
     await flutterTts.setPitch(1.0);
-    
+
     // Listen to completion to update state
     flutterTts.setCompletionHandler(() {
       setState(() {
@@ -94,14 +94,17 @@ class _SchemeDetailPageState extends State<SchemeDetailPage> {
       });
     } else {
       // If not speaking, start reading
-      String pageContent = '''
-      ${widget.name}. 
-      ${widget.description}
-      ''';
-      setState(() {
-        isSpeaking = true;
-      });
-      await flutterTts.speak(pageContent);
+      if (_schemeDetails != null) {
+        String pageContent = '''
+        ${widget.name}. 
+        Description: ${_summarizeText(widget.description, 50)}. 
+        Benefits: ${_schemeDetails!.benefits != null ? _summarizeText(_schemeDetails!.benefits!, 50) : 'Not specified'}.
+        ''';
+        setState(() {
+          isSpeaking = true;
+        });
+        await flutterTts.speak(pageContent);
+      }
     }
   }
 
@@ -173,20 +176,52 @@ class _SchemeDetailPageState extends State<SchemeDetailPage> {
                           ),
                           const SectionSpacer(height: 20),
 
-                          // Description Section
+                          // Description Section (Summarized)
                           if (widget.description.isNotEmpty) ...[
                             const SectionHeading(text: "Description"),
                             const SectionSpacer(height: 12),
-                            _buildInfoCard(widget.description),
+                            _buildInfoCard(_summarizeText(widget.description, 200)),
                             const SectionSpacer(height: 20),
                           ],
 
-                          // Benefits Section
+                          // Benefits Section (Summarized)
                           if (_schemeDetails!.benefits != null &&
                               _schemeDetails!.benefits!.isNotEmpty) ...[
                             const SectionHeading(text: "Benefits"),
                             const SectionSpacer(height: 12),
-                            _buildInfoCard(_schemeDetails!.benefits!),
+                            _buildInfoCard(_summarizeText(_schemeDetails!.benefits!, 200)),
+                            const SectionSpacer(height: 20),
+                          ],
+
+                          // Eligibility Section
+                          if (_schemeDetails!.eligibility.isNotEmpty) ...[
+                            const SectionHeading(text: "Eligibility Criteria"),
+                            const SectionSpacer(height: 12),
+                            _buildBulletList(_schemeDetails!.eligibility),
+                            const SectionSpacer(height: 20),
+                          ],
+
+                          // Exclusions Section
+                          if (_schemeDetails!.exclusions.isNotEmpty) ...[
+                            const SectionHeading(text: "Exclusions"),
+                            const SectionSpacer(height: 12),
+                            _buildBulletList(_schemeDetails!.exclusions),
+                            const SectionSpacer(height: 20),
+                          ],
+
+                          // Application Process Section
+                          if (_schemeDetails!.applicationProcess.isNotEmpty) ...[
+                            const SectionHeading(text: "Application Process"),
+                            const SectionSpacer(height: 12),
+                            _buildNumberedList(_schemeDetails!.applicationProcess),
+                            const SectionSpacer(height: 20),
+                          ],
+
+                          // Documents Required Section
+                          if (_schemeDetails!.documentsRequired.isNotEmpty) ...[
+                            const SectionHeading(text: "Documents Required"),
+                            const SectionSpacer(height: 12),
+                            _buildBulletList(_schemeDetails!.documentsRequired),
                             const SectionSpacer(height: 20),
                           ],
 
@@ -226,6 +261,118 @@ class _SchemeDetailPageState extends State<SchemeDetailPage> {
             color: Colors.black87,
             fontWeight: FontWeight.w500,
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Summarize text to a maximum number of words
+  String _summarizeText(String text, int maxWords) {
+    final words = text.split(' ');
+    if (words.length <= maxWords) {
+      return text;
+    }
+    return '${words.take(maxWords).join(' ')}...';
+  }
+
+  /// Build a bullet point list
+  Widget _buildBulletList(List<String> items) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: items.asMap().entries.map((entry) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '• ',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF800000),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      entry.value,
+                      style: GoogleFonts.openSans(
+                        fontSize: 15,
+                        height: 1.5,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  /// Build a numbered list
+  Widget _buildNumberedList(List<String> items) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: items.asMap().entries.map((entry) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF800000),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${entry.key + 1}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        entry.value,
+                        style: GoogleFonts.openSans(
+                          fontSize: 15,
+                          height: 1.5,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
         ),
       ),
     );

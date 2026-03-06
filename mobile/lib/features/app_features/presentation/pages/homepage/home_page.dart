@@ -19,17 +19,20 @@ final List<Map<String, String>> dummySchemes = [
   {
     'name': 'പെൻഷൻ യോജന',
     'description': 'വയോജനങ്ങൾക്കുള്ള പെൻഷൻ പദ്ധതി',
-    'howToApply': 'നിങ്ങളുടെ പ്രദേശത്തെ താലൂക്ക് ഓഫീസിൽ പോയി അപേക്ഷിക്കുക. ആധാർ കാർഡും വയസ്സ് തെളിയിക്കുന്ന രേഖയും കൂടെ കൊണ്ടുപോകുക.',
+    'howToApply':
+        'നിങ്ങളുടെ പ്രദേശത്തെ താലൂക്ക് ഓഫീസിൽ പോയി അപേക്ഷിക്കുക. ആധാർ കാർഡും വയസ്സ് തെളിയിക്കുന്ന രേഖയും കൂടെ കൊണ്ടുപോകുക.',
   },
   {
     'name': 'വിദ്യാഭ്യാസ സഹായം',
     'description': 'കുട്ടികളുടെ വിദ്യാഭ്യാസത്തിനുള്ള സാമ്പത്തിക സഹായം',
-    'howToApply': 'സ്കൂളിലൂടെ അപേക്ഷിക്കാം. വിദ്യാർത്ഥിയുടെ ബാങ്ക് അക്കൗണ്ട് വിശദാംശങ്ങളും വരുമാന സർട്ടിഫിക്കറ്റും ആവശ്യമാണ്.',
+    'howToApply':
+        'സ്കൂളിലൂടെ അപേക്ഷിക്കാം. വിദ്യാർത്ഥിയുടെ ബാങ്ക് അക്കൗണ്ട് വിശദാംശങ്ങളും വരുമാന സർട്ടിഫിക്കറ്റും ആവശ്യമാണ്.',
   },
   {
     'name': 'ആരോഗ്യ ഇൻഷുറൻസ്',
     'description': 'സൗജന്യ ആരോഗ്യ ഇൻഷുറൻസ് പദ്ധതി',
-    'howToApply': 'അടുത്തുള്ള ആരോഗ്യ കേന്ദ്രത്തിൽ പോയി രജിസ്റ്റർ ചെയ്യുക. കുടുംബത്തിലെ എല്ലാവരുടെയും ആധാർ കാർഡുകൾ കൊണ്ടുവരിക.',
+    'howToApply':
+        'അടുത്തുള്ള ആരോഗ്യ കേന്ദ്രത്തിൽ പോയി രജിസ്റ്റർ ചെയ്യുക. കുടുംബത്തിലെ എല്ലാവരുടെയും ആധാർ കാർഡുകൾ കൊണ്ടുവരിക.',
   },
 ];
 
@@ -57,10 +60,11 @@ class _HomePageState extends State<HomePage> {
   bool _isLoading = true;
   List<Scheme> _matchedSchemes = [];
   String? _errorMessage;
-  
+
   // Translation state
   final GoogleTranslator _translator = GoogleTranslator();
-  Map<String, Map<String, String>> _translations = {}; // schemeId -> {name, description}
+  Map<String, Map<String, String>> _translations =
+      {}; // schemeId -> {name, description}
   bool _isTranslating = false;
   String _currentLanguage = 'en';
 
@@ -70,7 +74,7 @@ class _HomePageState extends State<HomePage> {
     _initTts();
     _loadMatchedSchemes();
   }
-  
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -92,39 +96,39 @@ class _HomePageState extends State<HomePage> {
       });
     }
   }
-  
+
   // Translate all scheme names and descriptions to Malayalam
   Future<void> _translateSchemes() async {
     if (_isTranslating) return;
-    
+
     setState(() {
       _isTranslating = true;
     });
-    
+
     try {
       for (final scheme in _matchedSchemes) {
         // Skip if already translated
         if (_translations.containsKey(scheme.id)) continue;
-        
+
         // Translate name and description
         final translatedName = await _translator.translate(
           scheme.schemeName,
           from: 'en',
           to: 'ml',
         );
-        
+
         final translatedDesc = await _translator.translate(
           scheme.description ?? '',
           from: 'en',
           to: 'ml',
         );
-        
+
         _translations[scheme.id] = {
           'name': translatedName.text,
           'description': translatedDesc.text,
         };
       }
-      
+
       setState(() {
         _isTranslating = false;
       });
@@ -135,7 +139,7 @@ class _HomePageState extends State<HomePage> {
       });
     }
   }
-  
+
   // Get display text based on current language
   String _getDisplayName(Scheme scheme) {
     if (_currentLanguage == 'ml' && _translations.containsKey(scheme.id)) {
@@ -143,7 +147,7 @@ class _HomePageState extends State<HomePage> {
     }
     return scheme.schemeName;
   }
-  
+
   String _getDisplayDescription(Scheme scheme) {
     if (_currentLanguage == 'ml' && _translations.containsKey(scheme.id)) {
       return _translations[scheme.id]!['description']!;
@@ -179,7 +183,7 @@ class _HomePageState extends State<HomePage> {
         _matchedSchemes = schemes;
         _isLoading = false;
       });
-      
+
       // Translate if Malayalam is selected
       final lang = Provider.of<LanguageProvider>(context, listen: false);
       if (lang.languageCode == 'ml') {
@@ -197,10 +201,11 @@ class _HomePageState extends State<HomePage> {
   // Initialize TTS with Malayalam language
   Future<void> _initTts() async {
     await flutterTts.setLanguage("ml-IN"); // Malayalam language
-    await flutterTts.setSpeechRate(0.5); // Speed of speech (0.5 = slower, clear)
+    await flutterTts
+        .setSpeechRate(0.5); // Speed of speech (0.5 = slower, clear)
     await flutterTts.setVolume(1.0); // Volume (0.0 to 1.0)
     await flutterTts.setPitch(1.0); // Voice pitch
-    
+
     // Listen to completion to update state
     flutterTts.setCompletionHandler(() {
       setState(() {
@@ -260,13 +265,13 @@ class _HomePageState extends State<HomePage> {
               onPressed: () async {
                 // Close the dialog
                 Navigator.pop(dialogContext);
-                
+
                 // Perform logout
                 final authRepository = AuthRepository();
                 await authRepository.logout();
-                
+
                 if (!mounted) return;
-                
+
                 // Navigate to phone input page and remove all previous routes
                 Navigator.pushAndRemoveUntil(
                   context,
@@ -300,7 +305,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
-    
+
     return Scaffold(
       // ===== APP BAR WITH MAROON GRADIENT =====
       appBar: CustomAppBar(
@@ -318,20 +323,23 @@ class _HomePageState extends State<HomePage> {
           ),
           // Logout button
           IconButton(
-            icon: const Icon(Icons.logout, color: Color.fromARGB(255, 253, 240, 213)),
+            icon: const Icon(Icons.logout,
+                color: Color.fromARGB(255, 253, 240, 213)),
             tooltip: lang.translate('logout'),
             onPressed: () => _showLogoutDialog(lang),
           ),
         ],
       ),
-      backgroundColor: const Color.fromARGB(255, 237, 233, 233), // ✅ USE COLOR CONSTANT
+      backgroundColor:
+          const Color.fromARGB(255, 237, 233, 233), // ✅ USE COLOR CONSTANT
       body: Column(
         children: [
           // ===== PAGE HEADING WITH SAME BACKGROUND COLOR =====
           Container(
             width: double.infinity,
             decoration: const BoxDecoration(
-              color: Color.fromARGB(255, 237, 233, 233), // ✅ CHANGED: Gradient → Solid color
+              color: Color.fromARGB(
+                  255, 237, 233, 233), // ✅ CHANGED: Gradient → Solid color
             ),
             // ===== UI DESIGNER: CUSTOMIZE HEADING TEXT COLOR BELOW =====
             child: Padding(
@@ -431,8 +439,9 @@ class _HomePageState extends State<HomePage> {
                               itemBuilder: (context, index) {
                                 final scheme = _matchedSchemes[index];
                                 final displayName = _getDisplayName(scheme);
-                                final displayDescription = _getDisplayDescription(scheme);
-                                
+                                final displayDescription =
+                                    _getDisplayDescription(scheme);
+
                                 return SchemeTile(
                                   name: displayName,
                                   description: displayDescription,

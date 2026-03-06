@@ -7,13 +7,24 @@ from supabase import create_client
 import os
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
 
-# Initialize Supabase client
-supabase_client = create_client(
-    os.getenv('SUPABASE_URL'),
-    os.getenv('SUPABASE_KEY')
-)
+# Initialize Supabase client lazily
+_supabase_client = None
+
+def get_supabase_client():
+    """Get or create Supabase client"""
+    global _supabase_client
+    if _supabase_client is None:
+        supabase_url = os.getenv('SUPABASE_URL')
+        supabase_key = os.getenv('SUPABASE_KEY')
+        
+        if not supabase_url or not supabase_key:
+            raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set in environment variables")
+        
+        _supabase_client = create_client(supabase_url, supabase_key)
+    return _supabase_client
 
 def match_user_with_schemes(phone_number):
     """
@@ -30,7 +41,8 @@ def match_user_with_schemes(phone_number):
     """
     try:
         # Fetch ALL schemes from database
-        response = supabase_client.table('schemes').select('*').execute()
+        client = get_supabase_client()
+        response = client.table('schemes').select('*').execute()
         
         schemes = response.data if response.data else []
         
@@ -67,7 +79,8 @@ def get_scheme_details(scheme_id):
         dict: Complete scheme details
     """
     try:
-        response = supabase_client.table('schemes').select('*').eq('id', scheme_id).single().execute()
+        client = get_supabase_client()
+        response = client.table('schemes').select('*').eq('id', scheme_id).single().execute()
         return response.data
     except Exception as e:
         print(f"Error fetching scheme details: {e}")
