@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from services.pdf_parser import extract_scheme_from_pdf, extract_scheme_from_url
 from services.storage import save_scheme, get_all_schemes, get_scheme_by_id, delete_scheme
+from services.scheme_matcher import match_user_with_schemes, get_scheme_details
 import os
 import uuid
 
@@ -127,4 +128,39 @@ def remove_scheme(scheme_id):
         else:
             return jsonify({'error': 'Scheme not found'}), 404
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@schemes_bp.route('/match/<phone_number>', methods=['GET'])
+def get_matched_schemes(phone_number):
+    """Get schemes matched for a specific user"""
+    try:
+        matched_schemes = match_user_with_schemes(phone_number)
+        return jsonify({
+            'success': True,
+            'data': {
+                'phone_number': phone_number,
+                'matched_schemes': matched_schemes,
+                'total_matches': len(matched_schemes)
+            }
+        }), 200
+    except Exception as e:
+        print(f"Error in get_matched_schemes: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@schemes_bp.route('/details/<scheme_id>', methods=['GET'])
+def get_scheme_full_details(scheme_id):
+    """Get complete details for a specific scheme"""
+    try:
+        scheme = get_scheme_details(scheme_id)
+        if scheme:
+            return jsonify({
+                'success': True,
+                'data': scheme
+            }), 200
+        else:
+            return jsonify({'error': 'Scheme not found'}), 404
+    except Exception as e:
+        print(f"Error in get_scheme_full_details: {e}")
         return jsonify({'error': str(e)}), 500

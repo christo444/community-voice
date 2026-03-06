@@ -2,12 +2,15 @@
 
 import 'package:community_voice/features/app_features/presentation/widgets/widgets.dart';
 import 'package:community_voice/domain/repository/auth_repository.dart';
+import 'package:community_voice/domain/repository/scheme_repository.dart';
+import 'package:community_voice/domain/model/scheme.dart';
 import 'package:community_voice/features/app_features/presentation/pages/auth/phone_input_page.dart';
 import 'package:community_voice/core/localization/language_provider.dart';
 import 'package:community_voice/core/widgets/language_toggle_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
+import 'package:translator/translator.dart';
 import 'scheme_detail_page.dart';
 
 // Dummy data - temporary list of schemes for testing
@@ -46,10 +49,149 @@ class _HomePageState extends State<HomePage> {
   // Track which scheme is currently speaking (null if none)
   int? speakingIndex;
 
+  // Scheme repository for fetching data
+  final SchemeRepository _schemeRepository = SchemeRepository();
+  final AuthRepository _authRepository = AuthRepository();
+
+  // State management
+  bool _isLoading = true;
+  List<Scheme> _matchedSchemes = [];
+  String? _errorMessage;
+  
+  // Translation state
+  final GoogleTranslator _translator = GoogleTranslator();
+  Map<String, Map<String, String>> _translations = {}; // schemeId -> {name, description}
+  bool _isTranslating = false;
+  String _currentLanguage = 'en';
+
   @override
   void initState() {
     super.initState();
     _initTts();
+    _loadMatchedSchemes();
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final lang = Provider.of<LanguageProvider>(context);
+    if (lang.languageCode != _currentLanguage) {
+      _currentLanguage = lang.languageCode;
+      _handleLanguageChange(lang.languageCode);
+    }
+  }
+
+  // Handle language change - translate schemes if Malayalam is selected
+  Future<void> _handleLanguageChange(String languageCode) async {
+    if (languageCode == 'ml' && _matchedSchemes.isNotEmpty) {
+      await _translateSchemes();
+    } else {
+      // Clear translations if switching back to English
+      setState(() {
+        _translations.clear();
+      });
+    }
+  }
+  
+  // Translate all scheme names and descriptions to Malayalam
+  Future<void> _translateSchemes() async {
+    if (_isTranslating) return;
+    
+    setState(() {
+      _isTranslating = true;
+    });
+    
+    try {
+      for (final scheme in _matchedSchemes) {
+        // Skip if already translated
+        if (_translations.containsKey(scheme.id)) continue;
+        
+        // Translate name and description
+        final translatedName = await _translator.translate(
+          scheme.schemeName,
+          from: 'en',
+          to: 'ml',
+        );
+        
+        final translatedDesc = await _translator.translate(
+          scheme.description ?? '',
+          from: 'en',
+          to: 'ml',
+        );
+        
+        _translations[scheme.id] = {
+          'name': translatedName.text,
+          'description': translatedDesc.text,
+        };
+      }
+      
+      setState(() {
+        _isTranslating = false;
+      });
+    } catch (e) {
+      print('Translation error: $e');
+      setState(() {
+        _isTranslating = false;
+      });
+    }
+  }
+  
+  // Get display text based on current language
+  String _getDisplayName(Scheme scheme) {
+    if (_currentLanguage == 'ml' && _translations.containsKey(scheme.id)) {
+      return _translations[scheme.id]!['name']!;
+    }
+    return scheme.schemeName;
+  }
+  
+  String _getDisplayDescription(Scheme scheme) {
+    if (_currentLanguage == 'ml' && _translations.containsKey(scheme.id)) {
+      return _translations[scheme.id]!['description']!;
+    }
+    return scheme.description ?? 'No description available';
+  }
+
+  // Load matched schemes for the current user
+  Future<void> _loadMatchedSchemes() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+
+      // Get user's phone number
+      final phoneNumber = await _authRepository.getStoredPhoneNumber();
+
+      if (phoneNumber == null) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'User not logged in';
+        });
+        return;
+      }
+
+      // Fetch matched schemes
+      final schemes = await _schemeRepository.getMatchedSchemes(phoneNumber);
+
+      print('✅ Loaded ${schemes.length} schemes from backend');
+
+      setState(() {
+        _matchedSchemes = schemes;
+        _isLoading = false;
+      });
+      
+      // Translate if Malayalam is selected
+      final lang = Provider.of<LanguageProvider>(context, listen: false);
+      if (lang.languageCode == 'ml') {
+        await _translateSchemes();
+      }
+    } catch (e) {
+      print('❌ Error loading schemes: $e');
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Failed to load schemes: $e';
+      });
+    }
   }
 
   // Initialize TTS with Malayalam language
@@ -206,42 +348,123 @@ class _HomePageState extends State<HomePage> {
             ),
             // ===== END CUSTOMIZATION ZONE =====
           ),
-          // List of Schemes with updated SchemeTile
+          // List of Schemes with loading/error handling
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 12,
-              ),
-              itemCount: dummySchemes.length,
-              itemBuilder: (context, index) {
-                final scheme = dummySchemes[index];
-                return SchemeTile(
-                  name: scheme['name']!,
-                  description: scheme['description']!,
-                  onTap: () {
-                    // Navigate to detail page
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SchemeDetailPage(
-                          name: scheme['name']!,
-                          description: scheme['description']!,
-                          howToApply: scheme['howToApply']!,
+            child: _isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      color: Color(0xFF800000),
+                    ),
+                  )
+                : _errorMessage != null
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.error_outline,
+                              size: 64,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _errorMessage!,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: _loadMatchedSchemes,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF800000),
+                              ),
+                              child: const Text('Retry'),
+                            ),
+                          ],
                         ),
-                      ),
-                    );
-                  },
-                  trailing: VoiceButton(
-                    isSpeaking: speakingIndex == index,
-                    onPressed: () {
-                      // Toggle speech for this scheme
-                      _toggleSpeak(index, scheme['name']!, scheme['description']!);
-                    },
-                  ),
-                );
-              },
-            ),
+                      )
+                    : _matchedSchemes.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.inbox_outlined,
+                                  size: 64,
+                                  color: Colors.grey,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  lang.translate('noSchemesFound'),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 8),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 32),
+                                  child: Text(
+                                    'Complete your profile to get personalized scheme recommendations',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : RefreshIndicator(
+                            onRefresh: _loadMatchedSchemes,
+                            color: const Color(0xFF800000),
+                            child: ListView.builder(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 12,
+                              ),
+                              itemCount: _matchedSchemes.length,
+                              itemBuilder: (context, index) {
+                                final scheme = _matchedSchemes[index];
+                                final displayName = _getDisplayName(scheme);
+                                final displayDescription = _getDisplayDescription(scheme);
+                                
+                                return SchemeTile(
+                                  name: displayName,
+                                  description: displayDescription,
+                                  matchPercentage: scheme.matchPercentage,
+                                  onTap: () {
+                                    // Navigate to detail page with scheme ID
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => SchemeDetailPage(
+                                          schemeId: scheme.id,
+                                          name: displayName,
+                                          description: displayDescription,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  trailing: VoiceButton(
+                                    isSpeaking: speakingIndex == index,
+                                    onPressed: () {
+                                      // Toggle speech for this scheme
+                                      _toggleSpeak(
+                                        index,
+                                        displayName,
+                                        displayDescription,
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
           ),
         ],
       ),
