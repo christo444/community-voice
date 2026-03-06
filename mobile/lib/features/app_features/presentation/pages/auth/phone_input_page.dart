@@ -21,6 +21,15 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
   final AuthRepository _authRepository = AuthRepository();
   bool _isLoading = false;
 
+  static const LinearGradient maroonGradient = LinearGradient(
+    colors: [
+      Color.fromARGB(255, 139, 58, 58),
+      Color.fromARGB(255, 74, 14, 26),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
   @override
   void dispose() {
     _phoneController.dispose();
@@ -44,25 +53,25 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
     setState(() => _isLoading = true);
 
     try {
-      // Check if user exists
-      final existingUser = await _authRepository.checkUserExists(phoneNumber);
+      final existingUser =
+          await _authRepository.checkUserExists(phoneNumber);
 
       if (!mounted) return;
 
       if (existingUser != null) {
-        // User exists - go to PIN login
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PinLoginPage(phoneNumber: phoneNumber),
+            builder: (context) =>
+                PinLoginPage(phoneNumber: phoneNumber),
           ),
         );
       } else {
-        // New user - go to PIN setup
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PinSetupPage(phoneNumber: phoneNumber),
+            builder: (context) =>
+                PinSetupPage(phoneNumber: phoneNumber),
           ),
         );
       }
@@ -85,19 +94,29 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
   @override
   Widget build(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
+
+      // ✅ GRADIENT APPBAR
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         elevation: 0,
+        backgroundColor: Colors.transparent,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(gradient: maroonGradient),
+        ),
         actions: const [
           Padding(
             padding: EdgeInsets.all(8.0),
-            child: LanguageToggleButton(),
+            child: LanguageToggleButton(
+              backgroundColor: Colors.white,
+              foregroundColor:
+                  Color.fromARGB(255, 139, 58, 58),
+            ),
           ),
         ],
       ),
+
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -106,37 +125,37 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Spacer(),
-              
-              // Logo/Icon
+
+              // ✅ Gradient Logo Box
               Container(
-                height: 100,
-                width: 100,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF800000), // Maroon
-                  borderRadius: BorderRadius.circular(20),
+                height: 110,
+                width: 110,
+                decoration: const BoxDecoration(
+                  gradient: maroonGradient,
+                  borderRadius:
+                      BorderRadius.all(Radius.circular(24)),
                 ),
                 child: const Icon(
                   Icons.phone_android,
-                  size: 50,
+                  size: 55,
                   color: Colors.white,
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
-              // Title
+
               Text(
                 lang.translate('welcome'),
                 style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF800000),
+                  color: Color.fromARGB(255, 139, 58, 58),
                 ),
                 textAlign: TextAlign.center,
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               Text(
                 lang.translate('enterPhone'),
                 style: const TextStyle(
@@ -145,10 +164,10 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              
+
               const SizedBox(height: 48),
-              
-              // Phone input field
+
+              // ✅ Styled Phone Input
               TextField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
@@ -157,58 +176,84 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
                   FilteringTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(10),
                 ],
+                cursorColor:
+                    const Color.fromARGB(255, 139, 58, 58),
                 decoration: InputDecoration(
                   labelText: lang.translate('phoneNumber'),
-                  labelStyle: const TextStyle(color: Color(0xFF800000)),
-                  prefixIcon: const Icon(Icons.phone, color: Color(0xFF800000)),
+                  labelStyle: const TextStyle(
+                      color:
+                          Color.fromARGB(255, 139, 58, 58)),
+                  prefixIcon: const Icon(Icons.phone,
+                      color:
+                          Color.fromARGB(255, 139, 58, 58)),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF800000)),
+                    borderRadius:
+                        BorderRadius.circular(14),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderRadius:
+                        BorderRadius.circular(14),
+                    borderSide:
+                        BorderSide(color: Colors.grey.shade300),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF800000), width: 2),
+                    borderRadius:
+                        BorderRadius.circular(14),
+                    borderSide: const BorderSide(
+                        color: Color.fromARGB(
+                            255, 139, 58, 58),
+                        width: 2),
                   ),
                   counterText: '',
                 ),
               ),
-              
-              const SizedBox(height: 24),
-              
-              // Continue button
-              ElevatedButton(
-                onPressed: _isLoading ? null : _handleContinue,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF800000),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
+
+              const SizedBox(height: 28),
+
+              // ✅ Gradient Continue Button
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: maroonGradient,
+                  borderRadius:
+                      BorderRadius.all(Radius.circular(14)),
                 ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                child: ElevatedButton(
+                  onPressed:
+                      _isLoading ? null : _handleContinue,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child:
+                              CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<
+                                    Color>(Colors.white),
+                          ),
+                        )
+                      : Text(
+                          lang.translate('continue'),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight:
+                                FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      )
-                    : Text(
-                        lang.translate('continue'),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                ),
               ),
-              
+
               const Spacer(flex: 2),
             ],
           ),

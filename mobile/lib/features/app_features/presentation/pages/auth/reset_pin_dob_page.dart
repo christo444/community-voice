@@ -1,3 +1,5 @@
+// lib/features/app_features/presentation/pages/auth/reset_pin_dob_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../../domain/repository/profile_repository.dart';
@@ -16,6 +18,15 @@ class _ResetPinDobPageState extends State<ResetPinDobPage> {
   final TextEditingController _dobController = TextEditingController();
   final ProfileRepository _profileRepository = ProfileRepository();
   bool _isLoading = false;
+
+  static const LinearGradient maroonGradient = LinearGradient(
+    colors: [
+      Color.fromARGB(255, 139, 58, 58),
+      Color.fromARGB(255, 74, 14, 26),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 
   @override
   void dispose() {
@@ -89,14 +100,21 @@ class _ResetPinDobPageState extends State<ResetPinDobPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+
+      // ✅ Gradient AppBar
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
+        backgroundColor: Colors.transparent,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(gradient: maroonGradient),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF800000)),
+          icon: const Icon(Icons.arrow_back),
+          color: Colors.white,
           onPressed: () => Navigator.pop(context),
         ),
       ),
+
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -104,15 +122,18 @@ class _ResetPinDobPageState extends State<ResetPinDobPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 24),
+
               const Text(
                 'Verify Date of Birth',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF800000),
+                  color: Color.fromARGB(255, 139, 58, 58),
                 ),
               ),
+
               const SizedBox(height: 8),
+
               const Text(
                 'Enter the date of birth from your Aadhaar',
                 style: TextStyle(
@@ -120,7 +141,9 @@ class _ResetPinDobPageState extends State<ResetPinDobPage> {
                   color: Colors.grey,
                 ),
               ),
+
               const SizedBox(height: 40),
+
               TextField(
                 controller: _dobController,
                 keyboardType: TextInputType.datetime,
@@ -130,9 +153,9 @@ class _ResetPinDobPageState extends State<ResetPinDobPage> {
                 ],
                 decoration: InputDecoration(
                   labelText: 'Date of Birth (DD/MM/YYYY)',
-                  labelStyle: const TextStyle(color: Color(0xFF800000)),
+                  labelStyle: const TextStyle(color: Color.fromARGB(255, 139, 58, 58)),
                   prefixIcon:
-                      const Icon(Icons.calendar_today, color: Color(0xFF800000)),
+                      const Icon(Icons.calendar_today, color: Color.fromARGB(255, 139, 58, 58)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -143,39 +166,47 @@ class _ResetPinDobPageState extends State<ResetPinDobPage> {
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide:
-                        const BorderSide(color: Color(0xFF800000), width: 2),
+                        const BorderSide(color: Color.fromARGB(255, 139, 58, 58), width: 2),
                   ),
                 ),
               ),
+
               const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _handleVerifyDob,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF800000),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
+
+              // ✅ Gradient Verify Button
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: maroonGradient,
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
                 ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _handleVerifyDob,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          'Verify',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      )
-                    : const Text(
-                        'Verify',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                ),
               ),
             ],
           ),

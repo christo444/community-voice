@@ -22,6 +22,15 @@ class WelcomePage extends StatefulWidget {
 class _WelcomePageState extends State<WelcomePage> {
   bool _isLoading = false;
 
+  static const LinearGradient maroonGradient = LinearGradient(
+    colors: [
+      Color.fromARGB(255, 139, 58, 58),
+      Color.fromARGB(255, 74, 14, 26),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
   Future<void> _handleLogout(BuildContext context) async {
     final authRepository = AuthRepository();
     await authRepository.logout();
@@ -47,16 +56,12 @@ class _WelcomePageState extends State<WelcomePage> {
       if (profile != null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (context) => const HomePage(),
-          ),
+          MaterialPageRoute(builder: (context) => const HomePage()),
         );
       } else {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (context) => const AadhaarTestLauncher(),
-          ),
+          MaterialPageRoute(builder: (context) => const AadhaarTestLauncher()),
         );
       }
     } catch (e) {
@@ -68,9 +73,7 @@ class _WelcomePageState extends State<WelcomePage> {
         ),
       );
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -79,140 +82,144 @@ class _WelcomePageState extends State<WelcomePage> {
     final lang = Provider.of<LanguageProvider>(context);
 
     return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF800000),
-          elevation: 0,
-          title: const Text(
-            'Community Voice',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+      backgroundColor: Colors.white,
+      // ✅ Gradient AppBar
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(gradient: maroonGradient),
+        ),
+        title: const Text(
+          'Community Voice',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: LanguageToggleButton(
+              backgroundColor: Colors.white,
+              foregroundColor: Color.fromARGB(255, 139, 58, 58),
             ),
           ),
-          actions: [
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: LanguageToggleButton(
-                backgroundColor: Colors.white,
-                foregroundColor: Color(0xFF800000),
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.logout, color: Colors.white),
-              onPressed: () => _showLogoutDialog(context, lang),
-            ),
-          ],
-        ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 40),
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () => _showLogoutDialog(context, lang),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 40),
 
-                  // Welcome icon
-                  Center(
-                    child: Container(
-                      height: 120,
-                      width: 120,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF800000).withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.check_circle,
-                        size: 60,
-                        color: Color(0xFF800000),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Welcome title
-                  Text(
-                    lang.translate('welcome'),
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF800000),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Phone number display
-                  Text(
-                    widget.phoneNumber,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-
-                  const SizedBox(height: 48),
-
-                  // Info card
-                  Container(
-                    padding: const EdgeInsets.all(20),
+                // ✅ Gradient Icon Box
+                Center(
+                  child: Container(
+                    height: 120,
+                    width: 120,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF800000).withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: const Color(0xFF800000).withOpacity(0.2),
-                      ),
+                      gradient: maroonGradient,
+                      shape: BoxShape.circle,
                     ),
-                    child: Column(
-                      children: [
-                        const Icon(
-                          Icons.info_outline,
-                          color: Color(0xFF800000),
-                          size: 40,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          lang.translate('welcome'),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF800000),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'You will remain logged in until you manually logout',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.black54,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                    child: const Icon(
+                      Icons.check_circle,
+                      size: 60,
+                      color: Colors.white,
                     ),
                   ),
+                ),
 
-                  const SizedBox(height: 32),
+                const SizedBox(height: 32),
 
-                  // Continue button - Continue to Aadhaar verification
-                  ElevatedButton(
-                    onPressed:
-                        _isLoading ? null : () => _handleContinue(context),
+                Text(
+                  lang.translate('welcome'),
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(255, 139, 58, 58),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 16),
+
+                Text(
+                  widget.phoneNumber,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 48),
+
+                // Info card
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 139, 58, 58).withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color.fromARGB(255, 139, 58, 58).withOpacity(0.2),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.info_outline,
+                        color: Color.fromARGB(255, 139, 58, 58),
+                        size: 40,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        lang.translate('welcome'),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color.fromARGB(255, 139, 58, 58),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'You will remain logged in until you manually logout',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.black54,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                // ✅ Gradient Continue Button
+                Container(
+                  decoration: const BoxDecoration(
+                    gradient: maroonGradient,
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                  ),
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : () => _handleContinue(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF800000),
-                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      elevation: 0,
                     ),
                     child: _isLoading
                         ? const SizedBox(
@@ -220,8 +227,7 @@ class _WelcomePageState extends State<WelcomePage> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
                         : Text(
@@ -229,16 +235,19 @@ class _WelcomePageState extends State<WelcomePage> {
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
                   ),
+                ),
 
-                  const SizedBox(height: 60),
-                ],
-              ),
+                const SizedBox(height: 60),
+              ],
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   void _showLogoutDialog(BuildContext context, LanguageProvider lang) {
@@ -266,7 +275,7 @@ class _WelcomePageState extends State<WelcomePage> {
               },
               child: Text(
                 lang.translate('logout'),
-                style: const TextStyle(color: Color(0xFF800000)),
+                style: const TextStyle(color: Color.fromARGB(255, 139, 58, 58)),
               ),
             ),
           ],

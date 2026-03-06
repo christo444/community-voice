@@ -11,7 +11,7 @@ import 'reset_pin_dob_page.dart';
 
 class PinLoginPage extends StatefulWidget {
   final String phoneNumber;
-  
+
   const PinLoginPage({super.key, required this.phoneNumber});
 
   @override
@@ -22,6 +22,15 @@ class _PinLoginPageState extends State<PinLoginPage> {
   final TextEditingController _pinController = TextEditingController();
   final AuthRepository _authRepository = AuthRepository();
   bool _isLoading = false;
+
+  static const LinearGradient maroonGradient = LinearGradient(
+    colors: [
+      Color.fromARGB(255, 139, 58, 58),
+      Color.fromARGB(255, 74, 14, 26),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 
   @override
   void dispose() {
@@ -41,7 +50,8 @@ class _PinLoginPageState extends State<PinLoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      final isValid = await _authRepository.loginUser(widget.phoneNumber, pin);
+      final isValid =
+          await _authRepository.loginUser(widget.phoneNumber, pin);
 
       if (!mounted) return;
 
@@ -49,7 +59,8 @@ class _PinLoginPageState extends State<PinLoginPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => WelcomePage(phoneNumber: widget.phoneNumber),
+            builder: (context) =>
+                WelcomePage(phoneNumber: widget.phoneNumber),
           ),
         );
       } else {
@@ -78,43 +89,52 @@ class _PinLoginPageState extends State<PinLoginPage> {
   @override
   Widget build(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
+
+      // ✅ GRADIENT APPBAR
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
+        backgroundColor: Colors.transparent,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(gradient: maroonGradient),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF800000)),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         actions: const [
           Padding(
             padding: EdgeInsets.all(8.0),
-            child: LanguageToggleButton(),
+            child: LanguageToggleButton(
+              backgroundColor: Colors.white,
+              foregroundColor:
+                  Color.fromARGB(255, 139, 58, 58),
+            ),
           ),
         ],
       ),
+
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 24),
-              
-              // Title
+              const SizedBox(height: 32),
+
               const Text(
                 'Welcome Back!',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF800000),
+                  color: Color.fromARGB(255, 139, 58, 58),
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               Text(
                 'Enter PIN for: ${widget.phoneNumber}',
                 style: const TextStyle(
@@ -122,10 +142,10 @@ class _PinLoginPageState extends State<PinLoginPage> {
                   color: Colors.grey,
                 ),
               ),
-              
+
               const SizedBox(height: 48),
-              
-              // PIN input
+
+              // ✅ PIN Input
               TextField(
                 controller: _pinController,
                 keyboardType: TextInputType.number,
@@ -136,27 +156,40 @@ class _PinLoginPageState extends State<PinLoginPage> {
                   FilteringTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(4),
                 ],
+                cursorColor:
+                    const Color.fromARGB(255, 139, 58, 58),
                 decoration: InputDecoration(
                   labelText: lang.translate('enterYourPin'),
-                  labelStyle: const TextStyle(color: Color(0xFF800000)),
-                  prefixIcon: const Icon(Icons.lock, color: Color(0xFF800000)),
+                  labelStyle: const TextStyle(
+                      color:
+                          Color.fromARGB(255, 139, 58, 58)),
+                  prefixIcon: const Icon(Icons.lock,
+                      color:
+                          Color.fromARGB(255, 139, 58, 58)),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius:
+                        BorderRadius.circular(14),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderRadius:
+                        BorderRadius.circular(14),
+                    borderSide:
+                        BorderSide(color: Colors.grey.shade300),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF800000), width: 2),
+                    borderRadius:
+                        BorderRadius.circular(14),
+                    borderSide: const BorderSide(
+                        color: Color.fromARGB(
+                            255, 139, 58, 58),
+                        width: 2),
                   ),
                   counterText: '',
                 ),
                 onSubmitted: (_) => _handleLogin(),
               ),
-              
-              const SizedBox(height: 32),
+
+              const SizedBox(height: 24),
 
               Align(
                 alignment: Alignment.centerRight,
@@ -166,45 +199,65 @@ class _PinLoginPageState extends State<PinLoginPage> {
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                            ResetPinDobPage(phoneNumber: widget.phoneNumber),
+                            ResetPinDobPage(
+                                phoneNumber:
+                                    widget.phoneNumber),
                       ),
                     );
                   },
                   child: const Text(
                     'Forgot PIN?',
-                    style: TextStyle(color: Color(0xFF800000)),
+                    style: TextStyle(
+                        color: Color.fromARGB(
+                            255, 139, 58, 58)),
                   ),
                 ),
               ),
 
-              // Login button
-              ElevatedButton(
-                onPressed: _isLoading ? null : _handleLogin,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF800000),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
+              const SizedBox(height: 16),
+
+              // ✅ Gradient Login Button
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: maroonGradient,
+                  borderRadius:
+                      BorderRadius.all(Radius.circular(14)),
                 ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                child: ElevatedButton(
+                  onPressed:
+                      _isLoading ? null : _handleLogin,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child:
+                              CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<
+                                    Color>(Colors.white),
+                          ),
+                        )
+                      : Text(
+                          lang.translate('loginWithPin'),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight:
+                                FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      )
-                    : Text(
-                        lang.translate('loginWithPin'),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                ),
               ),
             ],
           ),

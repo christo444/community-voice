@@ -89,6 +89,7 @@ class _SchemeDetailPageState extends State<SchemeDetailPage> {
               children: [
                 // Scheme Name Card
                 Card(
+                  color: Colors.white, // ✅ Set card background to white
                   elevation: 3,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -104,23 +105,22 @@ class _SchemeDetailPageState extends State<SchemeDetailPage> {
                 const SectionHeading(text: "വിശദാംശങ്ങൾ:"),
                 const SectionSpacer(height: 12),
                 Card(
+                  color: Colors.white, // ✅ Set card background to white
                   elevation: 2,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    // ===== UI DESIGNER: CUSTOMIZE DESCRIPTION TEXT BELOW =====
                     child: Text(
                       widget.description,
                       style: GoogleFonts.openSans(
-                        fontSize: 16, // ✅ CUSTOMIZABLE: 15.5 → 16 (Larger)
-                        height: 1.6, // ✅ CUSTOMIZABLE: Line spacing
-                        color: Colors.black87, // ✅ CUSTOMIZABLE: Dark black
-                        fontWeight: FontWeight.w500, // ✅ CUSTOMIZABLE: Semi-bold
+                        fontSize: 16,
+                        height: 1.6,
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    // ===== END CUSTOMIZATION ZONE =====
                   ),
                 ),
                 const SectionSpacer(height: 20),
@@ -129,23 +129,22 @@ class _SchemeDetailPageState extends State<SchemeDetailPage> {
                 const SectionHeading(text: "എങ്ങനെ അപേക്ഷിക്കാം:"),
                 const SectionSpacer(height: 12),
                 Card(
+                  color: Colors.white, // ✅ Set card background to white
                   elevation: 2,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    // ===== UI DESIGNER: CUSTOMIZE HOW-TO-APPLY TEXT BELOW =====
                     child: Text(
                       widget.howToApply,
                       style: GoogleFonts.openSans(
-                        fontSize: 16, // ✅ CUSTOMIZABLE: 15.5 → 16 (Larger)
-                        height: 1.7, // ✅ CUSTOMIZABLE: Line spacing
-                        color: Colors.black87, // ✅ CUSTOMIZABLE: Dark black
-                        fontWeight: FontWeight.w400, // ✅ CUSTOMIZABLE: Regular weight
+                        fontSize: 16,
+                        height: 1.7,
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
-                    // ===== END CUSTOMIZATION ZONE =====
                   ),
                 ),
                 const SectionSpacer(height: 32),
