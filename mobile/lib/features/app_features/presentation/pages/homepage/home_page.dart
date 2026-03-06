@@ -88,7 +88,8 @@ class _HomePageState extends State<HomePage> {
   // Handle language change - translate schemes if Malayalam is selected
   Future<void> _handleLanguageChange(String languageCode) async {
     if (languageCode == 'ml' && _matchedSchemes.isNotEmpty) {
-      await _translateSchemes();
+      // Don't await - let translation happen in background
+      _translateSchemes();
     } else {
       // Clear translations if switching back to English
       setState(() {
@@ -97,7 +98,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Translate all scheme names and descriptions to Malayalam
+  // Translate all scheme names and descriptions to Malayalam (optimized with parallel translations)
   Future<void> _translateSchemes() async {
     if (_isTranslating) return;
 
@@ -106,28 +107,30 @@ class _HomePageState extends State<HomePage> {
     });
 
     try {
+      // Prepare all translation futures at once
+      List<Future<void>> translationFutures = [];
+
       for (final scheme in _matchedSchemes) {
         // Skip if already translated
         if (_translations.containsKey(scheme.id)) continue;
 
-        // Translate name and description
-        final translatedName = await _translator.translate(
-          scheme.schemeName,
-          from: 'en',
-          to: 'ml',
+        // Add parallel translation tasks
+        translationFutures.add(
+          Future.wait([
+            _translator.translate(scheme.schemeName, from: 'en', to: 'ml'),
+            _translator.translate(scheme.description ?? '',
+                from: 'en', to: 'ml'),
+          ]).then((results) {
+            _translations[scheme.id] = {
+              'name': results[0].text,
+              'description': results[1].text,
+            };
+          }),
         );
-
-        final translatedDesc = await _translator.translate(
-          scheme.description ?? '',
-          from: 'en',
-          to: 'ml',
-        );
-
-        _translations[scheme.id] = {
-          'name': translatedName.text,
-          'description': translatedDesc.text,
-        };
       }
+
+      // Execute all translations in parallel
+      await Future.wait(translationFutures);
 
       setState(() {
         _isTranslating = false;
@@ -184,10 +187,10 @@ class _HomePageState extends State<HomePage> {
         _isLoading = false;
       });
 
-      // Translate if Malayalam is selected
+      // Translate if Malayalam is selected (non-blocking)
       final lang = Provider.of<LanguageProvider>(context, listen: false);
       if (lang.languageCode == 'ml') {
-        await _translateSchemes();
+        _translateSchemes();
       }
     } catch (e) {
       print('❌ Error loading schemes: $e');
@@ -448,13 +451,14 @@ class _HomePageState extends State<HomePage> {
                                   matchPercentage: scheme.matchPercentage,
                                   onTap: () {
                                     // Navigate to detail page with scheme ID
+                                    // Pass original English name for proper translation handling
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => SchemeDetailPage(
                                           schemeId: scheme.id,
-                                          name: displayName,
-                                          description: displayDescription,
+                                          name: scheme.schemeName,
+                                          description: scheme.description ?? '',
                                         ),
                                       ),
                                     );

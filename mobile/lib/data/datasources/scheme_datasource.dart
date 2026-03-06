@@ -111,4 +111,39 @@ class SchemeDatasource {
       rethrow;
     }
   }
+
+  /// Summarize text using Gemini API (1-2 sentences)
+  Future<String> summarizeText(String text) async {
+    try {
+      print('📝 Summarizing text (${text.length} characters)');
+
+      final url = Uri.parse('$baseUrl/summarize');
+      final response = await http
+          .post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({'text': text}),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      print('Summarize response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+
+        if (jsonData['success'] == true && jsonData['summary'] != null) {
+          print('✅ Successfully summarized text');
+          return jsonData['summary'];
+        }
+      }
+
+      // If summarization fails, return original text
+      print('⚠️ Summarization failed, returning original text');
+      return text;
+    } catch (e) {
+      print('Error summarizing text: $e');
+      // Return original text if summarization fails
+      return text;
+    }
+  }
 }

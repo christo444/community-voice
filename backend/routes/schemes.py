@@ -4,6 +4,10 @@ from services.storage import save_scheme, get_all_schemes, get_scheme_by_id, del
 from services.scheme_matcher import match_user_with_schemes, get_scheme_details
 import os
 import uuid
+from google import genai
+from dotenv import load_dotenv
+
+load_dotenv()
 
 schemes_bp = Blueprint('schemes', __name__)
 
@@ -163,4 +167,50 @@ def get_scheme_full_details(scheme_id):
             return jsonify({'error': 'Scheme not found'}), 404
     except Exception as e:
         print(f"Error in get_scheme_full_details: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@schemes_bp.route('/summarize', methods=['POST'])
+def summarize_text():
+    """Summarize text to 1-2 sentences using Gemini"""
+    try:
+        data = request.get_json()
+        text = data.get('text', '')
+        
+        if not text or len(text.strip()) == 0:
+            return jsonify({'error': 'No text provided'}), 400
+        
+        # Get Gemini API key
+        api_key = os.getenv('GEMINI_API_KEY')
+        if not api_key:
+            return jsonify({'error': 'Gemini API not configured'}), 500
+        
+        # Initialize Gemini client
+        client = genai.Client(api_key=api_key)
+        
+        # Create prompt for summarization (max 1-2 sentences)
+        prompt = f"""Summarize the following text in ONLY 1-2 very short, simple sentences. 
+Make it extremely easy to understand for people with low literacy. Use the simplest words possible.
+Keep it very brief and clear.
+
+Text to summarize:
+{text}
+
+Provide ONLY the summary, no additional text or explanations."""
+        
+        # Call Gemini API
+        response = client.models.generate_content(
+            model='gemini-2.0-flash-exp',
+            contents=prompt
+        )
+        
+        summary = response.text.strip()
+        
+        return jsonify({
+            'success': True,
+            'summary': summary
+        }), 200
+        
+    except Exception as e:
+        print(f"Error in summarize_text: {e}")
         return jsonify({'error': str(e)}), 500

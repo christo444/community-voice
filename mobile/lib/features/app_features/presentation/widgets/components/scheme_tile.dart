@@ -74,6 +74,8 @@ class SchemeTile extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.roboto(
                       fontSize: 14,
                       color: Colors.black54,

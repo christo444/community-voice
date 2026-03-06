@@ -13,4 +13,9 @@ class SchemeRepository {
   Future<SchemeDetails?> getSchemeDetails(String schemeId) async {
     return await _datasource.getSchemeDetails(schemeId);
   }
+
+  /// Summarize text using Gemini API (max 3 sentences)
+  Future<String> summarizeText(String text) async {
+    return await _datasource.summarizeText(text);
+  }
 }
