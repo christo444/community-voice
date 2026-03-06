@@ -69,11 +69,6 @@ class _SchemeDetailPageState extends State<SchemeDetailPage> {
     }
   }
 
-  // Initialize TTS
-  Future<void> _initTts() async {
-    _initTts();
-  }
-
   // Initialize TTS with Malayalam language
   Future<void> _initTts() async {
     await flutterTts.setLanguage("ml-IN");

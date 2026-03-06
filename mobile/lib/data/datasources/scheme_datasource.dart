@@ -59,7 +59,7 @@ class SchemeDatasource {
       print('2. Port forwarding is active (adb reverse tcp:5000 tcp:5000)');
       print('Error: $e');
       throw Exception('Network error: Cannot connect to server');
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       print('⏱️ TIMEOUT');
       print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
