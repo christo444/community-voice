@@ -4,13 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 /// =================================================================
 /// SCHEME TILE WIDGET - UI DESIGNER'S FILE
 /// =================================================================
-/// 
+///
 /// UI DESIGNER: You can customize the look and feel of scheme tiles
 /// - Change tile design, spacing, borders
 /// - Modify text styles, colors, fonts
 /// - Add shadows, gradients, decorations
 /// - Customize the layout structure
-/// 
+///
 /// DEVELOPER: Only modify the parameters and callback functions
 /// - Do NOT change the widget parameters
 /// - Pass your data and logic through constructor
@@ -21,6 +21,7 @@ import 'package:google_fonts/google_fonts.dart';
 class SchemeTile extends StatelessWidget {
   final String name;
   final String description;
+  final int? matchPercentage;
   final Widget? trailing;
   final VoidCallback? onTap;
   final EdgeInsets? contentPadding;
@@ -30,6 +31,7 @@ class SchemeTile extends StatelessWidget {
     super.key,
     required this.name,
     required this.description,
+    this.matchPercentage,
     this.trailing,
     this.onTap,
     this.contentPadding,
@@ -72,11 +74,44 @@ class SchemeTile extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.roboto(
                       fontSize: 14,
                       color: Colors.black54,
                     ),
                   ),
+                  if (matchPercentage != null) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: matchPercentage! >= 75
+                            ? Colors.green.shade50
+                            : Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: matchPercentage! >= 75
+                              ? Colors.green
+                              : Colors.orange,
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        '$matchPercentage% Match',
+                        style: GoogleFonts.roboto(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: matchPercentage! >= 75
+                              ? Colors.green.shade700
+                              : Colors.orange.shade700,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

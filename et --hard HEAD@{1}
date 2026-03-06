@@ -1,0 +1,26 @@
+[33mfb716dc[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: pull origin main: Fast-forward
+[33m55eef9a[m HEAD@{1}: reset: moving to HEAD
+[33m55eef9a[m HEAD@{2}: pull origin main: Fast-forward
+[33mc29477d[m HEAD@{3}: reset: moving to HEAD
+[33mc29477d[m HEAD@{4}: pull origin main: Fast-forward
+[33mf5a5ee7[m HEAD@{5}: reset: moving to HEAD
+[33mf5a5ee7[m HEAD@{6}: commit: Authentication added for admin
+[33m4ce1285[m HEAD@{7}: pull origin main: Fast-forward
+[33mc1c5eda[m HEAD@{8}: reset: moving to HEAD
+[33mc1c5eda[m HEAD@{9}: checkout: moving from avinash to main
+[33m1e837b5[m[33m ([m[1;31morigin/avinash-codebase-20260219[m[33m, [m[1;31morigin/avinash[m[33m, [m[1;32mavinash[m[33m)[m HEAD@{10}: checkout: moving from main to avinash
+[33mc1c5eda[m HEAD@{11}: checkout: moving from lang to main
+[33m274c4fa[m[33m ([m[1;31morigin/lang[m[33m, [m[1;32mlang[m[33m)[m HEAD@{12}: commit: update
+[33m42b32fc[m HEAD@{13}: commit (merge): Merge main into lang - resolved conflicts in welcome_page.dart
+[33m9aa101b[m HEAD@{14}: checkout: moving from main to lang
+[33mc1c5eda[m HEAD@{15}: pull origin main: Fast-forward
+[33m2217629[m HEAD@{16}: checkout: moving from lang to main
+[33m9aa101b[m HEAD@{17}: checkout: moving from main to lang
+[33m2217629[m HEAD@{18}: checkout: moving from christo to main
+[33m7cc5438[m[33m ([m[1;31morigin/christo[m[33m, [m[1;32mchristo[m[33m)[m HEAD@{19}: commit: Documents updated
+[33m3944551[m HEAD@{20}: commit: Admin dashboard created
+[33m28e0efa[m HEAD@{21}: commit: Admin dashboard created
+[33m2217629[m HEAD@{22}: checkout: moving from main to christo
+[33m2217629[m HEAD@{23}: commit: Fix login flow and add profile management
+[33m861f83e[m HEAD@{24}: reset: moving to HEAD
+[33m861f83e[m HEAD@{25}: clone: from https://github.com/christo444/community-voice.git
