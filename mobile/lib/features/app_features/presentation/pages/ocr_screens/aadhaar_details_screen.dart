@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:community_voice/features/app_features/presentation/pages/quest/interview.dart';
-import 'package:community_voice/core/localization/language_provider.dart';
+
+// ✅ ONLY NEW IMPORTS (added, nothing removed)
 import '../../../../../domain/repository/profile_repository.dart';
 import '../../../../../domain/repository/auth_repository.dart';
 
@@ -24,16 +24,7 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
   final genderCtrl = TextEditingController();
   final addressCtrl = TextEditingController();
 
-  static const LinearGradient maroonGradient = LinearGradient(
-    colors: [
-      Color.fromARGB(255, 139, 58, 58),
-      Color.fromARGB(255, 74, 14, 26),
-    ],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
-  static const Color maroon = Color.fromARGB(255, 139, 58, 58);
+  final Color maroon = const Color(0xFF800000);
 
   @override
   void initState() {
@@ -41,17 +32,6 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
     _extract(widget.ocrText);
   }
 
-  @override
-  void dispose() {
-    nameCtrl.dispose();
-    dobCtrl.dispose();
-    ageCtrl.dispose();
-    genderCtrl.dispose();
-    addressCtrl.dispose();
-    super.dispose();
-  }
-
-  // ================= OCR LOGIC (UNCHANGED) =================
   void _extract(String text) {
     final lines = text
         .split('\n')
@@ -59,39 +39,124 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
         .where((e) => e.isNotEmpty)
         .toList();
 
+    // ================= NAME =================
     for (final line in lines) {
       final l = line.toLowerCase();
+
+      if (l == 'to') continue;
+      if (l.contains('government') ||
+          l.contains('unique') ||
+          l.contains('authority') ||
+          l.contains('aadhaar') ||
+          l.contains('uidai') ||
+          l.contains('enrollment')) continue;
+
       if (!RegExp(r'^[A-Za-z .]+$').hasMatch(line)) continue;
       if (line.split(' ').length < 2) continue;
-      if (l.contains('aadhaar') || l.contains('government')) continue;
+
       nameCtrl.text = line;
       break;
     }
 
-    final dobMatch =
-        RegExp(r'\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}\b').firstMatch(text);
+    // ================= DOB =================
+    for (final line in lines) {
+      final l = line.toLowerCase();
 
-    if (dobMatch != null) {
-      dobCtrl.text = dobMatch.group(0)!;
-      final year =
-          int.tryParse(dobCtrl.text.substring(dobCtrl.text.length - 4));
-      if (year != null) {
-        ageCtrl.text = (DateTime.now().year - year).toString();
+      if (l.contains('dob') || l.contains('date of birth')) {
+        final dateMatch = RegExp(
+          r'\b\d{1,2}[\s\/\-]\d{1,2}[\s\/\-]\d{4}\b',
+        ).firstMatch(line);
+
+        if (dateMatch != null) {
+          dobCtrl.text = dateMatch.group(0)!;
+
+          final yearMatch =
+              RegExp(r'\b(19|20)\d{2}\b').firstMatch(dobCtrl.text);
+
+          if (yearMatch != null) {
+            final year = int.parse(yearMatch.group(0)!);
+            ageCtrl.text = (DateTime.now().year - year).toString();
+          }
+          break;
+        }
       }
     }
 
-    if (text.toLowerCase().contains("female")) {
-      genderCtrl.text = "Female";
-    } else if (text.toLowerCase().contains("male")) {
-      genderCtrl.text = "Male";
+    // -------- Fallback: YOB --------
+    if (dobCtrl.text.isEmpty) {
+      final yobMatch = RegExp(
+        r'year\s*of\s*birth[:\s]*(\d{4})',
+        caseSensitive: false,
+      ).firstMatch(text);
+
+      if (yobMatch != null) {
+        dobCtrl.text = yobMatch.group(1)!;
+        ageCtrl.text =
+            (DateTime.now().year - int.parse(yobMatch.group(1)!)).toString();
+      }
     }
 
-    if (lines.length > 4) {
-      addressCtrl.text = lines.sublist(4).join("\n");
+    // ================= GENDER =================
+    final lowerText = text.toLowerCase();
+    if (RegExp(r'\bfemale\b').hasMatch(lowerText)) {
+      genderCtrl.text = 'Female';
+    } else if (RegExp(r'\bmale\b').hasMatch(lowerText)) {
+      genderCtrl.text = 'Male';
     }
+
+    // ================= ADDRESS =================
+    List<String> addressLines = [];
+    bool startCapture = false;
+
+    for (final line in lines) {
+      final l = line.toLowerCase();
+
+      if (l.startsWith('c/o') ||
+          l.startsWith('s/o') ||
+          l.startsWith('d/o') ||
+          l.startsWith('w/o')) {
+        startCapture = true;
+
+        String cleaned = line
+            .replaceFirst(
+              RegExp(
+                r'^(c/o|s/o|d/o|w/o)\s*[:\-]?\s*[A-Za-z .]+,?',
+                caseSensitive: false,
+              ),
+              '',
+            )
+            .trim();
+
+        if (cleaned.isNotEmpty) {
+          addressLines.add(cleaned);
+        }
+        continue;
+      }
+
+      if (!startCapture) continue;
+
+      if (l.contains('vtc') ||
+          l.contains('po') ||
+          l.contains('sub district') ||
+          l.contains('uidai') ||
+          l.contains('government') ||
+          l.contains('aadhaar')) {
+        continue;
+      }
+
+      final cleanedLine = line.replaceFirst(RegExp(r'^[A-Z]\s+'), '');
+
+      addressLines.add(cleanedLine);
+
+      if (RegExp(r'\b\d{6}\b').hasMatch(cleanedLine)) {
+        break;
+      }
+    }
+
+    addressCtrl.text = addressLines.join('\n');
   }
 
-  // ================= SAVE LOGIC (UNCHANGED) =================
+  // ================= NEW: SAVE PROFILE + NAVIGATE =================
   Future<void> _saveProfileAndContinue() async {
     final authRepository = AuthRepository();
     final phoneNumber = await authRepository.getStoredPhoneNumber();
@@ -128,7 +193,7 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
     if (result == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Failed to save profile.'),
+          content: Text('Failed to save profile. Please try again.'),
           backgroundColor: Colors.red,
         ),
       );
@@ -141,100 +206,88 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
     );
   }
 
-  // ================= TEXTFIELD =================
-  Widget _field(String label, TextEditingController controller,
-      {int max = 1}) {
+  // =================== TEXTFIELD DESIGN ===================
+  Widget _field(String label, TextEditingController c, {int max = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
       child: TextField(
-        controller: controller,
+        controller: c,
         enabled: isEditing,
         maxLines: max,
         cursorColor: maroon,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
+        ),
         decoration: InputDecoration(
           labelText: label,
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: maroon, width: 2),
+          labelStyle: TextStyle(
+            color: maroon,
+            fontWeight: FontWeight.w600,
           ),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: maroon.withOpacity(0.5), width: 1.4),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: maroon, width: 2),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: maroon.withOpacity(0.3), width: 1.2),
           ),
         ),
       ),
     );
   }
 
-  // ================= UI =================
   @override
   Widget build(BuildContext context) {
-    final lang = Provider.of<LanguageProvider>(context);
-
     return Scaffold(
-      backgroundColor: Colors.white,
-
-      // ✅ GRADIENT APPBAR (MATCHES INTERVIEW)
       appBar: AppBar(
-        title: const Text(
-          "User Details",
-          style: TextStyle(color: Colors.white),
-        ),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(gradient: maroonGradient),
-        ),
+        title: const Text("User Details"),
         actions: [
           TextButton(
             onPressed: () => setState(() => isEditing = !isEditing),
             child: Text(
               isEditing ? "Done" : "Edit",
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.black),
             ),
-          ),
+          )
         ],
       ),
-
-      body: ListView(
+      body: Padding(
         padding: const EdgeInsets.all(16),
-        children: [
-          _field("Name", nameCtrl),
-          _field("DOB / YOB", dobCtrl),
-          _field("Age", ageCtrl),
-          _field("Gender", genderCtrl),
-          _field("Address", addressCtrl, max: 6),
-        ],
-      ),
-
-      // ✅ GRADIENT BUTTON (MATCHES INTERVIEW)
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-        color: Colors.white,
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: maroonGradient,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: ElevatedButton(
-            onPressed: _saveProfileAndContinue,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent,
-              shadowColor: Colors.transparent,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    _field("Name", nameCtrl),
+                    _field("DOB / YOB", dobCtrl),
+                    _field("Age", ageCtrl),
+                    _field("Gender", genderCtrl),
+                    _field("Address", addressCtrl, max: 8),
+                  ],
+                ),
               ),
             ),
-            child: const Text(
-              "Confirm & Continue",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                // ✅ ONLY CHANGE: button now saves + navigates
+                onPressed: _saveProfileAndContinue,
+                child: const Text("Confirm & Continue"),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

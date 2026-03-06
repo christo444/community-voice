@@ -129,61 +129,47 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Define maroon gradient same as auth pages
-    const LinearGradient maroonGradient = LinearGradient(
-      colors: [
-        Color.fromARGB(255, 139, 58, 58),
-        Color.fromARGB(255, 74, 14, 26),
-      ],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    );
-
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: maroonGradient,
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                height: 100,
-                width: 100,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(
-                  Icons.voice_chat,
-                  size: 50,
-                  color: Color(0xFF800000),
-                ),
+      backgroundColor: const Color(0xFF800000),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 100,
+              width: 100,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
               ),
-              const SizedBox(height: 24),
-              const Text(
-                'Community Voice',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+              child: const Icon(
+                Icons.voice_chat,
+                size: 50,
+                color: Color(0xFF800000),
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'Inclusive Welfare Access',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white70,
-                ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Community Voice',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
-              const SizedBox(height: 32),
-              const CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Inclusive Welfare Access',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white70,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 32),
+            const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ],
         ),
       ),
     );
