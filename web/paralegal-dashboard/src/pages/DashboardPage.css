@@ -74,9 +74,9 @@
   margin-bottom: 8px;
 }
 
-.stat-total h3 { color: #667eea; }
+.stat-total h3 { color: #dc143c; }
 .stat-open h3 { color: #f59e0b; }
-.stat-progress h3 { color: #3b82f6; }
+.stat-progress h3 { color: #dc143c; }
 .stat-completed h3 { color: #10b981; }
 
 .stat-card p {
@@ -158,7 +158,7 @@
 }
 
 .btn-view {
-  background: #667eea;
+  background: linear-gradient(135deg, #dc143c 0%, #000000 100%);
   color: white;
   border: none;
   padding: 6px 12px;
@@ -169,7 +169,7 @@
 }
 
 .btn-view:hover {
-  background: #5568d3;
+  background: linear-gradient(135deg, #b01030 0%, #1a1a1a 100%);
 }
 
 /* Tabs */
@@ -200,7 +200,7 @@
 }
 
 .tab-btn.active {
-  background: #667eea;
+  background: linear-gradient(135deg, #dc143c 0%, #000000 100%);
   color: white;
 }
 
@@ -246,8 +246,8 @@
 }
 
 .case-card:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  border-color: #dc143c;
+  box-shadow: 0 4px 12px rgba(220, 20, 60, 0.2);
 }
 
 .case-header {
@@ -320,12 +320,12 @@
 }
 
 .btn-primary {
-  background: #667eea;
+  background: linear-gradient(135deg, #dc143c 0%, #000000 100%);
   color: white;
 }
 
 .btn-primary:hover {
-  background: #5568d3;
+  background: linear-gradient(135deg, #b01030 0%, #1a1a1a 100%);
 }
 
 .btn-secondary {
@@ -377,7 +377,7 @@
 }
 
 .contact-card ul li a {
-  color: #667eea;
+  color: #dc143c;
   text-decoration: none;
 }
 
@@ -392,10 +392,10 @@
 }
 
 .profile-info {
-  background: #f0f4ff;
+  background: #f8f9fa;
   padding: 24px;
   border-radius: 12px;
-  border: 2px solid #667eea;
+  border: 2px solid #dc143c;
 }
 
 .profile-info h3 {

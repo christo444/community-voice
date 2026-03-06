@@ -229,12 +229,12 @@ h1 {
 }
 
 .btn-primary {
-  background-color: #007bff;
+  background-color: #7a1f2b;
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #0056b3;
+  background-color: #661824;
 }
 
 .btn-primary:disabled {

@@ -4,7 +4,7 @@
   justify-content: center;
   align-items: center;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #dc143c 0%, #000000 100%);
 }
 
 .login-container {
@@ -60,11 +60,11 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #dc143c;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #dc143c 0%, #000000 100%);
   color: white;
   border: none;
   padding: 14px;
@@ -75,6 +75,7 @@
 }
 
 .btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #b01030 0%, #1a1a1a 100%);
   transform: translateY(-2px);
 }
 
@@ -97,7 +98,7 @@
 }
 
 .footer-links a {
-  color: #667eea;
+  color: #dc143c;
   text-decoration: none;
   font-size: 14px;
 }
