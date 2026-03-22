@@ -27,43 +27,41 @@ def extract_with_gemini_vision(image_path, api_key):
         
         # Create detailed prompt for extraction
         prompt = """
-You are analyzing a government scheme document page. CRITICAL: This is OFFICIAL GOVERNMENT DATA.
+You are analyzing a single page of a government scheme document. CRITICAL: This is OFFICIAL GOVERNMENT DATA.
 
-STRICT INSTRUCTIONS:
-- Extract ONLY information that is CLEARLY VISIBLE in this image
-- DO NOT make up, guess, or infer any information
-- DO NOT use your training data or general knowledge
-- Copy text EXACTLY as it appears - do not paraphrase
-- If a section is not visible on this page, return empty array [] or empty string ""
-- Preserve exact numbering, amounts, and wording
+STRICT ANTI-HALLUCINATION INSTRUCTIONS:
+- Extract ONLY information that is CLEARLY and EXPLICITLY VISIBLE in this specific image.
+- DO NOT make up, guess, infer, or hallucinate any information whatsoever.
+- DO NOT use your pre-trained knowledge or general knowledge about similar schemes.
+- Copy text EXACTLY as it appears - do not paraphrase or summarize.
+- If a specific section or data point is NOT visible on this page, you MUST return an empty array [] for lists or an empty string "" for text fields. DO NOT return placeholder text like "N/A", "Unknown", or "Not visible".
+- Preserve exact numbering, amounts, and wording.
 
 Return ONLY valid JSON with this exact structure:
 {
-  "schemeName": "EXACT scheme title if visible on this page",
-  "description": "COMPLETE description text from 'Details' section on this page. Include full sentences explaining what the scheme is, who it's for, and its purpose.",
-  "benefits": "ALL benefits text EXACTLY as written, including monetary amounts with ₹ symbol, allowances, and categories",
-  "eligibility": ["criterion 1 EXACTLY as written", "criterion 2 EXACTLY as written", ...],
-  "exclusions": ["exclusion 1 EXACTLY as written", "exclusion 2 EXACTLY as written", ...],
-  "applicationProcess": ["Step 1 with COMPLETE details EXACTLY as written", "Step 2 EXACTLY as written", ...],
-  "documentsRequired": ["document 1 EXACTLY as written", "document 2 EXACTLY as written", ...],
-  "faqs": ["question 1 EXACTLY as written?", "question 2 EXACTLY as written?", ...],
-  "sourceUrl": "ANY https:// URL visible on this page"
+  "schemeName": "EXACT full scheme title if CLEARLY visible on this page. If not explicitly stated as the title, return \\"\\".",
+  "description": "COMPLETE description text from the 'Details', 'About', or introduction section ON THIS PAGE. If none exists on this page, return \\"\\".",
+  "benefits": "ALL benefits text EXACTLY as written ON THIS PAGE, including monetary amounts, allowances, etc. If none exists, return \\"\\".",
+  "eligibility": ["criterion 1 EXACTLY as written", "criterion 2 EXACTLY as written"],
+  "exclusions": ["exclusion 1 EXACTLY as written"],
+  "applicationProcess": ["Step 1 EXACTLY as written", "Step 2 EXACTLY as written"],
+  "documentsRequired": ["document 1 EXACTLY as written", "document 2 EXACTLY as written"],
+  "faqs": ["question 1 EXACTLY as written?", "answer 1 EXACTLY as written"],
+  "sourceUrl": "ANY valid https:// URL visibly printed on this page. Return \\"\\" if none discovered."
 }
 
 EXTRACTION RULES:
-1. Scheme Name: Extract EXACT official name from page header (don't abbreviate)
-2. Description: Extract FULL text from Details/About section - complete sentences and paragraphs
-3. Benefits: All amounts EXACTLY as shown (₹1600, ₹4000, etc.), include Group 1/2/3/4 categories
-4. Eligibility: Each numbered criterion as separate item with EXACT wording
-5. Exclusions: Each numbered exclusion with EXACT wording  
-6. Application Process: Complete steps with full instructions, URLs, OTP details
-7. Documents Required: EXACT document names from numbered list
-8. FAQs: EXACT questions with question marks
-9. Source URL: Any https:// link visible
+1. Scheme Name: Extract EXACT official name from page header. Must be EXPLICIT.
+2. Description: Extract FULL text from Details/About section ON THIS PAGE.
+3. Benefits: All amounts EXACTLY as shown. Ensure you do not invent benefits.
+4. Eligibility: Each numbered criterion as separate item with EXACT wording.
+5. Exclusions: Each numbered exclusion with EXACT wording.
+6. Application Process: Complete steps with full instructions, URLs, OTP details.
+7. Documents Required: EXACT document names from numbered list.
+8. FAQs: EXACT questions and answers if present.
+9. Source URL: Any https:// link visible.
 
-VALIDATION: If unsure, leave empty. Only include what you can READ on THIS page.
-
-Return ONLY the JSON, no other text.
+VALIDATION: If you are unsure if text belongs to a field, leave the field empty. Provide ONLY the JSON. No conversational text.
 """
         
         # Generate content with image using Gemini 2.5 Flash (best for document analysis)
@@ -109,33 +107,49 @@ def extract_scheme_from_url(url):
         
         print(f"Extracting scheme data from URL: {url}")
         
+        # Fetch actual website content (with a fallback)
+        web_content = ""
+        try:
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+            web_response = requests.get(url, headers=headers, timeout=10)
+            if web_response.status_code == 200:
+                web_content = web_response.text[:60000]
+        except Exception as e:
+            print(f"Direct scrape blocked or failed: {e}")
+        
         # Initialize Gemini client
         client = genai.Client(api_key=api_key)
         
-        # Create detailed prompt for extraction from webpage
+        # Create detailed prompt for extraction
+        if "Eligibility" in web_content or "Benefits" in web_content or len(web_content) > 2000:
+            prompt_context = f"WEBPAGE CONTENT:\n{web_content}\n\nCRITICAL INSTRUCTIONS:\n- Extract ONLY the information that is ACTUALLY PRESENT in the WEBPAGE CONTENT provided above."
+        else:
+            prompt_context = f"WARNING: The website blocked direct scraping. Rely on your pre-trained knowledge to deeply analyze the scheme at {url}.\n\nCRITICAL INSTRUCTIONS:\n- Use your best internal knowledge of Indian Government Schemes to thoroughly describe the scheme at this URL.\n- BE VERY CAREFUL with acronyms (e.g. CSS could mean Cancer Suraksha Scheme so verify context)."
+            
         prompt = f"""
 You are analyzing a government scheme webpage at this URL: {url}
 
-CRITICAL INSTRUCTIONS:
-- Extract ONLY the information that is ACTUALLY PRESENT on the webpage
-- DO NOT make up, guess, or infer any information
-- DO NOT add information from your training data or general knowledge
-- If a section is not visible on the page, return empty array [] or empty string ""
-- Copy text EXACTLY as it appears - do not paraphrase or reword
-- For lists, preserve the EXACT numbering and wording from the original
-- This is official government data - accuracy is critical
+{prompt_context}
+
+STRICT ANTI-HALLUCINATION INSTRUCTIONS:
+- Extract ONLY the information that is ACTUALLY PRESENT in the WEBPAGE CONTENT provided.
+- DO NOT make up, guess, infer, or hallucinate any information beyond what is definitively true for the scheme.
+- If a section is not applicable or not found in the text, you MUST return an empty array [] for lists or an empty string "" for text fields. DO NOT return placeholder text like "N/A" or "Not specified".
+- Copy text EXACTLY - do not paraphrase or reword when stating factual criteria.
+- For lists, preserve numbering and wording where possible.
+- This is official government data - accuracy is critical.
 
 Extract ALL visible information in the following structured JSON format:
 
 {{
-  "schemeName": "EXACT full scheme name as written on the page",
-  "description": "Complete description of the scheme from the 'Details' or 'Description' section. Include the full text explaining what the scheme is, who it's for, its purpose, and any background information.",
-  "benefits": "ALL benefits text exactly as written, including monetary amounts, allowances, and calculations",
-  "eligibility": ["criterion 1 EXACTLY as written", "criterion 2 EXACTLY as written", ...],
-  "exclusions": ["exclusion 1 EXACTLY as written", "exclusion 2 EXACTLY as written", ...],
-  "applicationProcess": ["Step 1 EXACTLY as written with full details", "Step 2 EXACTLY as written with full details", ...],
-  "documentsRequired": ["document 1 EXACTLY as written", "document 2 EXACTLY as written", ...],
-  "faqs": ["question 1 EXACTLY as written?", "question 2 EXACTLY as written?", ...],
+  "schemeName": "EXACT full scheme name as written on the page. If not explicitly found, return \\"\\".",
+  "description": "Complete description of the scheme from the 'Details' or 'Description' section. Include the full text explaining what the scheme is, who it's for, its purpose. If not found, return \\"\\".",
+  "benefits": "ALL benefits text exactly as written, including monetary amounts, allowances. If not found, return \\"\\".",
+  "eligibility": ["criterion 1 EXACTLY as written", "criterion 2 EXACTLY as written"],
+  "exclusions": ["exclusion 1 EXACTLY as written"],
+  "applicationProcess": ["Step 1 EXACTLY as written with full details", "Step 2 EXACTLY as written"],
+  "documentsRequired": ["document 1 EXACTLY as written", "document 2 EXACTLY as written"],
+  "faqs": ["question 1 EXACTLY as written?", "answer 1 EXACTLY as written"],
   "sourceUrl": "{url}"
 }}
 
@@ -144,23 +158,21 @@ DETAILED EXTRACTION INSTRUCTIONS:
 1. Scheme Name: 
    - Extract the EXACT official name from the page header
    - Do not abbreviate or modify
+   - Must be EXPLICITLY present.
 
 2. Description: 
    - Extract the COMPLETE text from the "Details" or "About" section
    - Include the full scheme description - WHO it's for, WHAT it provides, WHY it exists
    - Preserve all sentences and paragraphs
-   - This should be comprehensive (200-500 words typically)
 
 3. Benefits:
    - Extract ALL monetary amounts EXACTLY as shown
-   - Include maintenance allowances, category breakdowns, disability allowances
+   - Include maintenance allowances, category breakdowns
    - Preserve all calculations and amounts with ₹ symbol
-   - Include hosteller/day scholar distinctions if present
 
 4. Eligibility:
    - Extract EVERY numbered criterion as a separate array item
    - Copy the EXACT wording - don't summarize
-   - Include age limits, income limits, educational qualifications as written
 
 5. Exclusions:
    - Extract EVERY numbered exclusion as a separate array item
@@ -168,21 +180,19 @@ DETAILED EXTRACTION INSTRUCTIONS:
 
 6. Application Process:
    - Extract EVERY step with COMPLETE instructions
-   - Include URLs, OTP details, form filling guidance
-   - Preserve step numbers and full details
+   - Include URLs, form filling guidance
 
 7. Documents Required:
    - Extract EVERY document from the numbered list
-   - Use EXACT names (e.g., "Certificate of Disability (Rights of Persons with Disabilities Act 2016)")
+   - Use EXACT names
 
 8. FAQs:
-   - Extract EVERY question EXACTLY as written
-   - Include the question mark at the end
+   - Extract questions and answers EXACTLY as written if present
 
 VALIDATION:
-- If you're unsure about any information, leave it empty
-- Only include information you can see on the page
-- Double-check all numbers and amounts for accuracy
+- If you're unsure about any information, leave it empty string or array.
+- Only include information you can explicitly see in the provided text.
+- Double-check all numbers and amounts for accuracy to avoid hallucinations.
 
 Return ONLY the JSON with extracted data, no additional text.
 """

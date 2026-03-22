@@ -41,7 +41,7 @@ class SchemeDatasource {
       final response = await http.get(
         url,
         headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 60));
 
       print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       print('📡 RESPONSE RECEIVED');
@@ -95,7 +95,7 @@ class SchemeDatasource {
       print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       print('⏱️ TIMEOUT');
       print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      print('Request took longer than 10 seconds');
+      print('Request took longer than 60 seconds');
       print('💡 Backend might not be accessible from emulator');
       throw Exception('Request timeout');
     } on FormatException catch (e) {
@@ -124,7 +124,7 @@ class SchemeDatasource {
       final response = await http.get(
         url,
         headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 30));
 
       print('Response status: ${response.statusCode}');
 
@@ -155,7 +155,7 @@ class SchemeDatasource {
             headers: {'Content-Type': 'application/json'},
             body: json.encode({'text': text}),
           )
-          .timeout(const Duration(seconds: 15));
+          .timeout(const Duration(seconds: 30));
 
       print('Summarize response status: ${response.statusCode}');
 
