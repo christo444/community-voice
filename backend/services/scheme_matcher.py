@@ -145,6 +145,7 @@ Analyze the user profile against the eligibility criteria for EACH scheme provid
 2. Logical implications (e.g., if income is below 5 lakh and criteria says below 8 lakh, that matches)
 3. Partial matches (e.g., if user is a student and criteria mentions "students or unemployed youth", that's a match)
 4. Missing information (if user profile doesn't have a field, assume it's UNKNOWN and don't count as matched OR unmatched)
+5. COMMON SENSE REALISM: Apply strict real-world age limits implicitly implied by the scheme. For instance, a 62-year old CANNOT logically qualify for a "Pre-Matric" (primary/middle school) scheme. Old Age schemes are for 60+ only. Drop the match score aggressively if physical real-world logic contradicts the criteria.
 
 IMPORTANT RULES:
 - Evaluate EVERY scheme provided.

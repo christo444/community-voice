@@ -10,17 +10,18 @@ client = create_client(supabase_url, supabase_key)
 
 profiles = [
     {
-        "phone_number": "1111111111",
-        "name": "User One",
-        "age": 22,
+        "phone_number": "3333333333",
+        "name": "User Three",
+        "age": 65,
         "gender": "Male",
-        "state_district": "Delhi",
-        "address": "Permanent resident of India",
-        "income_below": "100000",
-        "education": "Undergraduate student in recognized university, passed previous exam with 60%, not receiving any other scholarship/stipend",
-        "special_category": "General",
-        "disability": "Yes, holds differently-abled certificate, 45% visual impairment",
-        "kutcha_house": False,
+        "state_district": "Puducherry",
+        "address": "Native of Puducherry, Union Territory",
+        "income_below": "50000",
+        "education": "Illiterate",
+        "special_category": "Scheduled Caste",
+        "caste_certificate": True,
+        "disability": "No",
+        "kutcha_house": True,
         "pension": "No"
     }
 ]
@@ -29,8 +30,8 @@ profiles = [
 for p in profiles:
     try:
         client.table('profile_details').upsert(p).execute()
-        print(f"Upserted profile for {p['phone_number']}")
+        print(f"Upserted highly realistic profile for {p['phone_number']}")
     except Exception as e:
         print(f"Error upserting {p['phone_number']}: {e}")
 
-print("Successfully updated test users and profiles!")
+print("Successfully updated User 3 to match Scheme 2 and Scheme 4 realistically!")
