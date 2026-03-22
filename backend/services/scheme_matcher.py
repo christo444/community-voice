@@ -33,9 +33,11 @@ def build_profile_summary(profile):
     """Build a comprehensive text summary of user profile for AI matching"""
     summary_parts = []
 
-    # Basic Information
-    if profile.get('name'):
-        summary_parts.append(f"Name: {profile['name']}")
+    # Unique Identifier
+    if profile.get('user_id'):
+        summary_parts.append(f"User ID: {profile['user_id']}")
+
+    # Basic Information (Removed Name and Address for privacy)
     if profile.get('age'):
         summary_parts.append(f"Age: {profile['age']} years")
     if profile.get('gender'):
@@ -43,11 +45,9 @@ def build_profile_summary(profile):
     if profile.get('date_of_birth'):
         summary_parts.append(f"Date of Birth: {profile['date_of_birth']}")
 
-    # Location
+    # Location (Removed specific address for privacy)
     if profile.get('state_district'):
         summary_parts.append(f"Location: {profile['state_district']}")
-    if profile.get('address'):
-        summary_parts.append(f"Address: {profile['address']}")
 
     # Economic Status
     if profile.get('income_below'):
@@ -240,7 +240,20 @@ def match_user_with_schemes(phone_number):
             return []
 
         user_profile = profile_response.data[0]
-        print(f"✅ Profile found: {user_profile.get('name', 'Unknown')}")
+        
+        # Ensure user_id exists for privacy anonymity 
+        if not user_profile.get('user_id'):
+            import uuid
+            new_id = str(uuid.uuid4())
+            try:
+                # Try to persist it to the database if the column exists
+                client.table('profile_details').update({'user_id': new_id}).eq('phone_number', phone_number).execute()
+            except Exception:
+                pass # Column might not exist yet, but we will still use it for this session
+            user_profile['user_id'] = new_id
+            print(f"🔒 Generated secure unique User ID for privacy stripping.")
+
+        print(f"✅ Profile found and anonymized securely.")
 
         # 2. Build profile summary for AI
         profile_summary = build_profile_summary(user_profile)
