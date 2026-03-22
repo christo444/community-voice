@@ -108,103 +108,117 @@ def build_profile_summary(profile):
     return "\n".join(summary_parts)
 
 
-def match_with_gemini(profile_summary, scheme):
-    """Use Gemini AI to intelligently match user profile with scheme eligibility"""
+def match_with_gemini_batch(profile_summary, schemes_batch):
+    """Use Gemini AI to intelligently match user profile with a batch of schemes"""
     try:
         api_key = os.getenv('GEMINI_API_KEY')
         if not api_key:
             print("Warning: GEMINI_API_KEY not set, using fallback matching")
-            return None
+            return []
 
         # Initialize Gemini client
         client = genai.Client(api_key=api_key)
 
-        # Build eligibility criteria text
-        eligibility_text = "\n".join([f"{i+1}. {criterion}" for i, criterion in enumerate(scheme.get('eligibility', []))])
+        schemes_text_parts = []
+        for i, s in enumerate(schemes_batch):
+            eligibility_text = "\n".join([f"{j+1}. {criterion}" for j, criterion in enumerate(s.get('eligibility', []))])
+            if not eligibility_text.strip():
+                eligibility_text = "No specific eligibility criteria - open to all"
+            
+            p = f"--- SCHEME INDEX: {i} ---\nScheme Name: {s.get('scheme_name', 'Unknown')}\nDescription: {s.get('description', 'No description')}\nELIGIBILITY CRITERIA:\n{eligibility_text}"
+            schemes_text_parts.append(p)
 
-        # If no eligibility criteria, assume everyone is eligible
-        if not eligibility_text.strip():
-            return {
-                'match_percentage': 100,
-                'matched_criteria': ['No specific eligibility criteria - open to all'],
-                'unmatched_criteria': [],
-                'reasoning': 'This scheme has no specific eligibility restrictions'
-            }
+        schemes_context = "\n\n".join(schemes_text_parts)
 
         # Create detailed matching prompt
-        prompt = f"""You are an expert government scheme eligibility analyzer for India. Your task is to determine if a user is eligible for a government scheme based on their profile.
+        prompt = f"""You are an expert government scheme eligibility analyzer for India. Your task is to determine if a user is eligible for MULTIPLE government schemes based on their profile.
 
 USER PROFILE:
 {profile_summary}
 
-SCHEME DETAILS:
-Scheme Name: {scheme.get('scheme_name', 'Unknown')}
-Description: {scheme.get('description', 'No description')}
-
-ELIGIBILITY CRITERIA:
-{eligibility_text}
+SCHEMES TO ANALYZE:
+{schemes_context}
 
 TASK:
-Analyze the user profile against the eligibility criteria. Consider:
+Analyze the user profile against the eligibility criteria for EACH scheme provided above. Consider:
 1. Different wordings for the same concept (e.g., "SC/ST" = "Scheduled Caste/Scheduled Tribe", "below poverty line" = "low income", "farmer" = "agriculture", etc.)
 2. Logical implications (e.g., if income is below 5 lakh and criteria says below 8 lakh, that matches)
 3. Partial matches (e.g., if user is a student and criteria mentions "students or unemployed youth", that's a match)
 4. Missing information (if user profile doesn't have a field, assume it's UNKNOWN and don't count as matched OR unmatched)
 
 IMPORTANT RULES:
-- Only count criteria where you can CONFIRM a match or mismatch from the user profile
-- If information is missing/unknown for a criterion, DO NOT include it in matched or unmatched lists
-- Be lenient with similar wordings (farmer=agriculturist, SC=Scheduled Caste, etc.)
-- Calculate match percentage as: (matched criteria count / total criteria count) × 100
+- Evaluate EVERY scheme provided.
+- Only count criteria where you can CONFIRM a match or mismatch from the user profile.
+- If information is missing/unknown for a criterion, DO NOT include it in matched or unmatched lists.
+- Be lenient with similar wordings.
+- Calculate match percentage as: (matched criteria count / total criteria count) × 100. If no specific criteria, match is 100.
 
-OUTPUT FORMAT (JSON ONLY):
-{{
-  "match_percentage": <number 0-100>,
-  "matched_criteria": ["criterion 1 that user meets", "criterion 2 that user meets", ...],
-  "unmatched_criteria": ["criterion 1 that user does NOT meet", "criterion 2 that user does NOT meet", ...],
-  "reasoning": "Brief explanation of why the user matches or doesn't match this scheme"
-}}
+OUTPUT FORMAT:
+You MUST return ONLY a valid JSON ARRAY of objects with this exact structure (no other text or markdown):
+[
+  {{
+    "scheme_index": <exact SCHEME INDEX integer from the prompt>,
+    "match_percentage": <number 0-100>,
+    "matched_criteria": ["criterion 1 that user meets", "criterion 2 that user meets"],
+    "unmatched_criteria": ["criterion 1 that user does NOT meet"],
+    "reasoning": "Brief explanation of why the user matches or doesn't match this scheme"
+  }}
+]
+"""
 
-Return ONLY valid JSON, no other text."""
-
-        # Call Gemini API
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt
-        )
+        # Call Gemini API with retry logic for rate limits
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                response = client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=prompt
+                )
+                break # Success!
+            except Exception as e:
+                import time
+                error_str = str(e)
+                if '429' in error_str and attempt < max_retries - 1:
+                    print(f"⚠️ Hit Gemini rate limit (429). Retrying in 25 seconds... (Attempt {attempt+1}/{max_retries - 1})")
+                    time.sleep(25)
+                else:
+                    raise e # Re-raise if not a rate limit or out of retries
 
         # Parse JSON response
         response_text = response.text.strip()
 
-        # Remove markdown code blocks if present
+        # Remove markdown code blocks using regular expressions for robustness
+        import re
         if response_text.startswith('```'):
-            response_text = response_text.split('```')[1]
-            if response_text.startswith('json'):
-                response_text = response_text[4:]
-            response_text = response_text.strip()
+            response_text = re.sub(r'^```json?\s*', '', response_text)
+            response_text = re.sub(r'\s*```$', '', response_text)
+        
+        # Fallback to extract JSON array if there's text before/after
+        match = re.search(r'(\[.*\])', response_text, re.DOTALL)
+        if match:
+            response_text = match.group(1)
 
         result = json.loads(response_text)
 
-        # Validate result structure
-        if not all(key in result for key in ['match_percentage', 'matched_criteria', 'unmatched_criteria', 'reasoning']):
-            print(f"Invalid Gemini response structure for scheme {scheme.get('scheme_name')}")
-            return None
+        # Ensure it's a list
+        if not isinstance(result, list):
+            print("Error: Gemini response is not a JSON array.")
+            return []
 
         return result
 
     except json.JSONDecodeError as e:
-        print(f"Error parsing Gemini JSON response: {e}")
-        print(f"Response text: {response_text[:200]}")
-        return None
+        print(f"Error parsing Gemini batch JSON response: {e}")
+        return []
     except Exception as e:
-        print(f"Error in Gemini matching: {e}")
-        return None
+        print(f"Error in Gemini batch matching: {e}")
+        return []
 
 def match_user_with_schemes(phone_number):
     """
     Match user with eligible schemes based on their profile using AI
-
-    Uses Google Gemini to intelligently compare user profile with scheme eligibility criteria.
+    
+    Uses Google Gemini to intelligently compare user profile with scheme eligibility criteria in batches.
     Only returns schemes with 75% or higher match.
 
     Args:
@@ -222,7 +236,6 @@ def match_user_with_schemes(phone_number):
 
         if not profile_response.data or len(profile_response.data) == 0:
             print(f"⚠️ No profile found for phone: {phone_number}")
-            # Return empty list if no profile exists
             return []
 
         user_profile = profile_response.data[0]
@@ -242,41 +255,48 @@ def match_user_with_schemes(phone_number):
             print("⚠️ No schemes in database")
             return []
 
-        # 4. Match each scheme using Gemini AI
+        # 4. Match schemes using Gemini AI in batches
         matched_schemes = []
-
-        for idx, scheme in enumerate(schemes, 1):
-            scheme_name = scheme.get('scheme_name', 'Unknown')
+        BATCH_SIZE = 10
+        
+        for i in range(0, len(schemes), BATCH_SIZE):
+            batch = schemes[i:i+BATCH_SIZE]
             print(f"\n{'='*60}")
-            print(f"🔄 [{idx}/{len(schemes)}] Matching: {scheme_name}")
+            print(f"🔄 Processing Batch {i//BATCH_SIZE + 1} ({len(batch)} schemes)")
             print(f"{'='*60}")
 
-            # Use Gemini to analyze match
-            match_result = match_with_gemini(profile_summary, scheme)
-
-            if match_result is None:
-                # If Gemini fails, skip this scheme
-                print(f"❌ Gemini matching failed for: {scheme_name}")
+            batch_results = match_with_gemini_batch(profile_summary, batch)
+            
+            if not batch_results:
+                print("❌ Gemini batch matching failed or returned empty.")
                 continue
+                
+            # Map batch results back to schemes using the index
+            for match_result in batch_results:
+                scheme_idx = match_result.get('scheme_index')
+                
+                if scheme_idx is None or scheme_idx >= len(batch) or scheme_idx < 0:
+                    print(f"⚠️ Invalid scheme index {scheme_idx} returned by Gemini")
+                    continue
+                    
+                scheme = batch[scheme_idx]
+                
+                match_percentage = match_result.get('match_percentage', 0)
+                print(f"📊 {scheme.get('scheme_name')}: Match Score {match_percentage}%")
 
-            match_percentage = match_result.get('match_percentage', 0)
-            print(f"📊 Match Score: {match_percentage}%")
-
-            # 5. Only include schemes with >= 75% match
-            if match_percentage >= 75:
-                print(f"✅ MATCHED! Adding to results")
-                matched_schemes.append({
-                    'scheme_id': scheme['id'],
-                    'scheme_name': scheme['scheme_name'],
-                    'description': scheme.get('description'),
-                    'benefits': scheme.get('benefits'),
-                    'match_percentage': match_percentage,
-                    'matched_criteria': match_result.get('matched_criteria', []),
-                    'unmatched_criteria': match_result.get('unmatched_criteria', []),
-                    'reasoning': match_result.get('reasoning', '')
-                })
-            else:
-                print(f"❌ Match too low ({match_percentage}% < 75%), skipping")
+                # 5. Only include schemes with >= 75% match
+                if match_percentage >= 75:
+                    print(f"✅ MATCHED! Adding to results")
+                    matched_schemes.append({
+                        'scheme_id': scheme['id'],
+                        'scheme_name': scheme['scheme_name'],
+                        'description': scheme.get('description'),
+                        'benefits': scheme.get('benefits'),
+                        'match_percentage': match_percentage,
+                        'matched_criteria': match_result.get('matched_criteria', []),
+                        'unmatched_criteria': match_result.get('unmatched_criteria', []),
+                        'reasoning': match_result.get('reasoning', '')
+                    })
 
         print(f"\n{'='*60}")
         print(f"🎯 FINAL RESULTS: {len(matched_schemes)} schemes matched (>= 75%)")
