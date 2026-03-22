@@ -5,9 +5,25 @@ import 'dart:async';
 import '../../domain/model/scheme.dart';
 
 class SchemeDatasource {
-  // Using localhost via adb port forwarding (adb reverse tcp:5000 tcp:5000)
-  // This maps localhost:5000 on emulator to localhost:5000 on host machine
-  static const String baseUrl = 'http://localhost:5000/api/schemes';
+  static const String _defaultHost = 'localhost:5000';
+  static const String _androidEmulatorHost = '10.0.2.2:5000';
+  static const String _apiPath = '/api/schemes';
+
+  // Optional override: flutter run --dart-define=SCHEME_API_BASE_URL=http://192.168.1.10:5000/api/schemes
+  static const String _overrideBaseUrl =
+      String.fromEnvironment('SCHEME_API_BASE_URL', defaultValue: '');
+
+  String get baseUrl {
+    if (_overrideBaseUrl.trim().isNotEmpty) {
+      return _overrideBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+    }
+
+    if (Platform.isAndroid) {
+      return 'http://$_androidEmulatorHost$_apiPath';
+    }
+
+    return 'http://$_defaultHost$_apiPath';
+  }
 
   /// Fetch matched schemes for a user based on their phone number
   /// Returns schemes where user meets eligibility criteria
@@ -25,7 +41,7 @@ class SchemeDatasource {
       final response = await http.get(
         url,
         headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 60));
 
       print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       print('📡 RESPONSE RECEIVED');
@@ -38,7 +54,20 @@ class SchemeDatasource {
         final jsonData = json.decode(response.body);
 
         if (jsonData['success'] == true && jsonData['data'] != null) {
-          final schemes = (jsonData['data']['matched_schemes'] as List)
+          final dynamic data = jsonData['data'];
+          final List<dynamic> matchedSchemes;
+
+          if (data is Map<String, dynamic> && data['matched_schemes'] is List) {
+            matchedSchemes = data['matched_schemes'] as List<dynamic>;
+          } else if (data is List) {
+            matchedSchemes = data;
+          } else if (jsonData['matched_schemes'] is List) {
+            matchedSchemes = jsonData['matched_schemes'] as List<dynamic>;
+          } else {
+            throw Exception('Invalid response format: missing matched_schemes');
+          }
+
+          final schemes = matchedSchemes
               .map((schemeJson) => Scheme.fromJson(schemeJson))
               .toList();
 
@@ -57,14 +86,16 @@ class SchemeDatasource {
       print('Cannot connect to backend');
       print('Make sure:');
       print('1. Backend server is running (python app.py)');
-      print('2. Port forwarding is active (adb reverse tcp:5000 tcp:5000)');
+      print('2. App can reach backend host: $baseUrl');
+      print(
+          '3. If using a real device, pass --dart-define=SCHEME_API_BASE_URL=http://<your-ip>:5000/api/schemes');
       print('Error: $e');
       throw Exception('Network error: Cannot connect to server');
     } on TimeoutException {
       print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       print('⏱️ TIMEOUT');
       print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      print('Request took longer than 10 seconds');
+      print('Request took longer than 60 seconds');
       print('💡 Backend might not be accessible from emulator');
       throw Exception('Request timeout');
     } on FormatException catch (e) {
@@ -93,7 +124,7 @@ class SchemeDatasource {
       final response = await http.get(
         url,
         headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 30));
 
       print('Response status: ${response.statusCode}');
 
@@ -124,7 +155,7 @@ class SchemeDatasource {
             headers: {'Content-Type': 'application/json'},
             body: json.encode({'text': text}),
           )
-          .timeout(const Duration(seconds: 15));
+          .timeout(const Duration(seconds: 30));
 
       print('Summarize response status: ${response.statusCode}');
 

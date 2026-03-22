@@ -200,7 +200,7 @@ Provide ONLY the summary, no additional text or explanations."""
         
         # Call Gemini API
         response = client.models.generate_content(
-            model='gemini-2.0-flash-exp',
+            model='gemini-2.5-flash',
             contents=prompt
         )
         
