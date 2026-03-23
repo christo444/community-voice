@@ -362,5 +362,173 @@ def get_users():
             'error': str(e)
         }), 500
 
+# ==================== CASE STATUS MANAGEMENT ====================
+@app.route('/api/cases', methods=['GET'])
+def get_all_cases():
+    """Get all assigned cases (for admin dashboard)"""
+    try:
+        status = request.args.get('status', None)
+        paralegal_id = request.args.get('paralegal_id', None)
+        
+        query = supabase.table('paralegal_cases').select('*, profile:profile_details!paralegal_cases_user_phone_number_fkey(*)').order('assigned_at', desc=True)
+        
+        if status:
+            query = query.eq('status', status)
+        if paralegal_id:
+            query = query.eq('paralegal_id', paralegal_id)
+        
+        response = query.execute()
+        
+        return jsonify({
+            'success': True,
+            'data': response.data
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/cases/<case_id>', methods=['PUT'])
+def update_case(case_id):
+    """Update case status (accept/reject/complete)"""
+    try:
+        data = request.json
+        paralegal_id = data.get('paralegal_id')
+        new_status = data.get('status')
+        notes = data.get('notes', '')
+        
+        if not new_status:
+            return jsonify({
+                'success': False,
+                'error': 'Status is required'
+            }), 400
+        
+        # Verify paralegal ownership
+        case_response = supabase.table('paralegal_cases').select('paralegal_id').eq('id', case_id).single().execute()
+        
+        if not case_response.data:
+            return jsonify({
+                'success': False,
+                'error': 'Case not found'
+            }), 404
+        
+        # Only allow paralegal to update their own cases
+        if paralegal_id and case_response.data.get('paralegal_id') != paralegal_id:
+            return jsonify({
+                'success': False,
+                'error': 'Unauthorized: Case does not belong to this paralegal'
+            }), 403
+        
+        update_data = {
+            'status': new_status,
+            'updated_at': datetime.now().isoformat()
+        }
+        
+        if notes:
+            update_data['notes'] = notes
+        
+        response = supabase.table('paralegal_cases').update(update_data).eq('id', case_id).execute()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Case status updated to {new_status}',
+            'data': response.data
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/cases/<case_id>/reassign', methods=['POST'])
+def reassign_case(case_id):
+    """Reassign case to different paralegal (admin only)"""
+    try:
+        data = request.json
+        new_paralegal_id = data.get('paralegal_id')
+        admin_email = data.get('admin_email')
+        
+        if not new_paralegal_id:
+            return jsonify({
+                'success': False,
+                'error': 'New paralegal ID is required'
+            }), 400
+        
+        # Reset case to open status when reassigning
+        update_data = {
+            'paralegal_id': new_paralegal_id,
+            'status': 'open',
+            'updated_at': datetime.now().isoformat(),
+            'notes': f'Reassigned by {admin_email}'
+        }
+        
+        response = supabase.table('paralegal_cases').update(update_data).eq('id', case_id).execute()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Case reassigned successfully',
+            'data': response.data
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/cases-summary', methods=['GET'])
+def get_cases_summary():
+    """Get case statistics by paralegal and status"""
+    try:
+        # Get all cases with paralegal details
+        cases_response = supabase.table('paralegal_cases').select('id, paralegal_id, status').execute()
+        
+        # Get all paralegals
+        paralegals_response = supabase.table('paralegals').select('id, name, email').execute()
+        
+        # Build summary
+        summary = {
+            'total_cases': len(cases_response.data) if cases_response.data else 0,
+            'by_status': {
+                'open': 0,
+                'in_progress': 0,
+                'completed': 0
+            },
+            'by_paralegal': {}
+        }
+        
+        # Count by status
+        for case in (cases_response.data or []):
+            status = case.get('status', 'open')
+            summary['by_status'][status] = summary['by_status'].get(status, 0) + 1
+            
+            # Count by paralegal
+            paralegal_id = case.get('paralegal_id')
+            if paralegal_id not in summary['by_paralegal']:
+                # Find paralegal name
+                paralegal = next((p for p in (paralegals_response.data or []) if p['id'] == paralegal_id), None)
+                summary['by_paralegal'][paralegal_id] = {
+                    'name': paralegal['name'] if paralegal else 'Unknown',
+                    'email': paralegal['email'] if paralegal else 'Unknown',
+                    'total': 0,
+                    'open': 0,
+                    'in_progress': 0,
+                    'completed': 0
+                }
+            
+            summary['by_paralegal'][paralegal_id]['total'] += 1
+            status_key = case.get('status', 'open')
+            summary['by_paralegal'][paralegal_id][status_key] = summary['by_paralegal'][paralegal_id].get(status_key, 0) + 1
+        
+        return jsonify({
+            'success': True,
+            'data': summary
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
