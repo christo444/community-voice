@@ -11,7 +11,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Supabase
   await Supabase.initialize(
     url: 'https://wzpfhmngcfwrbgzcdymv.supabase.co',
     anonKey:
@@ -34,11 +33,11 @@ class CommunityVoice extends StatelessWidget {
         title: 'Community Voice',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          primaryColor: const Color(0xFF800000), // Maroon
+          primaryColor: const Color.fromARGB(255, 139, 58, 58),
           scaffoldBackgroundColor: Colors.white,
           colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF800000),
-            primary: const Color(0xFF800000),
+            seedColor: const Color.fromARGB(255, 139, 58, 58),
+            primary: const Color.fromARGB(255, 139, 58, 58),
           ),
           useMaterial3: true,
         ),
@@ -59,6 +58,16 @@ class _SplashScreenState extends State<SplashScreen> {
   final AuthRepository _authRepository = AuthRepository();
   final ProfileRepository _profileRepository = ProfileRepository();
 
+  // ✅ SAME gradient as PhoneInputPage
+  static const LinearGradient maroonGradient = LinearGradient(
+    colors: [
+      Color.fromARGB(255, 139, 58, 58),
+      Color.fromARGB(255, 74, 14, 26),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
   @override
   void initState() {
     super.initState();
@@ -66,7 +75,6 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkLoginStatus() async {
-    // Show splash for at least 1 second
     await Future.delayed(const Duration(seconds: 1));
 
     try {
@@ -75,13 +83,13 @@ class _SplashScreenState extends State<SplashScreen> {
       if (!mounted) return;
 
       if (user != null) {
-        // User is logged in - check if they have completed their profile
         final phoneNumber = await _authRepository.getStoredPhoneNumber();
+
         if (phoneNumber != null) {
-          final profile = await _profileRepository.getProfile(phoneNumber);
+          final profile =
+              await _profileRepository.getProfile(phoneNumber);
 
           if (profile != null) {
-            // Profile exists - go to home page
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -89,7 +97,6 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             );
           } else {
-            // No profile - go to Aadhaar verification
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -98,7 +105,6 @@ class _SplashScreenState extends State<SplashScreen> {
             );
           }
         } else {
-          // No phone number stored - go to phone input
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -107,7 +113,6 @@ class _SplashScreenState extends State<SplashScreen> {
           );
         }
       } else {
-        // User not logged in - go to phone input
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -116,7 +121,6 @@ class _SplashScreenState extends State<SplashScreen> {
         );
       }
     } catch (e) {
-      // On error, go to phone input
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
@@ -130,46 +134,53 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF800000),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              height: 100,
-              width: 100,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: maroonGradient,
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                height: 100,
+                width: 100,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(
+                  Icons.voice_chat,
+                  size: 50,
+                  color: Color.fromARGB(255, 139, 58, 58),
+                ),
               ),
-              child: const Icon(
-                Icons.voice_chat,
-                size: 50,
-                color: Color(0xFF800000),
+              const SizedBox(height: 24),
+              const Text(
+                'Community Voice',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Community Voice',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+              const SizedBox(height: 8),
+              const Text(
+                'Inclusive Welfare Access',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white70,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Inclusive Welfare Access',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white70,
+              const SizedBox(height: 32),
+              const CircularProgressIndicator(
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(Colors.white),
               ),
-            ),
-            const SizedBox(height: 32),
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

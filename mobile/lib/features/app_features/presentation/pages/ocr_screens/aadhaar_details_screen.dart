@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:community_voice/features/app_features/presentation/pages/quest/interview.dart';
 
-// ✅ ONLY NEW IMPORTS (added, nothing removed)
 import '../../../../../domain/repository/profile_repository.dart';
 import '../../../../../domain/repository/auth_repository.dart';
 
@@ -24,7 +23,16 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
   final genderCtrl = TextEditingController();
   final addressCtrl = TextEditingController();
 
-  final Color maroon = const Color(0xFF800000);
+  final Color maroon = const Color.fromARGB(255, 139, 58, 58);
+
+  static const LinearGradient maroonGradient = LinearGradient(
+    colors: [
+      Color.fromARGB(255, 139, 58, 58),
+      Color.fromARGB(255, 74, 14, 26),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 
   @override
   void initState() {
@@ -39,11 +47,9 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
         .where((e) => e.isNotEmpty)
         .toList();
 
-    // ================= NAME =================
     for (final line in lines) {
       final l = line.toLowerCase();
 
-      if (l == 'to') continue;
       if (l.contains('government') ||
           l.contains('unique') ||
           l.contains('authority') ||
@@ -58,147 +64,42 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
       break;
     }
 
-    // ================= DOB =================
-    for (final line in lines) {
-      final l = line.toLowerCase();
+    final dobMatch = RegExp(r'\b\d{1,2}[\s\/\-]\d{1,2}[\s\/\-]\d{4}\b')
+        .firstMatch(text);
 
-      if (l.contains('dob') || l.contains('date of birth')) {
-        final dateMatch = RegExp(
-          r'\b\d{1,2}[\s\/\-]\d{1,2}[\s\/\-]\d{4}\b',
-        ).firstMatch(line);
-
-        if (dateMatch != null) {
-          dobCtrl.text = dateMatch.group(0)!;
-
-          final yearMatch =
-              RegExp(r'\b(19|20)\d{2}\b').firstMatch(dobCtrl.text);
-
-          if (yearMatch != null) {
-            final year = int.parse(yearMatch.group(0)!);
-            ageCtrl.text = (DateTime.now().year - year).toString();
-          }
-          break;
-        }
-      }
+    if (dobMatch != null) {
+      dobCtrl.text = dobMatch.group(0)!;
+      final year = int.parse(dobCtrl.text.split(RegExp(r'[\s\/\-]')).last);
+      ageCtrl.text = (DateTime.now().year - year).toString();
     }
 
-    // -------- Fallback: YOB --------
-    if (dobCtrl.text.isEmpty) {
-      final yobMatch = RegExp(
-        r'year\s*of\s*birth[:\s]*(\d{4})',
-        caseSensitive: false,
-      ).firstMatch(text);
-
-      if (yobMatch != null) {
-        dobCtrl.text = yobMatch.group(1)!;
-        ageCtrl.text =
-            (DateTime.now().year - int.parse(yobMatch.group(1)!)).toString();
-      }
-    }
-
-    // ================= GENDER =================
-    final lowerText = text.toLowerCase();
-    if (RegExp(r'\bfemale\b').hasMatch(lowerText)) {
+    if (text.toLowerCase().contains('female')) {
       genderCtrl.text = 'Female';
-    } else if (RegExp(r'\bmale\b').hasMatch(lowerText)) {
+    } else if (text.toLowerCase().contains('male')) {
       genderCtrl.text = 'Male';
     }
 
-    // ================= ADDRESS =================
-    List<String> addressLines = [];
-    bool startCapture = false;
-
-    for (final line in lines) {
-      final l = line.toLowerCase();
-
-      if (l.startsWith('c/o') ||
-          l.startsWith('s/o') ||
-          l.startsWith('d/o') ||
-          l.startsWith('w/o')) {
-        startCapture = true;
-
-        String cleaned = line
-            .replaceFirst(
-              RegExp(
-                r'^(c/o|s/o|d/o|w/o)\s*[:\-]?\s*[A-Za-z .]+,?',
-                caseSensitive: false,
-              ),
-              '',
-            )
-            .trim();
-
-        if (cleaned.isNotEmpty) {
-          addressLines.add(cleaned);
-        }
-        continue;
-      }
-
-      if (!startCapture) continue;
-
-      if (l.contains('vtc') ||
-          l.contains('po') ||
-          l.contains('sub district') ||
-          l.contains('uidai') ||
-          l.contains('government') ||
-          l.contains('aadhaar')) {
-        continue;
-      }
-
-      final cleanedLine = line.replaceFirst(RegExp(r'^[A-Z]\s+'), '');
-
-      addressLines.add(cleanedLine);
-
-      if (RegExp(r'\b\d{6}\b').hasMatch(cleanedLine)) {
-        break;
-      }
-    }
-
-    addressCtrl.text = addressLines.join('\n');
+    addressCtrl.text = lines.skipWhile((l) => !l.contains('C/O')).join('\n');
   }
 
-  // ================= NEW: SAVE PROFILE + NAVIGATE =================
   Future<void> _saveProfileAndContinue() async {
     final authRepository = AuthRepository();
     final phoneNumber = await authRepository.getStoredPhoneNumber();
 
-    if (phoneNumber == null) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Phone number not found. Please login again.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    int? ageInt;
-    if (ageCtrl.text.isNotEmpty) {
-      ageInt = int.tryParse(ageCtrl.text.replaceAll(RegExp(r'[^0-9]'), ''));
-    }
+    if (phoneNumber == null) return;
 
     final profileRepository = ProfileRepository();
 
-    final result = await profileRepository.saveOcrData(
+    await profileRepository.saveOcrData(
       phoneNumber: phoneNumber,
-      name: nameCtrl.text.isNotEmpty ? nameCtrl.text : null,
-      dateOfBirth: dobCtrl.text.isNotEmpty ? dobCtrl.text : null,
-      age: ageInt,
-      gender: genderCtrl.text.isNotEmpty ? genderCtrl.text : null,
-      address: addressCtrl.text.isNotEmpty ? addressCtrl.text : null,
+      name: nameCtrl.text,
+      dateOfBirth: dobCtrl.text,
+      age: int.tryParse(ageCtrl.text),
+      gender: genderCtrl.text,
+      address: addressCtrl.text,
     );
 
     if (!mounted) return;
-
-    if (result == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to save profile. Please try again.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
 
     Navigator.pushReplacement(
       context,
@@ -206,7 +107,6 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
     );
   }
 
-  // =================== TEXTFIELD DESIGN ===================
   Widget _field(String label, TextEditingController c, {int max = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
@@ -215,32 +115,16 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
         enabled: isEditing,
         maxLines: max,
         cursorColor: maroon,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-          color: Colors.black,
-        ),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(
-            color: maroon,
-            fontWeight: FontWeight.w600,
-          ),
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          labelStyle: TextStyle(color: maroon),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: maroon.withOpacity(0.5), width: 1.4),
+            borderSide: BorderSide(color: maroon.withOpacity(0.5)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(color: maroon, width: 2),
-          ),
-          disabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: maroon.withOpacity(0.3), width: 1.2),
           ),
         ),
       ),
@@ -250,18 +134,40 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // ✅ SAME GRADIENT APPBAR
       appBar: AppBar(
-        title: const Text("User Details"),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          "User Details",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: maroonGradient,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => setState(() => isEditing = !isEditing),
             child: Text(
               isEditing ? "Done" : "Edit",
-              style: const TextStyle(color: Colors.black),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           )
         ],
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -274,17 +180,34 @@ class _AadhaarDetailsScreenState extends State<AadhaarDetailsScreen> {
                     _field("DOB / YOB", dobCtrl),
                     _field("Age", ageCtrl),
                     _field("Gender", genderCtrl),
-                    _field("Address", addressCtrl, max: 8),
+                    _field("Address", addressCtrl, max: 6),
                   ],
                 ),
               ),
             ),
-            SizedBox(
+
+            // ✅ SAME MAROON GRADIENT BUTTON
+            Container(
               width: double.infinity,
+              decoration: const BoxDecoration(
+                gradient: maroonGradient,
+                borderRadius: BorderRadius.all(Radius.circular(14)),
+              ),
               child: ElevatedButton(
-                // ✅ ONLY CHANGE: button now saves + navigates
                 onPressed: _saveProfileAndContinue,
-                child: const Text("Confirm & Continue"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: const Text(
+                  "Confirm & Continue",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ],

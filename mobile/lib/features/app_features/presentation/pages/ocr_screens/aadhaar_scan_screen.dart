@@ -56,7 +56,7 @@ class _AadhaarScanScreenState extends State<AadhaarScanScreen> {
       MaterialPageRoute(
         builder: (_) => AadhaarScanControllerScreen(
           ocrText: result.text,
-          aadhaarData: _data, // ✅ SAME OBJECT PASSED EVERY TIME
+          aadhaarData: _data,
         ),
       ),
     );
@@ -86,7 +86,35 @@ class _AadhaarScanScreenState extends State<AadhaarScanScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Scan Aadhaar")),
+      // ✅ Same Gradient Maroon AppBar
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          "Scan Aadhaar",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color.fromARGB(255, 139, 58, 58),
+                Color.fromARGB(255, 74, 14, 26),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+      ),
+
       body: !_isReady
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -94,11 +122,13 @@ class _AadhaarScanScreenState extends State<AadhaarScanScreen> {
                 Expanded(
                   child: CameraPreview(_cameraController!),
                 ),
+
                 if (_isProcessing)
                   const Padding(
                     padding: EdgeInsets.all(12),
                     child: CircularProgressIndicator(),
                   ),
+
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
@@ -107,6 +137,11 @@ class _AadhaarScanScreenState extends State<AadhaarScanScreen> {
                         child: ElevatedButton.icon(
                           icon: const Icon(Icons.camera_alt),
                           label: const Text("Scan"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(255, 139, 58, 58),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
                           onPressed: _captureFromCamera,
                         ),
                       ),
@@ -115,6 +150,13 @@ class _AadhaarScanScreenState extends State<AadhaarScanScreen> {
                         child: OutlinedButton.icon(
                           icon: const Icon(Icons.photo),
                           label: const Text("Gallery"),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor:
+                                const Color.fromARGB(255, 139, 58, 58),
+                            side: const BorderSide(
+                                color: Color.fromARGB(255, 139, 58, 58)),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
                           onPressed: _pickFromGallery,
                         ),
                       ),
