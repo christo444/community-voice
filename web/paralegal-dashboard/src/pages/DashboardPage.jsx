@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../utils/supabase'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import './DashboardPage.css'
+
+const PARALEGAL_API_URL = 'http://localhost:5001/api'
 
 function DashboardPage({ paralegal, onLogout }) {
   const navigate = useNavigate()
@@ -69,21 +72,21 @@ function DashboardPage({ paralegal, onLogout }) {
     if (!window.confirm('Accept this case?')) return
 
     try {
-      const { error } = await supabase
-        .from('paralegal_cases')
-        .update({ 
-          status: 'in_progress',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', caseId)
+      const response = await axios.put(
+        `${PARALEGAL_API_URL}/cases/${caseId}`,
+        {
+          paralegal_id: paralegal.id,
+          status: 'in_progress'
+        }
+      )
 
-      if (error) throw error
-
-      alert('Case accepted!')
-      fetchCases()
+      if (response.data.success) {
+        alert('Case accepted!')
+        fetchCases()
+      }
     } catch (error) {
       console.error('Error accepting case:', error)
-      alert('Failed to accept case')
+      alert(error.response?.data?.error || 'Failed to accept case')
     }
   }
 
@@ -91,22 +94,22 @@ function DashboardPage({ paralegal, onLogout }) {
     const reason = window.prompt('Reason for rejection (optional):')
     
     try {
-      const { error } = await supabase
-        .from('paralegal_cases')
-        .update({ 
+      const response = await axios.put(
+        `${PARALEGAL_API_URL}/cases/${caseId}`,
+        {
+          paralegal_id: paralegal.id,
           status: 'completed',
-          notes: reason ? `Rejected: ${reason}` : 'Rejected',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', caseId)
+          notes: reason ? `Rejected: ${reason}` : 'Rejected'
+        }
+      )
 
-      if (error) throw error
-
-      alert('Case rejected')
-      fetchCases()
+      if (response.data.success) {
+        alert('Case rejected')
+        fetchCases()
+      }
     } catch (error) {
       console.error('Error rejecting case:', error)
-      alert('Failed to reject case')
+      alert(error.response?.data?.error || 'Failed to reject case')
     }
   }
 

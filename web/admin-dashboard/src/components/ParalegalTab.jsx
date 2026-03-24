@@ -9,6 +9,8 @@ function ParalegalTab() {
   const [applications, setApplications] = useState([]);
   const [paralegals, setParalegals] = useState([]);
   const [users, setUsers] = useState([]);
+  const [cases, setCases] = useState([]);
+  const [casesSummary, setCasesSummary] = useState({});
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
   const [showApprovalModal, setShowApprovalModal] = useState(false);
@@ -17,11 +19,16 @@ function ParalegalTab() {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedParalegal, setSelectedParalegal] = useState('');
+  const [showReassignModal, setShowReassignModal] = useState(false);
+  const [selectedCase, setSelectedCase] = useState(null);
+  const [caseStatusFilter, setCaseStatusFilter] = useState('all');
 
   useEffect(() => {
     fetchApplications();
     fetchParalegals();
     fetchUsers();
+    fetchCases();
+    fetchCasesSummary();
   }, []);
 
   const fetchApplications = async () => {
@@ -51,6 +58,24 @@ function ParalegalTab() {
       setUsers(response.data.data || []);
     } catch (error) {
       console.error('Error fetching users:', error);
+    }
+  };
+
+  const fetchCases = async () => {
+    try {
+      const response = await axios.get(`${PARALEGAL_API_URL}/cases`);
+      setCases(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching cases:', error);
+    }
+  };
+
+  const fetchCasesSummary = async () => {
+    try {
+      const response = await axios.get(`${PARALEGAL_API_URL}/cases-summary`);
+      setCasesSummary(response.data.data || {});
+    } catch (error) {
+      console.error('Error fetching cases summary:', error);
     }
   };
 
@@ -136,9 +161,37 @@ function ParalegalTab() {
       setShowAssignModal(false);
       setSelectedParalegal('');
       setSelectedUser(null);
+      fetchCases();
+      fetchCasesSummary();
     } catch (error) {
       setMessage({ 
         text: error.response?.data?.error || 'Error assigning case', 
+        type: 'error' 
+      });
+    }
+  };
+
+  const handleReassignCase = async () => {
+    if (!selectedParalegal || !selectedCase) {
+      setMessage({ text: 'Please select a paralegal', type: 'error' });
+      return;
+    }
+
+    try {
+      await axios.post(`${PARALEGAL_API_URL}/cases/${selectedCase.id}/reassign`, {
+        paralegal_id: selectedParalegal,
+        admin_email: 'admin@communityvoice.com'
+      });
+
+      setMessage({ text: 'Case reassigned successfully', type: 'success' });
+      setShowReassignModal(false);
+      setSelectedParalegal('');
+      setSelectedCase(null);
+      fetchCases();
+      fetchCasesSummary();
+    } catch (error) {
+      setMessage({ 
+        text: error.response?.data?.error || 'Error reassigning case', 
         type: 'error' 
       });
     }
@@ -160,6 +213,12 @@ function ParalegalTab() {
             onClick={() => setActiveView('paralegals')}
           >
             Approved Paralegals ({paralegals.length})
+          </button>
+          <button 
+            className={activeView === 'cases' ? 'active' : ''}
+            onClick={() => setActiveView('cases')}
+          >
+            Case Management
           </button>
           <button 
             className={activeView === 'assign' ? 'active' : ''}
@@ -309,6 +368,112 @@ function ParalegalTab() {
         </div>
       )}
 
+      {/* Case Management View */}
+      {activeView === 'cases' && (
+        <div className="cases-view">
+          <h3>Case Management</h3>
+          
+          {/* Case Statistics */}
+          <div className="stats-container">
+            <div className="stat-card">
+              <h4>Total Cases</h4>
+              <p className="stat-number">{casesSummary.total_cases || 0}</p>
+            </div>
+            <div className="stat-card">
+              <h4>Open</h4>
+              <p className="stat-number stat-open">{casesSummary.by_status?.open || 0}</p>
+            </div>
+            <div className="stat-card">
+              <h4>In Progress</h4>
+              <p className="stat-number stat-progress">{casesSummary.by_status?.in_progress || 0}</p>
+            </div>
+            <div className="stat-card">
+              <h4>Completed</h4>
+              <p className="stat-number stat-completed">{casesSummary.by_status?.completed || 0}</p>
+            </div>
+          </div>
+
+          {/* Case Status Filter */}
+          <div className="filter-container">
+            <label>Filter by Status:</label>
+            <select value={caseStatusFilter} onChange={(e) => setCaseStatusFilter(e.target.value)}>
+              <option value="all">All Cases</option>
+              <option value="open">Open</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+
+          {/* Cases Table */}
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>User Name</th>
+                  <th>Phone</th>
+                  <th>Assigned To</th>
+                  <th>Status</th>
+                  <th>Assigned Date</th>
+                  <th>Last Updated</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cases
+                  .filter(c => caseStatusFilter === 'all' || c.status === caseStatusFilter)
+                  .map((caseItem) => {
+                    const paralegal = paralegals.find(p => p.id === caseItem.paralegal_id);
+                    return (
+                      <tr key={caseItem.id}>
+                        <td>{caseItem.profile?.name || 'Unknown'}</td>
+                        <td>{caseItem.user_phone_number}</td>
+                        <td>{paralegal?.name || 'Unassigned'}</td>
+                        <td>
+                          <span className={`status-badge status-${caseItem.status}`}>
+                            {caseItem.status === 'in_progress' ? 'In Progress' : caseItem.status.charAt(0).toUpperCase() + caseItem.status.slice(1)}
+                          </span>
+                        </td>
+                        <td>{new Date(caseItem.assigned_at).toLocaleDateString()}</td>
+                        <td>{new Date(caseItem.updated_at).toLocaleDateString()}</td>
+                        <td>
+                          <button
+                            onClick={() => {
+                              setSelectedCase(caseItem);
+                              setShowReassignModal(true);
+                            }}
+                            className="btn btn-small btn-reassign"
+                          >
+                            Reassign
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Paralegal Workload Summary */}
+          <div className="workload-section">
+            <h4>Paralegal Workload</h4>
+            <div className="workload-cards">
+              {Object.entries(casesSummary.by_paralegal || {}).map(([paralegalId, stats]) => (
+                <div key={paralegalId} className="workload-card">
+                  <h5>{stats.name}</h5>
+                  <p className="email">{stats.email}</p>
+                  <div className="workload-stats">
+                    <div>Total: <strong>{stats.total}</strong></div>
+                    <div>Open: <strong className="text-open">{stats.open}</strong></div>
+                    <div>In Progress: <strong className="text-progress">{stats.in_progress}</strong></div>
+                    <div>Completed: <strong className="text-completed">{stats.completed}</strong></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Approval Modal */}
       {showApprovalModal && (
         <div className="modal-overlay" onClick={() => setShowApprovalModal(false)}>
@@ -343,6 +508,32 @@ function ParalegalTab() {
             <div className="modal-actions">
               <button onClick={handleAssignCase} className="btn btn-primary">Assign</button>
               <button onClick={() => setShowAssignModal(false)} className="btn btn-secondary">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reassign Case Modal */}
+      {showReassignModal && (
+        <div className="modal-overlay" onClick={() => setShowReassignModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Reassign Case</h3>
+            <p><strong>User:</strong> {selectedCase?.profile?.name} ({selectedCase?.user_phone_number})</p>
+            <p><strong>Current Paralegal:</strong> {paralegals.find(p => p.id === selectedCase?.paralegal_id)?.name || 'Unassigned'}</p>
+            <div className="form-group">
+              <label>Select New Paralegal:</label>
+              <select value={selectedParalegal} onChange={(e) => setSelectedParalegal(e.target.value)}>
+                <option value="">-- Select a Paralegal --</option>
+                {paralegals.filter(p => p.is_active && p.id !== selectedCase?.paralegal_id).map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} - {p.email}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="modal-actions">
+              <button onClick={handleReassignCase} className="btn btn-primary">Reassign</button>
+              <button onClick={() => setShowReassignModal(false)} className="btn btn-secondary">Cancel</button>
             </div>
           </div>
         </div>
