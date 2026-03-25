@@ -36,6 +36,9 @@ class Translations {
       'eligibleSchemes': 'Schemes You Are Eligible For',
       'schemeDetails': 'Scheme Details',
       'logoutConfirmMessage': 'Are you sure you want to logout?',
+      'contactParalegal': 'Contact Paralegal for help',
+      'requestSent': 'Request sent for paralegal',
+      'requestFailed': 'Failed to send request',
 
       // Interview questions
       'interviewQuestions': 'Interview Questions',
@@ -69,6 +72,8 @@ class Translations {
           'Is your house made of temporary materials like mud,thatch etc?(yes / no)',
       'q19':
           'Are you pregnant or have you given birth within the last year?(yes / no)',
+      'q20':
+          'Are you a widow, single parent, or dependent family member?(yes / no)',
     },
     'ml': {
       'welcome': 'സ്വാഗതം',
@@ -96,6 +101,9 @@ class Translations {
       'invalidPin': 'അസാധുവായ PIN',
       'aadhaarVerification': 'ആധാര പരിശോധന',
       'ocr': 'OCR',
+      'contactParalegal': 'സഹായത്തിന് പാരാലീഗലിനെ ബന്ധപ്പെടുക',
+      'requestSent': 'പാരാലീഗലിനുള്ള അഭ്യർത്ഥന അയച്ചു',
+      'requestFailed': 'അഭ്യർത്ഥന പരാജയപ്പെട്ടു',
       'gallery': 'ഗാലറി',
       'camera': 'ക്യാമറ',
       'cancel': 'റദ്ദാക്കുക',
@@ -142,6 +150,8 @@ class Translations {
       'q17': 'നിങ്ങൾ സ്ഥിരമായി താമസിക്കുന്ന സംസ്ഥാനവും ജില്ലയും ഏതാണ്?',
       'q18':
           'നിങ്ങളുടെ വീട് ചെളി, ഓട് തുടങ്ങിയ താൽക്കാലിക വസ്തുക്കൾ കൊണ്ടാണോ നിർമ്മിച്ചിരിക്കുന്നത്? (അതെ / ഇല്ല)',
+      'q20':
+          'നിങ്ങൾ ഒരു വിധവയോ, ഒറ്റയ്ക്ക് ജീവിക്കുന്ന രക്ഷിതാവോ, അല്ലെങ്കിൽ ആശ്രിത കുടുംബാംഗമോ ആണോ?(അതെ / അല്ല)',
       'q19':
           'നിങ്ങൾ ഗർഭിണിയാണോ അല്ലെങ്കിൽ കഴിഞ്ഞ ഒരു വർഷത്തിനുള്ളിൽ കുട്ടിക്ക് ജന്മം നൽകിയിട്ടുണ്ടോ?(അതെ / ഇല്ല)',
     },

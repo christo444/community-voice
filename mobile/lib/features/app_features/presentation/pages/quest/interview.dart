@@ -17,13 +17,31 @@ class InterviewQuestionsPage extends StatefulWidget {
 }
 
 class _InterviewQuestionsPageState extends State<InterviewQuestionsPage> {
-  final List<TextEditingController> _controllers = List.generate(19, (_) => TextEditingController());
+  final List<TextEditingController> _controllers =
+      List.generate(20, (_) => TextEditingController());
   final List<String> _questionKeys = [
-    'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 
-    'q8', 'q9', 'q10', 'q11', 'q12', 'q13', 'q14',
-    'q15', 'q16', 'q17', 'q18', 'q19'
+    'q1',
+    'q2',
+    'q3',
+    'q4',
+    'q5',
+    'q6',
+    'q7',
+    'q8',
+    'q9',
+    'q10',
+    'q11',
+    'q12',
+    'q13',
+    'q14',
+    'q15',
+    'q16',
+    'q17',
+    'q18',
+    'q19',
+    'q20'
   ];
-  
+
   late stt.SpeechToText _speech;
   bool _isListening = false;
   int? _currentListeningIndex;
@@ -58,7 +76,7 @@ class _InterviewQuestionsPageState extends State<InterviewQuestionsPage> {
   Future<void> _startListening(int index) async {
     // Play mic click sound
     SystemSound.play(SystemSoundType.click);
-    
+
     final lang = Provider.of<LanguageProvider>(context, listen: false);
     bool available = await _speech.initialize(
       onError: (error) => print('Speech recognition error: $error'),
@@ -106,7 +124,7 @@ class _InterviewQuestionsPageState extends State<InterviewQuestionsPage> {
   void _stopListening() {
     // Play sound when stopping
     SystemSound.play(SystemSoundType.click);
-    
+
     _speech.stop();
     setState(() {
       _isListening = false;
@@ -117,7 +135,7 @@ class _InterviewQuestionsPageState extends State<InterviewQuestionsPage> {
   Future<String> _translateToEnglish(String text) async {
     try {
       if (text.isEmpty) return '';
-      
+
       // Check if text contains Malayalam characters
       final malayalamRegex = RegExp(r'[\u0D00-\u0D7F]');
       if (!malayalamRegex.hasMatch(text)) {
@@ -183,6 +201,7 @@ class _InterviewQuestionsPageState extends State<InterviewQuestionsPage> {
         'stateDistrict',
         'kutchaHouse',
         'pregnantOrLactating',
+        'widowSingleParentDependent',
       ];
 
       for (int i = 0; i < _controllers.length; i++) {
@@ -247,7 +266,7 @@ class _InterviewQuestionsPageState extends State<InterviewQuestionsPage> {
   @override
   Widget build(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -274,8 +293,9 @@ class _InterviewQuestionsPageState extends State<InterviewQuestionsPage> {
         padding: const EdgeInsets.all(16),
         itemCount: _questionKeys.length,
         itemBuilder: (context, index) {
-          final isCurrentlyListening = _isListening && _currentListeningIndex == index;
-          
+          final isCurrentlyListening =
+              _isListening && _currentListeningIndex == index;
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -327,7 +347,7 @@ class _InterviewQuestionsPageState extends State<InterviewQuestionsPage> {
                         isCurrentlyListening ? Icons.stop : Icons.mic,
                         color: Colors.white,
                       ),
-                      tooltip: isCurrentlyListening 
+                      tooltip: isCurrentlyListening
                           ? lang.translate('stopListening')
                           : lang.translate('speakAnswer'),
                     ),

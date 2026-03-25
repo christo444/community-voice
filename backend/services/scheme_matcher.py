@@ -90,6 +90,8 @@ def build_profile_summary(profile):
         summary_parts.append(f"Person with Disability: {'Yes' if profile['disability'] else 'No'}")
     if profile.get('pregnant_or_lactating'):
         summary_parts.append(f"Pregnant or Lactating Mother: {'Yes' if profile['pregnant_or_lactating'] else 'No'}")
+    if profile.get('widow_singleparent_dependentfamilymember'):
+        summary_parts.append(f"Vulnerable Status: Widow, Single Parent, or Dependent Family Member")
 
     # Housing
     if profile.get('kutcha_house'):
