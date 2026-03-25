@@ -27,19 +27,21 @@ class SchemeDatasource {
 
   /// Fetch matched schemes for a user based on their phone number
   /// Returns schemes where user meets eligibility criteria
-  Future<List<Scheme>> getMatchedSchemes(String phoneNumber) async {
+  Future<List<Scheme>> getMatchedSchemes(String phoneNumber,
+      {bool refresh = false}) async {
     try {
       print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      print('📞 FETCHING SCHEMES');
+      print('📞 FETCHING SCHEMES (Refresh: $refresh)');
       print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       print('Phone: $phoneNumber');
-      print('URL: $baseUrl/match/$phoneNumber');
 
-      final url = Uri.parse('$baseUrl/match/$phoneNumber');
-      print('Parsed URI: $url');
+      final uri = Uri.parse('$baseUrl/match/$phoneNumber')
+          .replace(queryParameters: refresh ? {'refresh': 'true'} : null);
+
+      print('URL: $uri');
 
       final response = await http.get(
-        url,
+        uri,
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 60));
 
@@ -140,6 +142,53 @@ class SchemeDatasource {
     } catch (e) {
       print('Error fetching scheme details: $e');
       rethrow;
+    }
+  }
+
+  /// Fetch all schemes from the database, not filtered by user eligibility
+  Future<List<Scheme>> getAllSchemes() async {
+    try {
+      print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      print('📞 FETCHING ALL SCHEMES');
+      print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      print('URL: $baseUrl');
+
+      final url = Uri.parse(baseUrl);
+      print('Parsed URI: $url');
+
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 60));
+
+      print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      print('📡 RESPONSE RECEIVED');
+      print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      print('Status Code: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+
+        if (jsonData['success'] == true && jsonData['data'] != null) {
+          final List<dynamic> allSchemes = jsonData['data'] as List<dynamic>;
+          final schemes = allSchemes
+              .map((schemeJson) => Scheme.fromJson(schemeJson))
+              .toList();
+
+          print('✅  Successfully parsed ${schemes.length} schemes');
+          return schemes;
+        } else {
+          throw Exception('Invalid response format');
+        }
+      } else {
+        throw Exception('Failed to load schemes: ${response.statusCode}');
+      }
+    } on SocketException catch (e) {
+      throw Exception('Network error: Cannot connect to server\n$e');
+    } on TimeoutException {
+      throw Exception('Request timeout');
+    } catch (e) {
+      throw Exception('Failed fetching or parsing all schemes: $e');
     }
   }
 

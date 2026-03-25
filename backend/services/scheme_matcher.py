@@ -289,7 +289,7 @@ def process_batch_and_save(profile_summary, schemes_batch, phone_number, client)
         print(f"Error in process_batch_and_save: {e}")
         return []
 
-def match_user_with_schemes(phone_number):
+def match_user_with_schemes(phone_number, force_refresh=False):
     """
     Match user with eligible schemes based on their profile using AI
     
@@ -302,6 +302,7 @@ def match_user_with_schemes(phone_number):
 
     Args:
         phone_number (str): User's phone number
+        force_refresh (bool): Whether to force a full re-match ignoring cache
 
     Returns:
         list: List of matched schemes with match percentage >= 75%
@@ -340,13 +341,17 @@ def match_user_with_schemes(phone_number):
             return []
 
         # 3. Fetch CACHED matches from user_schemes
-        print("Checking for cached matches...")
-        try:
-            cached_response = client.table('user_schemes').select('*').eq('user_phone', phone_number).execute()
-            cached_records = cached_response.data if cached_response.data else []
-        except Exception as e:
-            print(f"Error fetching cached matches (table might not exist): {e}")
-            cached_records = []
+        cached_records = []
+        if not force_refresh:
+            print("Checking for cached matches...")
+            try:
+                cached_response = client.table('user_schemes').select('*').eq('user_phone', phone_number).execute()
+                cached_records = cached_response.data if cached_response.data else []
+            except Exception as e:
+                print(f"Error fetching cached matches (table might not exist): {e}")
+                cached_records = []
+        else:
+            print("Force refresh requested. Ignoring cache.")
 
         # Map cached records by scheme_id for quick lookup
         cached_map = {record['scheme_id']: record for record in cached_records}

@@ -5,8 +5,14 @@ class SchemeRepository {
   final SchemeDatasource _datasource = SchemeDatasource();
 
   /// Get schemes matched for a specific user
-  Future<List<Scheme>> getMatchedSchemes(String phoneNumber) async {
-    return await _datasource.getMatchedSchemes(phoneNumber);
+  Future<List<Scheme>> getMatchedSchemes(String phoneNumber,
+      {bool refresh = false}) async {
+    return await _datasource.getMatchedSchemes(phoneNumber, refresh: refresh);
+  }
+
+  /// Get all schemes from the database unconditionally
+  Future<List<Scheme>> getAllSchemes() async {
+    return await _datasource.getAllSchemes();
   }
 
   /// Get complete details for a specific scheme

@@ -159,7 +159,38 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Load matched schemes for the current user
-  Future<void> _loadMatchedSchemes() async {
+  Future<void> _loadAllSchemes() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+
+      // Fetch all schemes
+      final schemes = await _schemeRepository.getAllSchemes();
+
+      print('✅ Loaded ${schemes.length} total schemes from backend');
+
+      setState(() {
+        _matchedSchemes = schemes;
+        _isLoading = false;
+      });
+
+      // Translate if Malayalam is selected (non-blocking)
+      final lang = Provider.of<LanguageProvider>(context, listen: false);
+      if (lang.languageCode == 'ml') {
+        _translateSchemes();
+      }
+    } catch (e) {
+      print('❌ Error loading all schemes: $e');
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Failed to load schemes: $e';
+      });
+    }
+  }
+
+  Future<void> _loadMatchedSchemes({bool refresh = false}) async {
     try {
       setState(() {
         _isLoading = true;
@@ -178,7 +209,8 @@ class _HomePageState extends State<HomePage> {
       }
 
       // Fetch matched schemes
-      final schemes = await _schemeRepository.getMatchedSchemes(phoneNumber);
+      final schemes = await _schemeRepository.getMatchedSchemes(phoneNumber,
+          refresh: refresh);
 
       print('✅ Loaded ${schemes.length} schemes from backend');
 
@@ -358,6 +390,57 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             // ===== END CUSTOMIZATION ZONE =====
+          ),
+          // ===== ACTION BUTTONS =====
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => _loadMatchedSchemes(refresh: true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 109, 7, 7),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12.0),
+                      child: Text(
+                        'Check Eligible Schemes',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _loadAllSchemes,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 109, 7, 7),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12.0),
+                      child: Text(
+                        'See All Schemes',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           // List of Schemes with loading/error handling
           Expanded(

@@ -23,16 +23,21 @@ class Scheme {
   factory Scheme.fromJson(Map<String, dynamic> json) {
     return Scheme(
       id: json['scheme_id'] ?? json['id'] ?? '',
-      schemeName: json['scheme_name'] ?? '',
+      schemeName: json['scheme_name'] ?? json['schemeName'] ?? '',
       description: json['description'],
       benefits: json['benefits'],
-      matchPercentage: json['match_percentage']?.toInt(),
-      matchedCriteria: json['matched_criteria'] != null
-          ? List<String>.from(json['matched_criteria'])
-          : null,
-      unmatchedCriteria: json['unmatched_criteria'] != null
-          ? List<String>.from(json['unmatched_criteria'])
-          : null,
+      matchPercentage:
+          (json['match_percentage'] ?? json['matchPercentage'])?.toInt(),
+      matchedCriteria:
+          (json['matched_criteria'] ?? json['matchedCriteria']) != null
+              ? List<String>.from(
+                  json['matched_criteria'] ?? json['matchedCriteria'])
+              : null,
+      unmatchedCriteria:
+          (json['unmatched_criteria'] ?? json['unmatchedCriteria']) != null
+              ? List<String>.from(
+                  json['unmatched_criteria'] ?? json['unmatchedCriteria'])
+              : null,
       reasoning: json['reasoning'],
     );
   }

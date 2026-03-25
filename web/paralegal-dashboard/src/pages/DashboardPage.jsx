@@ -282,43 +282,29 @@ function DashboardPage({ paralegal, onLogout }) {
                             <th>User Name</th>
                             <th>Phone</th>
                             <th>Scheme</th>
-                            <th>Age</th>
                             <th>Started</th>
-                            <th>Actions</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {activeCases.map((caseItem) => (
-                            <tr key={caseItem.id}>
-                              <td>{caseItem.profile?.name || 'N/A'}</td>
-                              <td>{caseItem.user_phone_number}</td>
-                              <td>General Assistance</td>
-                              <td>{caseItem.profile?.age || 'N/A'}</td>
-                              <td>{new Date(caseItem.assigned_at).toLocaleDateString()}</td>
-                              <td style={{display: 'flex', gap: '5px'}}>
-                                <button
-                                  onClick={() => navigate(`/case/${caseItem.id}`)}
-                                  className="btn btn-primary"
-                                >
-                                  Manage
-                                </button>
-                                <button
-                                  onClick={async () => {
-                                    if(window.confirm('Mark this case as completed?')) {
-                                      try {
-                                        await axios.put(`${PARALEGAL_API_URL}/cases/${caseItem.id}`, { status: 'completed' });
-                                        fetchCases();
-                                      } catch (err) {}
-                                    }
-                                  }}
-                                  className="btn btn-success"
-                                  style={{backgroundColor: '#28a745', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold'}}
-                                >
-                                  ✓ Complete
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
+                          {activeCases.map((caseItem) => {
+                            const name = caseItem.user_name || caseItem.profile?.name || 'Unknown User';
+                            const phone = caseItem.user_phone_number || 'N/A';
+                            const scheme = caseItem.scheme_name || 'General Assistance';
+                            
+                            return (
+                              <tr 
+                                key={caseItem.id} 
+                                onClick={() => navigate(`/case/${caseItem.id}`)}
+                                style={{cursor: 'pointer'}}
+                                className="clickable-row"
+                              >
+                                <td>{name}</td>
+                                <td>{phone}</td>
+                                <td>{scheme}</td>
+                                <td>{new Date(caseItem.assigned_at).toLocaleDateString()}</td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>

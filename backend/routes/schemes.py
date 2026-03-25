@@ -93,13 +93,21 @@ def extract_from_url():
 def get_schemes():
     """Get all saved schemes"""
     try:
+        print("\n" + "="*50)
+        print("📥 [API] GET /api/schemes")
+        print("Fetching all schemes from database...")
         schemes = get_all_schemes()
+        print(f"✅ Successfully retrieved {len(schemes)} schemes")
+        print("="*50 + "\n")
         return jsonify({
             'success': True,
             'count': len(schemes),
             'data': schemes
         }), 200
     except Exception as e:
+        print("\n" + "="*50)
+        print(f"❌ [API Error] GET /api/schemes: {str(e)}")
+        print("="*50 + "\n")
         return jsonify({'error': str(e)}), 500
 
 
@@ -139,7 +147,13 @@ def remove_scheme(scheme_id):
 def get_matched_schemes(phone_number):
     """Get schemes matched for a specific user"""
     try:
-        matched_schemes = match_user_with_schemes(phone_number)
+        force_refresh = request.args.get('refresh', 'false').lower() == 'true'
+        print("\n" + "="*50)
+        print(f"📥 [API] GET /api/schemes/match/{phone_number} (Refresh: {force_refresh})")
+        print("Checking eligibility and fetching matched schemes...")
+        matched_schemes = match_user_with_schemes(phone_number, force_refresh=force_refresh)
+        print(f"✅ Successfully found {len(matched_schemes)} eligible schemes for {phone_number}")
+        print("="*50 + "\n")
         return jsonify({
             'success': True,
             'data': {
@@ -149,7 +163,9 @@ def get_matched_schemes(phone_number):
             }
         }), 200
     except Exception as e:
-        print(f"Error in get_matched_schemes: {e}")
+        print("\n" + "="*50)
+        print(f"❌ [API Error] GET /api/schemes/match/{phone_number}: {e}")
+        print("="*50 + "\n")
         return jsonify({'error': str(e)}), 500
 
 
