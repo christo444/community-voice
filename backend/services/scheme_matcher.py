@@ -180,7 +180,7 @@ You MUST return ONLY a valid JSON ARRAY of objects with this exact structure (no
                 import time
                 error_str = str(e)
                 if '429' in error_str and attempt < max_retries - 1:
-                    print(f"⚠️ Hit Gemini rate limit (429). Retrying in 25 seconds... (Attempt {attempt+1}/{max_retries - 1})")
+                    print(f"Hit Gemini rate limit (429). Retrying in 25 seconds... (Attempt {attempt+1}/{max_retries - 1})")
                     time.sleep(25)
                 else:
                     raise e # Re-raise if not a rate limit or out of retries
@@ -232,11 +232,11 @@ def match_user_with_schemes(phone_number):
         client = get_supabase_client()
 
         # 1. Fetch user profile
-        print(f"🔍 Fetching profile for phone: {phone_number}")
+        print(f"Fetching profile for phone: {phone_number}")
         profile_response = client.table('profile_details').select('*').eq('phone_number', phone_number).execute()
 
         if not profile_response.data or len(profile_response.data) == 0:
-            print(f"⚠️ No profile found for phone: {phone_number}")
+            print(f"No profile found for phone: {phone_number}")
             return []
 
         user_profile = profile_response.data[0]
@@ -251,22 +251,22 @@ def match_user_with_schemes(phone_number):
             except Exception:
                 pass # Column might not exist yet, but we will still use it for this session
             user_profile['user_id'] = new_id
-            print(f"🔒 Generated secure unique User ID for privacy stripping.")
+            print(f"Generated secure unique User ID for privacy stripping.")
 
-        print(f"✅ Profile found and anonymized securely.")
+        print(f"Profile found and anonymized securely.")
 
         # 2. Build profile summary for AI
         profile_summary = build_profile_summary(user_profile)
-        print(f"📝 Profile summary created ({len(profile_summary)} chars)")
+        print(f"Profile summary created ({len(profile_summary)} chars)")
 
         # 3. Fetch all schemes from database
-        print("📚 Fetching all schemes from database...")
+        print("Fetching all schemes from database...")
         schemes_response = client.table('schemes').select('*').execute()
         schemes = schemes_response.data if schemes_response.data else []
-        print(f"📚 Found {len(schemes)} total schemes")
+        print(f"Found {len(schemes)} total schemes")
 
         if not schemes:
-            print("⚠️ No schemes in database")
+            print("No schemes in database")
             return []
 
         # 4. Match schemes using Gemini AI in batches
@@ -276,13 +276,13 @@ def match_user_with_schemes(phone_number):
         for i in range(0, len(schemes), BATCH_SIZE):
             batch = schemes[i:i+BATCH_SIZE]
             print(f"\n{'='*60}")
-            print(f"🔄 Processing Batch {i//BATCH_SIZE + 1} ({len(batch)} schemes)")
+            print(f"Processing Batch {i//BATCH_SIZE + 1} ({len(batch)} schemes)")
             print(f"{'='*60}")
 
             batch_results = match_with_gemini_batch(profile_summary, batch)
             
             if not batch_results:
-                print("❌ Gemini batch matching failed or returned empty.")
+                print("Gemini batch matching failed or returned empty.")
                 continue
                 
             # Map batch results back to schemes using the index
@@ -290,17 +290,17 @@ def match_user_with_schemes(phone_number):
                 scheme_idx = match_result.get('scheme_index')
                 
                 if scheme_idx is None or scheme_idx >= len(batch) or scheme_idx < 0:
-                    print(f"⚠️ Invalid scheme index {scheme_idx} returned by Gemini")
+                    print(f"Invalid scheme index {scheme_idx} returned by Gemini")
                     continue
                     
                 scheme = batch[scheme_idx]
                 
                 match_percentage = match_result.get('match_percentage', 0)
-                print(f"📊 {scheme.get('scheme_name')}: Match Score {match_percentage}%")
+                print(f"{scheme.get('scheme_name')}: Match Score {match_percentage}%")
 
                 # 5. Only include schemes with >= 75% match
                 if match_percentage >= 75:
-                    print(f"✅ MATCHED! Adding to results")
+                    print(f"MATCHED! Adding to results")
                     matched_schemes.append({
                         'scheme_id': scheme['id'],
                         'scheme_name': scheme['scheme_name'],
@@ -313,7 +313,7 @@ def match_user_with_schemes(phone_number):
                     })
 
         print(f"\n{'='*60}")
-        print(f"🎯 FINAL RESULTS: {len(matched_schemes)} schemes matched (>= 75%)")
+        print(f"FINAL RESULTS: {len(matched_schemes)} schemes matched (>= 75%)")
         print(f"{'='*60}")
 
         # Sort by match percentage (highest first)
@@ -322,7 +322,7 @@ def match_user_with_schemes(phone_number):
         return matched_schemes
 
     except Exception as e:
-        print(f"❌ Error matching schemes: {e}")
+        print(f"Error matching schemes: {e}")
         import traceback
         traceback.print_exc()
         raise
