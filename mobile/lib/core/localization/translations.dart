@@ -39,6 +39,9 @@ class Translations {
       'contactParalegal': 'Contact Paralegal for help',
       'requestSent': 'Request sent for paralegal',
       'requestFailed': 'Failed to send request',
+      'checkEligibleSchemes': 'Check Eligible\nSchemes',
+      'seeEligibleSchemes': 'See Eligible\nSchemes',
+      'seeAllSchemes': 'See All\nSchemes',
 
       // Interview questions
       'interviewQuestions': 'Interview Questions',
@@ -113,6 +116,9 @@ class Translations {
       'eligibleSchemes': 'നിങ്ങൾക്ക്  അർഹതയുള്ള  പദ്ധതികൾ',
       'schemeDetails': 'പദ്ധതി വിശദാംശങ്ങൾ',
       'logoutConfirmMessage': 'നിങ്ങൾക്ക് ലോഗ് ഔട്ട് ചെയ്യണമെന്ന് ഉറപ്പാണോ?',
+      'checkEligibleSchemes': 'അർഹത\nപരിശോധിക്കുക',
+      'seeEligibleSchemes': 'അർഹതയുള്ളവ\nകാണുക',
+      'seeAllSchemes': 'എല്ലാ\nപദ്ധതികളും',
 
       // Interview questions
       'interviewQuestions': 'അഭിമുഖ ചോദ്യങ്ങൾ',
