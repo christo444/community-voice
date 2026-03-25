@@ -215,12 +215,88 @@ You MUST return ONLY a valid JSON ARRAY of objects with this exact structure (no
         print(f"Error in Gemini batch matching: {e}")
         return []
 
+import threading
+
+def process_batch_and_save(profile_summary, schemes_batch, phone_number, client):
+    """
+    Process a batch of schemes with Gemini and save results to DB.
+    Run in background thread or foreground.
+    """
+    try:
+        print(f"Processing batch of {len(schemes_batch)} schemes for {phone_number}")
+        batch_results = match_with_gemini_batch(profile_summary, schemes_batch)
+        
+        if not batch_results:
+            print("Gemini batch matching failed or returned empty.")
+            return []
+
+        saved_matches = []
+        
+        # Map batch results back to schemes using the index
+        for match_result in batch_results:
+            scheme_idx = match_result.get('scheme_index')
+            
+            if scheme_idx is None or scheme_idx >= len(schemes_batch) or scheme_idx < 0:
+                print(f"Invalid scheme index {scheme_idx} returned by Gemini")
+                continue
+                
+            scheme = schemes_batch[scheme_idx]
+            
+            # Safe conversion to integer for database
+            raw_percentage = match_result.get('match_percentage', 0)
+            try:
+                match_percentage = int(float(raw_percentage))
+            except (ValueError, TypeError):
+                match_percentage = 0
+                
+            is_eligible = match_percentage >= 75
+            
+            # Save to user_schemes table
+            try:
+                db_record = {
+                    'user_phone': phone_number,
+                    'scheme_id': scheme['id'],
+                    'is_eligible': is_eligible,
+                    'match_percentage': match_percentage,
+                    'matched_criteria': match_result.get('matched_criteria', []),
+                    'unmatched_criteria': match_result.get('unmatched_criteria', []),
+                    'reasoning': match_result.get('reasoning', '')
+                }
+                
+                # Check if record exists before upserting (if using insert) or just use upsert
+                # Since we want to update if logic improved
+                client.table('user_schemes').upsert(db_record, on_conflict='user_phone, scheme_id').execute()
+                
+                if is_eligible:
+                    # Construct return object
+                    matched_scheme = scheme.copy()
+                    matched_scheme['match_percentage'] = match_percentage
+                    matched_scheme['matched_criteria'] = match_result.get('matched_criteria', [])
+                    matched_scheme['unmatched_criteria'] = match_result.get('unmatched_criteria', [])
+                    matched_scheme['reasoning'] = match_result.get('reasoning', '')
+                    saved_matches.append(matched_scheme)
+                    print(f"✅ Matched: {scheme.get('scheme_name')} ({match_percentage}%)")
+                else:
+                    print(f"❌ Not eligible: {scheme.get('scheme_name')} ({match_percentage}%)")
+                    
+            except Exception as e:
+                print(f"Error saving match result to DB: {e}")
+        
+        return saved_matches
+    except Exception as e:
+        print(f"Error in process_batch_and_save: {e}")
+        return []
+
 def match_user_with_schemes(phone_number):
     """
     Match user with eligible schemes based on their profile using AI
     
-    Uses Google Gemini to intelligently compare user profile with scheme eligibility criteria in batches.
-    Only returns schemes with 75% or higher match.
+    Uses Google Gemini to intelligently compare user profile with scheme eligibility criteria.
+    - First checks 'user_schemes' table for cached matches.
+    - If user has matches, returns them immediately.
+    - Checks for NEW schemes not in cache.
+    - If new schemes exist, spawns BACKGROUND thread to process them.
+    - If user has NO matches (first time), runs synchronously.
 
     Args:
         phone_number (str): User's phone number
@@ -251,81 +327,87 @@ def match_user_with_schemes(phone_number):
             except Exception:
                 pass # Column might not exist yet, but we will still use it for this session
             user_profile['user_id'] = new_id
-            print(f"Generated secure unique User ID for privacy stripping.")
 
-        print(f"Profile found and anonymized securely.")
-
-        # 2. Build profile summary for AI
-        profile_summary = build_profile_summary(user_profile)
-        print(f"Profile summary created ({len(profile_summary)} chars)")
-
-        # 3. Fetch all schemes from database
+        # 2. Fetch ALL schemes
         print("Fetching all schemes from database...")
         schemes_response = client.table('schemes').select('*').execute()
-        schemes = schemes_response.data if schemes_response.data else []
-        print(f"Found {len(schemes)} total schemes")
-
-        if not schemes:
+        all_schemes = schemes_response.data if schemes_response.data else []
+        
+        if not all_schemes:
             print("No schemes in database")
             return []
 
-        # 4. Match schemes using Gemini AI in batches
-        matched_schemes = []
-        BATCH_SIZE = 10
+        # 3. Fetch CACHED matches from user_schemes
+        print("Checking for cached matches...")
+        try:
+            cached_response = client.table('user_schemes').select('*').eq('user_phone', phone_number).execute()
+            cached_records = cached_response.data if cached_response.data else []
+        except Exception as e:
+            print(f"Error fetching cached matches (table might not exist): {e}")
+            cached_records = []
+
+        # Map cached records by scheme_id for quick lookup
+        cached_map = {record['scheme_id']: record for record in cached_records}
         
-        for i in range(0, len(schemes), BATCH_SIZE):
-            batch = schemes[i:i+BATCH_SIZE]
-            print(f"\n{'='*60}")
-            print(f"Processing Batch {i//BATCH_SIZE + 1} ({len(batch)} schemes)")
-            print(f"{'='*60}")
+        # Identify NEW schemes (not in cache)
+        new_schemes = [s for s in all_schemes if s['id'] not in cached_map]
+        
+        # Prepare list of eligible schemes from cache
+        eligible_schemes = []
+        for s in all_schemes:
+            if s['id'] in cached_map:
+                record = cached_map[s['id']]
+                if record.get('is_eligible', False):
+                    # Combine scheme data with match data
+                    matched_s = s.copy()
+                    matched_s['match_percentage'] = record.get('match_percentage')
+                    matched_s['matched_criteria'] = record.get('matched_criteria')
+                    matched_s['unmatched_criteria'] = record.get('unmatched_criteria')
+                    matched_s['reasoning'] = record.get('reasoning')
+                    eligible_schemes.append(matched_s)
 
-            batch_results = match_with_gemini_batch(profile_summary, batch)
+        matched_schemes = eligible_schemes
+        
+        profile_summary = build_profile_summary(user_profile)
+
+        # LOGIC BRANCHING
+        if not cached_records:
+            # SCENARIO 1: First time user (No cache) -> Run SYNCHRONOUSLY
+            print("🆕 First time matching for user. Running full sync match...")
+            BATCH_SIZE = 10
+            for i in range(0, len(all_schemes), BATCH_SIZE):
+                batch = all_schemes[i:i+BATCH_SIZE]
+                results = process_batch_and_save(profile_summary, batch, phone_number, client)
+                matched_schemes.extend(results)
+                
+        elif new_schemes:
+            # SCENARIO 2: Returning user with NEW schemes -> Return cached, process new in BACKGROUND
+            print(f"🔄 User has {len(eligible_schemes)} cached matches. Found {len(new_schemes)} new schemes.")
+            print("🚀 Launching background thread for new schemes...")
             
-            if not batch_results:
-                print("Gemini batch matching failed or returned empty.")
-                continue
-                
-            # Map batch results back to schemes using the index
-            for match_result in batch_results:
-                scheme_idx = match_result.get('scheme_index')
-                
-                if scheme_idx is None or scheme_idx >= len(batch) or scheme_idx < 0:
-                    print(f"Invalid scheme index {scheme_idx} returned by Gemini")
-                    continue
-                    
-                scheme = batch[scheme_idx]
-                
-                match_percentage = match_result.get('match_percentage', 0)
-                print(f"{scheme.get('scheme_name')}: Match Score {match_percentage}%")
+            def background_worker():
+                print("🧵 Background thread started...")
+                BATCH_SIZE = 10
+                for i in range(0, len(new_schemes), BATCH_SIZE):
+                    batch = new_schemes[i:i+BATCH_SIZE]
+                    process_batch_and_save(profile_summary, batch, phone_number, client)
+                print("🧵 Background thread finished.")
 
-                # 5. Only include schemes with >= 75% match
-                if match_percentage >= 75:
-                    print(f"MATCHED! Adding to results")
-                    matched_schemes.append({
-                        'scheme_id': scheme['id'],
-                        'scheme_name': scheme['scheme_name'],
-                        'description': scheme.get('description'),
-                        'benefits': scheme.get('benefits'),
-                        'match_percentage': match_percentage,
-                        'matched_criteria': match_result.get('matched_criteria', []),
-                        'unmatched_criteria': match_result.get('unmatched_criteria', []),
-                        'reasoning': match_result.get('reasoning', '')
-                    })
-
-        print(f"\n{'='*60}")
-        print(f"FINAL RESULTS: {len(matched_schemes)} schemes matched (>= 75%)")
-        print(f"{'='*60}")
-
-        # Sort by match percentage (highest first)
-        matched_schemes.sort(key=lambda x: x['match_percentage'], reverse=True)
+            thread = threading.Thread(target=background_worker)
+            thread.daemon = True # Ensure thread doesn't block app shutdown
+            thread.start()
+            
+        else:
+            # SCENARIO 3: Returning user, everything up to date -> Return cached immediately
+            print("✅ All schemes already processed. Returning cached results.")
 
         return matched_schemes
 
     except Exception as e:
-        print(f"Error matching schemes: {e}")
+        print(f"Error in match_user_with_schemes: {e}")
         import traceback
         traceback.print_exc()
-        raise
+        return []
 
 
 def get_scheme_details(scheme_id):

@@ -26,17 +26,9 @@ function DashboardPage({ paralegal, onLogout }) {
     try {
       setLoading(true)
 
-      // Fetch cases using paralegal ID
-      const { data: casesData, error } = await supabase
-        .from('paralegal_cases')
-        .select(`
-          *,
-          profile:profile_details!paralegal_cases_user_phone_number_fkey(*)
-        `)
-        .eq('paralegal_id', paralegal.id)
-        .order('assigned_at', { ascending: false })
-
-      if (error) throw error
+      // Fetch cases using Backend API instead of direct Supabase to bypass RLS
+      const response = await axios.get(`${PARALEGAL_API_URL}/cases?paralegal_id=${paralegal.id}`);
+      const casesData = response.data.data;
 
       setCases(casesData || [])
 
@@ -200,42 +192,50 @@ function DashboardPage({ paralegal, onLogout }) {
                     </div>
                   ) : (
                     <div className="cases-grid">
-                      {openCases.map((caseItem) => (
-                        <div key={caseItem.id} className="case-card">
-                          <div className="case-header">
-                            <h3>{caseItem.profile?.name || 'Unknown User'}</h3>
-                            <span className="badge badge-new">NEW</span>
+                      {openCases.map((caseItem) => {
+                        const address = caseItem.profile?.address || caseItem.profile?.state_district || 'N/A';
+                        return (
+                        <div key={caseItem.id} className="case-card" style={{border: '1px solid #ddd', borderRadius: '8px', padding: '15px', position: 'relative'}}>
+                          <div className="case-header" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}}>
+                            <h3 style={{margin: 0, fontSize: '1.2rem'}}>{caseItem.profile?.name || 'Unknown User'}</h3>
+                            <span className="badge" style={{backgroundColor: '#fff3cd', color: '#856404', padding: '4px 8px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 'bold'}}>NEW</span>
                           </div>
-                          <div className="case-body">
+                          <div className="case-body" style={{fontSize: '0.9rem', color: '#444'}}>
                             <div className="case-info">
-                              <p><strong>Phone:</strong> {caseItem.user_phone_number}</p>
-                              <p><strong>Age:</strong> {caseItem.profile?.age || 'N/A'}</p>
-                              <p><strong>Gender:</strong> {caseItem.profile?.gender || 'N/A'}</p>
-                              <p><strong>Assigned:</strong> {new Date(caseItem.assigned_at).toLocaleDateString()}</p>
+                              <p style={{margin: '5px 0'}}><strong>Scheme:</strong> General Assistance</p>
+                              <p style={{margin: '5px 0'}}><strong>Phone:</strong> {caseItem.user_phone_number}</p>
+                              <p style={{margin: '5px 0'}}><strong>Address:</strong> {address}</p>
+                              <p style={{margin: '5px 0'}}><strong>Age:</strong> {caseItem.profile?.age || 'N/A'}</p>
+                              <p style={{margin: '5px 0'}}><strong>Gender:</strong> {caseItem.profile?.gender || 'N/A'}</p>
+                              <p style={{margin: '5px 0'}}><strong>Assigned:</strong> {new Date(caseItem.assigned_at).toLocaleDateString()}</p>
                             </div>
                           </div>
-                          <div className="case-actions">
+                          <div className="case-actions" style={{display: 'flex', gap: '10px', marginTop: '15px'}}>
                             <button 
-                              className="btn btn-accept"
+                              className="btn"
+                              style={{backgroundColor: '#28a745', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '5px', flex: 1, cursor: 'pointer', fontWeight: 'bold'}}
                               onClick={() => handleAcceptCase(caseItem.id)}
                             >
-                              ✓ Accept
+                              ✓ Approve
                             </button>
                             <button 
-                              className="btn btn-reject"
+                              className="btn"
+                              style={{backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '5px', flex: 1, cursor: 'pointer', fontWeight: 'bold'}}
                               onClick={() => handleRejectCase(caseItem.id)}
                             >
                               ✗ Reject
                             </button>
                             <button 
-                              className="btn btn-view"
+                              className="btn"
+                              style={{backgroundColor: '#4A0000', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '5px', flex: 1, cursor: 'pointer', fontWeight: 'bold'}}
                               onClick={() => navigate(`/case/${caseItem.id}`)}
                             >
                               👁 View
                             </button>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -259,9 +259,9 @@ function DashboardPage({ paralegal, onLogout }) {
                           <tr>
                             <th>User Name</th>
                             <th>Phone</th>
+                            <th>Scheme</th>
                             <th>Age</th>
                             <th>Started</th>
-                            <th>Last Updated</th>
                             <th>Actions</th>
                           </tr>
                         </thead>
@@ -270,15 +270,29 @@ function DashboardPage({ paralegal, onLogout }) {
                             <tr key={caseItem.id}>
                               <td>{caseItem.profile?.name || 'N/A'}</td>
                               <td>{caseItem.user_phone_number}</td>
+                              <td>General Assistance</td>
                               <td>{caseItem.profile?.age || 'N/A'}</td>
                               <td>{new Date(caseItem.assigned_at).toLocaleDateString()}</td>
-                              <td>{new Date(caseItem.updated_at).toLocaleDateString()}</td>
-                              <td>
+                              <td style={{display: 'flex', gap: '5px'}}>
                                 <button
                                   onClick={() => navigate(`/case/${caseItem.id}`)}
                                   className="btn btn-primary"
                                 >
-                                  Manage Case
+                                  Manage
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    if(window.confirm('Mark this case as completed?')) {
+                                      try {
+                                        await axios.put(`${PARALEGAL_API_URL}/cases/${caseItem.id}`, { status: 'completed' });
+                                        fetchCases();
+                                      } catch (err) {}
+                                    }
+                                  }}
+                                  className="btn btn-success"
+                                  style={{backgroundColor: '#28a745', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold'}}
+                                >
+                                  ✓ Complete
                                 </button>
                               </td>
                             </tr>

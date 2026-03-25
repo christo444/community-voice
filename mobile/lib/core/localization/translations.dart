@@ -47,16 +47,14 @@ class Translations {
 
       'q1': 'What is your current occupation?',
       'q2': 'Is your job in the organised or unorganised sector?',
-      'q3':
-          'Is your annual family income below the government\'s low income threshold?(yes / no)',
+      'q3': 'What is your annual family income?',
       'q4': 'Do you have a valid income certificate?(yes / no)',
       'q5': 'Are you involved in agriculture or related activities?(yes / no)',
       'q6': 'Do you own or lease agricultural land?',
       'q7': 'Do you run or plan to start a small business or MSME?(yes / no)',
       'q8': 'What is your highest education level?',
       'q9': 'Do you have a government-issued disability certificate?(yes / no)',
-      'q10':
-          'Are you a widow, single parent, or dependent family member?(yes / no)',
+      'q10': 'Which category do you belong to?',
       'q11':
           'Do you currently receive any pension from the government?(yes / no)',
       'q12': 'Do you have an Aadhaar-linked bank account?(yes / no)',
@@ -118,8 +116,7 @@ class Translations {
 
       'q1': 'നിങ്ങളുടെ ഇപ്പോഴത്തെ തൊഴിൽ എന്താണ്?',
       'q2': 'നിങ്ങളുടെ ജോലി സംഘടിത മേഖലയിലാണോ അസംഘടിത മേഖലയിലാണോ?',
-      'q3':
-          'നിങ്ങളുടെ വാർഷിക കുടുംബ വരുമാനം സർക്കാരിന്റെ താഴ്ന്ന വരുമാന പരിധിക്ക് താഴെയാണോ?(അതെ / അല്ല)',
+      'q3': 'നിങ്ങളുടെ വാർഷിക കുടുംബ വരുമാനം എത്രയാണ്?',
       'q4':
           'നിങ്ങളുടെ കൈവശം സാധുവായ വരുമാന സർട്ടിഫിക്കറ്റ് ഉണ്ടോ?(ഉണ്ട് / ഇല്ല)',
       'q5':
@@ -130,8 +127,7 @@ class Translations {
       'q8': 'നിങ്ങളുടെ ഏറ്റവും ഉയർന്ന വിദ്യാഭ്യാസ നിലവാരം എന്താണ്?',
       'q9':
           'നിങ്ങൾക്ക് സർക്കാർ നൽകിയ വൈകല്യ സർട്ടിഫിക്കറ്റ് ഉണ്ടോ?(ഉണ്ട് / ഇല്ല)',
-      'q10':
-          'നിങ്ങൾ ഒരു വിധവയോ, ഒറ്റയ്ക്ക് ജീവിക്കുന്ന രക്ഷിതാവോ, അല്ലെങ്കിൽ ആശ്രിത കുടുംബാംഗമോ ആണോ?(അതെ / അല്ല)',
+      'q10': 'ഏത് വിഭാഗത്തിലാണ് നിങ്ങൾ ഉൾപ്പെടുന്നത്?',
       'q11':
           'നിങ്ങൾക്ക് നിലവിൽ സർക്കാരിൽ നിന്ന് എന്തെങ്കിലും പെൻഷൻ ലഭിക്കുന്നുണ്ടോ?(ഉണ്ട് / ഇല്ല)',
       'q12':

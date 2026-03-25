@@ -197,6 +197,33 @@ function ParalegalTab() {
     }
   };
 
+  const handleAdminStatusUpdate = async (caseId, newStatus) => {
+    try {
+      await axios.put(`${PARALEGAL_API_URL}/cases/${caseId}`, {
+        status: newStatus
+      });
+      fetchCases();
+      fetchCasesSummary();
+    } catch (error) {
+      setMessage({ text: 'Error updating status', type: 'error' });
+    }
+  };
+
+  const handleInlineReassign = async (caseId, newParalegalId) => {
+    if (!newParalegalId) return;
+    try {
+      await axios.post(`${PARALEGAL_API_URL}/cases/${caseId}/reassign`, {
+        paralegal_id: newParalegalId,
+        admin_email: 'admin'
+      });
+      fetchCases();
+      fetchCasesSummary();
+      setMessage({ text: 'Case reassigned successfully', type: 'success' });
+    } catch (error) {
+      setMessage({ text: 'Error reassigning case', type: 'error' });
+    }
+  };
+
   return (
     <div className="paralegal-tab">
       <div className="tab-header">
@@ -343,25 +370,32 @@ function ParalegalTab() {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
-                  <tr key={user.phone_number}>
-                    <td>{user.name || 'N/A'}</td>
-                    <td>{user.phone_number}</td>
-                    <td>{user.age || 'N/A'}</td>
-                    <td>{user.gender || 'N/A'}</td>
-                    <td>
-                      <button
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setShowAssignModal(true);
-                        }}
-                        className="btn btn-primary"
-                      >
-                        Assign to Paralegal
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {users.map((user) => {
+                  const activeCase = cases.find(c => c.user_phone_number === user.phone_number && c.status !== 'completed');
+                  return (
+                    <tr key={user.phone_number}>
+                      <td>{user.name || 'N/A'}</td>
+                      <td>{user.phone_number}</td>
+                      <td>{user.age || 'N/A'}</td>
+                      <td>{user.gender || 'N/A'}</td>
+                      <td>
+                        {activeCase ? (
+                          <button disabled className="btn" style={{backgroundColor: '#ccc', color: '#666', opacity: 0.8, border: '1px solid #999'}}>Assigned</button>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setShowAssignModal(true);
+                            }}
+                            className="btn btn-primary"
+                          >
+                            Assign to Paralegal
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -371,7 +405,7 @@ function ParalegalTab() {
       {/* Case Management View */}
       {activeView === 'cases' && (
         <div className="cases-view">
-          <h3>Case Management</h3>
+          <h3>User Scheme Requests</h3>
           
           {/* Case Statistics */}
           <div className="stats-container">
@@ -411,10 +445,11 @@ function ParalegalTab() {
                 <tr>
                   <th>User Name</th>
                   <th>Phone</th>
-                  <th>Assigned To</th>
+                  <th>Address</th>
+                  <th>Scheme</th>
+                  <th>Assigned Paralegal</th>
                   <th>Status</th>
-                  <th>Assigned Date</th>
-                  <th>Last Updated</th>
+                  <th>Reassign</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -423,27 +458,47 @@ function ParalegalTab() {
                   .filter(c => caseStatusFilter === 'all' || c.status === caseStatusFilter)
                   .map((caseItem) => {
                     const paralegal = paralegals.find(p => p.id === caseItem.paralegal_id);
+                    const address = caseItem.profile?.address || caseItem.profile?.state_district || 'N/A';
                     return (
                       <tr key={caseItem.id}>
-                        <td>{caseItem.profile?.name || 'Unknown'}</td>
+                        <td>
+                          {caseItem.profile?.name || 'Unknown'}
+                        </td>
                         <td>{caseItem.user_phone_number}</td>
+                        <td style={{maxWidth: '150px', whiteSpace: 'normal', fontSize: '0.9em'}}>{address}</td>
+                        <td>General Assistance</td>
                         <td>{paralegal?.name || 'Unassigned'}</td>
                         <td>
                           <span className={`status-badge status-${caseItem.status}`}>
                             {caseItem.status === 'in_progress' ? 'In Progress' : caseItem.status.charAt(0).toUpperCase() + caseItem.status.slice(1)}
                           </span>
                         </td>
-                        <td>{new Date(caseItem.assigned_at).toLocaleDateString()}</td>
-                        <td>{new Date(caseItem.updated_at).toLocaleDateString()}</td>
                         <td>
-                          <button
-                            onClick={() => {
-                              setSelectedCase(caseItem);
-                              setShowReassignModal(true);
-                            }}
-                            className="btn btn-small btn-reassign"
+                          <select 
+                            value="" 
+                            onChange={(e) => handleInlineReassign(caseItem.id, e.target.value)}
+                            style={{padding: '4px', borderRadius: '4px', border: '1px solid #ddd'}}
                           >
-                            Reassign
+                            <option value="" disabled>Select Paralegal</option>
+                            {paralegals.filter(p => p.is_active && p.id !== caseItem.paralegal_id).map(p => (
+                              <option key={p.id} value={p.id}>{p.name}</option>
+                            ))}
+                          </select>
+                        </td>
+                        <td style={{display: 'flex', flexDirection: 'column', gap: '5px'}}>
+                          <button
+                            onClick={() => handleAdminStatusUpdate(caseItem.id, 'in_progress')}
+                            className="btn"
+                            style={{backgroundColor: '#8B0000', color: 'white', padding: '4px 8px', fontSize: '0.8em', border: 'none', borderRadius: '4px', cursor: 'pointer'}}
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleAdminStatusUpdate(caseItem.id, 'completed')}
+                            className="btn"
+                            style={{backgroundColor: '#28a745', color: 'white', padding: '4px 8px', fontSize: '0.8em', border: 'none', borderRadius: '4px', cursor: 'pointer'}}
+                          >
+                            Complete
                           </button>
                         </td>
                       </tr>
