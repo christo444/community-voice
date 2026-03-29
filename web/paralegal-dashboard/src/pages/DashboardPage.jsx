@@ -26,25 +26,34 @@ function DashboardPage({ paralegal, onLogout }) {
     try {
       setLoading(true)
 
-      // Fetch cases using paralegal ID
-      const { data: casesData, error } = await supabase
-        .from('paralegal_cases')
-        .select(`
-          *,
-          profile:profile_details!paralegal_cases_user_phone_number_fkey(*)
-        `)
-        .eq('paralegal_id', paralegal.id)
-        .order('assigned_at', { ascending: false })
+      // Fetch cases assigned to me
+      const myCasesRes = await axios.get(`${PARALEGAL_API_URL}/cases?paralegal_id=${paralegal.id}`);
+      const myCases = myCasesRes.data.data || [];
 
-      if (error) throw error
+      // Fetch unassigned user requests (excluding ones I rejected)
+      const availableRes = await axios.get(`${PARALEGAL_API_URL}/cases?unassigned=true&paralegal_id=${paralegal.id}`);
+      const availableCases = availableRes.data.data || [];
 
-      setCases(casesData || [])
+      // Combine them
+      const allCases = [...availableCases, ...myCases];
+      
+      // Sort: Open requests first, then by date (assigned_at or created_at)
+      allCases.sort((a, b) => {
+          if (a.status === 'open' && b.status !== 'open') return -1;
+          if (a.status !== 'open' && b.status === 'open') return 1;
+          
+          const dateA = new Date(a.created_at || a.assigned_at);
+          const dateB = new Date(b.created_at || b.assigned_at);
+          return dateB - dateA;
+      });
+
+      setCases(allCases)
 
       // Calculate stats
-      const total = casesData?.length || 0
-      const open = casesData?.filter(c => c.status === 'open').length || 0
-      const in_progress = casesData?.filter(c => c.status === 'in_progress').length || 0
-      const completed = casesData?.filter(c => c.status === 'completed').length || 0
+      const total = allCases.length
+      const open = availableCases.length // Open requests
+      const in_progress = myCases.filter(c => c.status === 'in_progress').length
+      const completed = myCases.filter(c => c.status === 'completed').length
 
       setStats({ total, open, in_progress, completed })
     } catch (error) {
@@ -91,25 +100,54 @@ function DashboardPage({ paralegal, onLogout }) {
   }
 
   const handleRejectCase = async (caseId) => {
-    const reason = window.prompt('Reason for rejection (optional):')
-    
-    try {
-      const response = await axios.put(
-        `${PARALEGAL_API_URL}/cases/${caseId}`,
-        {
-          paralegal_id: paralegal.id,
-          status: 'completed',
-          notes: reason ? `Rejected: ${reason}` : 'Rejected'
-        }
-      )
+    // Check if it's an unassigned request or an active case
+    const caseItem = cases.find(c => c.id === caseId)
+    if (!caseItem) return
 
-      if (response.data.success) {
-        alert('Case rejected')
-        fetchCases()
-      }
-    } catch (error) {
-      console.error('Error rejecting case:', error)
-      alert(error.response?.data?.error || 'Failed to reject case')
+    if (caseItem.status === 'open') {
+        // It's a new request - just hide it from me
+        if (!window.confirm('Reject and hide this request?')) return
+        try {
+            const response = await axios.post(
+                `${PARALEGAL_API_URL}/cases/${caseId}/reject`,
+                {
+                    paralegal_id: paralegal.id,
+                    reason: 'Declined by paralegal'
+                }
+            )
+            if (response.data.success) {
+                alert('Request removed from your view')
+                fetchCases()
+            }
+        } catch (error) {
+            console.error('Error rejecting request:', error)
+            alert('Failed to reject request')
+        }
+    } else {
+        // It's an active case - mark as rejected/completed?
+        // Existing logic for "Reject" on active cases seems weird (why reject active?)
+        // Maybe "Drop case"? For now I'll keep the old logic but clarify it's for non-open cases.
+        const reason = window.prompt('Reason for rejection (optional):')
+        if (!reason && reason !== '') return // User cancelled prompt
+        
+        try {
+            const response = await axios.put(
+                `${PARALEGAL_API_URL}/cases/${caseId}`,
+                {
+                    paralegal_id: paralegal.id,
+                    status: 'completed', // or rejected?
+                    notes: reason ? `Rejected: ${reason}` : 'Rejected'
+                }
+            )
+    
+            if (response.data.success) {
+                alert('Case status updated')
+                fetchCases()
+            }
+        } catch (error) {
+            console.error('Error updating case:', error)
+            alert('Failed to update case')
+        }
     }
   }
 
@@ -135,21 +173,13 @@ function DashboardPage({ paralegal, onLogout }) {
       <div className="dashboard-content">
         {/* Stats Cards */}
         <div className="stats-grid">
-          <div className="stat-card stat-total">
-            <h3>{stats.total}</h3>
-            <p>Total Cases</p>
-          </div>
           <div className="stat-card stat-open">
             <h3>{stats.open}</h3>
-            <p>New Requests</p>
+            <p>User Requests</p>
           </div>
           <div className="stat-card stat-progress">
             <h3>{stats.in_progress}</h3>
-            <p>In Progress</p>
-          </div>
-          <div className="stat-card stat-completed">
-            <h3>{stats.completed}</h3>
-            <p>Completed</p>
+            <p>Approved</p>
           </div>
         </div>
 
@@ -159,25 +189,13 @@ function DashboardPage({ paralegal, onLogout }) {
             className={activeTab === 'requests' ? 'tab-btn active' : 'tab-btn'}
             onClick={() => setActiveTab('requests')}
           >
-            📋 New Requests ({openCases.length})
+            📋 User Requests ({openCases.length})
           </button>
           <button 
             className={activeTab === 'approved' ? 'tab-btn active' : 'tab-btn'}
             onClick={() => setActiveTab('approved')}
           >
             ✅ Approved ({activeCases.length})
-          </button>
-          <button 
-            className={activeTab === 'completed' ? 'tab-btn active' : 'tab-btn'}
-            onClick={() => setActiveTab('completed')}
-          >
-            ✓ Completed ({completedCases.length})
-          </button>
-          <button 
-            className={activeTab === 'contact' ? 'tab-btn active' : 'tab-btn'}
-            onClick={() => setActiveTab('contact')}
-          >
-            📞 Contact
           </button>
         </div>
 
@@ -200,42 +218,46 @@ function DashboardPage({ paralegal, onLogout }) {
                     </div>
                   ) : (
                     <div className="cases-grid">
-                      {openCases.map((caseItem) => (
-                        <div key={caseItem.id} className="case-card">
-                          <div className="case-header">
-                            <h3>{caseItem.profile?.name || 'Unknown User'}</h3>
-                            <span className="badge badge-new">NEW</span>
+                      {openCases.map((caseItem) => {
+                        // Support both new direct fields and old profile fields
+                        const name = caseItem.user_name || caseItem.profile?.name || 'Unknown User';
+                        const phone = caseItem.user_phone_number || 'N/A';
+                        const location = caseItem.location || caseItem.profile?.address || caseItem.profile?.state_district || 'N/A';
+                        const scheme = caseItem.scheme_name || 'General Assistance';
+                        
+                        return (
+                        <div key={caseItem.id} className="case-card" style={{border: '1px solid #ddd', borderRadius: '8px', padding: '15px', position: 'relative', background: '#fff'}}>
+                          <div className="case-header" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}}>
+                            <h3 style={{margin: 0, fontSize: '1.2rem'}}>{name}</h3>
+                            <span className="badge" style={{backgroundColor: '#fff3cd', color: '#856404', padding: '4px 8px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 'bold'}}>NEW REQUEST</span>
                           </div>
-                          <div className="case-body">
+                          <div className="case-body" style={{fontSize: '0.9rem', color: '#444'}}>
                             <div className="case-info">
-                              <p><strong>Phone:</strong> {caseItem.user_phone_number}</p>
-                              <p><strong>Age:</strong> {caseItem.profile?.age || 'N/A'}</p>
-                              <p><strong>Gender:</strong> {caseItem.profile?.gender || 'N/A'}</p>
-                              <p><strong>Assigned:</strong> {new Date(caseItem.assigned_at).toLocaleDateString()}</p>
+                              <p style={{margin: '5px 0'}}><strong>Scheme:</strong> {scheme}</p>
+                              <p style={{margin: '5px 0'}}><strong>Phone:</strong> {phone}</p>
+                              <p style={{margin: '5px 0'}}><strong>Place:</strong> {location}</p>
+                              <p style={{margin: '5px 0'}}><strong>Received:</strong> {new Date(caseItem.assigned_at || caseItem.created_at).toLocaleString()}</p>
                             </div>
                           </div>
-                          <div className="case-actions">
+                          <div className="case-actions" style={{display: 'flex', gap: '10px', marginTop: '15px'}}>
                             <button 
-                              className="btn btn-accept"
+                              className="btn"
+                              style={{backgroundColor: '#28a745', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '5px', flex: 1, cursor: 'pointer', fontWeight: 'bold'}}
                               onClick={() => handleAcceptCase(caseItem.id)}
                             >
                               ✓ Accept
                             </button>
                             <button 
-                              className="btn btn-reject"
+                              className="btn"
+                              style={{backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '5px', flex: 1, cursor: 'pointer', fontWeight: 'bold'}}
                               onClick={() => handleRejectCase(caseItem.id)}
                             >
                               ✗ Reject
                             </button>
-                            <button 
-                              className="btn btn-view"
-                              onClick={() => navigate(`/case/${caseItem.id}`)}
-                            >
-                              👁 View
-                            </button>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -259,30 +281,30 @@ function DashboardPage({ paralegal, onLogout }) {
                           <tr>
                             <th>User Name</th>
                             <th>Phone</th>
-                            <th>Age</th>
+                            <th>Scheme</th>
                             <th>Started</th>
-                            <th>Last Updated</th>
-                            <th>Actions</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {activeCases.map((caseItem) => (
-                            <tr key={caseItem.id}>
-                              <td>{caseItem.profile?.name || 'N/A'}</td>
-                              <td>{caseItem.user_phone_number}</td>
-                              <td>{caseItem.profile?.age || 'N/A'}</td>
-                              <td>{new Date(caseItem.assigned_at).toLocaleDateString()}</td>
-                              <td>{new Date(caseItem.updated_at).toLocaleDateString()}</td>
-                              <td>
-                                <button
-                                  onClick={() => navigate(`/case/${caseItem.id}`)}
-                                  className="btn btn-primary"
-                                >
-                                  Manage Case
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
+                          {activeCases.map((caseItem) => {
+                            const name = caseItem.user_name || caseItem.profile?.name || 'Unknown User';
+                            const phone = caseItem.user_phone_number || 'N/A';
+                            const scheme = caseItem.scheme_name || 'General Assistance';
+                            
+                            return (
+                              <tr 
+                                key={caseItem.id} 
+                                onClick={() => navigate(`/case/${caseItem.id}`)}
+                                style={{cursor: 'pointer'}}
+                                className="clickable-row"
+                              >
+                                <td>{name}</td>
+                                <td>{phone}</td>
+                                <td>{scheme}</td>
+                                <td>{new Date(caseItem.assigned_at).toLocaleDateString()}</td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -290,106 +312,11 @@ function DashboardPage({ paralegal, onLogout }) {
                 </div>
               )}
 
-              {/* Completed Cases Tab */}
-              {activeTab === 'completed' && (
-                <div className="completed-section">
-                  <h2>Completed Cases</h2>
-                  <p className="section-desc">Your case history and completed work</p>
-                  
-                  {completedCases.length === 0 ? (
-                    <div className="no-data">
-                      <p>📋 No completed cases yet</p>
-                      <p>Your completed work will appear here</p>
-                    </div>
-                  ) : (
-                    <div className="cases-table">
-                      <table>
-                        <thead>
-                          <tr>
-                            <th>User Name</th>
-                            <th>Phone</th>
-                            <th>Completed On</th>
-                            <th>Notes</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {completedCases.map((caseItem) => (
-                            <tr key={caseItem.id}>
-                              <td>{caseItem.profile?.name || 'N/A'}</td>
-                              <td>{caseItem.user_phone_number}</td>
-                              <td>{new Date(caseItem.updated_at).toLocaleDateString()}</td>
-                              <td>{caseItem.notes ? caseItem.notes.substring(0, 50) + '...' : 'No notes'}</td>
-                              <td>
-                                <button
-                                  onClick={() => navigate(`/case/${caseItem.id}`)}
-                                  className="btn btn-secondary"
-                                >
-                                  View
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              )}
+              {/* Completed Cases Tab - Removed */}
 
-              {/* Contact Tab */}
-              {activeTab === 'contact' && (
-                <div className="contact-section">
-                  <h2>Contact & Support</h2>
-                  <p className="section-desc">Get help and contact information</p>
-                  
-                  <div className="contact-grid">
-                    <div className="contact-card">
-                      <h3>📧 Email Support</h3>
-                      <p>admin@communityvoice.org</p>
-                      <p className="help-text">For general inquiries and support</p>
-                    </div>
-                    
-                    <div className="contact-card">
-                      <h3>📞 Phone Support</h3>
-                      <p>+91 1800-XXX-XXXX</p>
-                      <p className="help-text">Mon-Fri, 9 AM - 6 PM</p>
-                    </div>
-                    
-                    <div className="contact-card">
-                      <h3>🏛️ Admin Dashboard</h3>
-                      <p>Contact your admin for:</p>
-                      <ul>
-                        <li>Case assignment issues</li>
-                        <li>Account access problems</li>
-                        <li>Technical difficulties</li>
-                      </ul>
-                    </div>
-                    
-                    <div className="contact-card">
-                      <h3>📚 Resources</h3>
-                      <ul>
-                        <li><a href="#">Paralegal Guidelines</a></li>
-                        <li><a href="#">Case Management Manual</a></li>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="#">Best Practices</a></li>
-                      </ul>
-                    </div>
-                  </div>
 
-                  <div className="profile-info">
-                    <h3>Your Profile</h3>
-                    <div className="profile-details">
-                      <p><strong>Name:</strong> {paralegal.name}</p>
-                      <p><strong>Email:</strong> {paralegal.email}</p>
-                      <p><strong>Qualification:</strong> {paralegal.qualification}</p>
-                      {paralegal.phone_number && (
-                        <p><strong>Phone:</strong> {paralegal.phone_number}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Contact Tab - Removed */}
+
             </>
           )}
         </div>

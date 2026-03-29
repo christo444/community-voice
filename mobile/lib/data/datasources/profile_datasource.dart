@@ -95,7 +95,10 @@ class ProfileDatasource {
         'ews_certificate': answers['ewsCertificate'],
         'state_district': answers['stateDistrict'],
         'kutcha_house': answers['kutchaHouse'],
-        'pregnant_or_lactating': answers['pregnantOrLactating'],
+        'pregnant_or_lactating':
+            answers['pregnantOrLactating']?.toLowerCase() == 'yes',
+        'widow_singleparent_dependentfamilymember':
+            answers['widowSingleParentDependent']?.toLowerCase() == 'yes',
         'updated_at': DateTime.now().toIso8601String(),
       };
 

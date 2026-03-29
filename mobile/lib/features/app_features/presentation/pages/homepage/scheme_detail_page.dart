@@ -8,6 +8,11 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:translator/translator.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:community_voice/domain/repository/auth_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:community_voice/core/config/api_config.dart';
 
 class SchemeDetailPage extends StatefulWidget {
   final String schemeId;
@@ -45,6 +50,11 @@ class _SchemeDetailPageState extends State<SchemeDetailPage> {
   Map<String, String> _translations = {}; // field -> translated text
   bool _isTranslating = false;
   String _currentLanguage = 'en';
+
+  // Request for help state
+  bool _isSendingRequest = false;
+  bool _requestSent = false;
+  String? _requestError;
 
   @override
   void initState() {
@@ -242,6 +252,102 @@ class _SchemeDetailPageState extends State<SchemeDetailPage> {
       });
 
       await flutterTts.speak(content);
+    }
+  }
+
+  // Contact Paralegal logic
+  Future<void> _contactParalegal() async {
+    setState(() {
+      _isSendingRequest = true;
+      _requestError = null;
+    });
+
+    try {
+      final authRepo = AuthRepository();
+      final phoneNumber = await authRepo.getStoredPhoneNumber();
+
+      if (phoneNumber == null) {
+        throw Exception('User phone not found');
+      }
+
+      String name = 'User';
+      String location = 'Unknown';
+
+      try {
+        final supabase = Supabase.instance.client;
+
+        // Try getting profile details
+        // Assuming table 'profile_details' or 'user_profiles' based on project conventions
+        // We'll try querying 'users' table as fallback if profile fails, but users table might just have auth details
+        final profileRes = await supabase
+            .from('profile_details')
+            .select()
+            .eq('phone_number', phoneNumber)
+            .maybeSingle();
+
+        if (profileRes != null) {
+          name = profileRes['name'] ?? profileRes['full_name'] ?? 'User';
+          // Join parts if needed
+          if (name == 'User' && profileRes['first_name'] != null) {
+            name =
+                '${profileRes['first_name']} ${profileRes['last_name'] ?? ''}'
+                    .trim();
+          }
+          location = profileRes['place'] ??
+              profileRes['address'] ??
+              profileRes['district'] ??
+              'Unknown Place';
+        }
+      } catch (e) {
+        print('Profile fetch error: $e');
+        // Proceed with defaults
+        name = 'User $phoneNumber';
+      }
+
+      // Call Paralegal API
+      final url = '${ApiConfig.paralegalApiBase}/user/request-help';
+      print('Sending request to paralegal API: $url');
+
+      final response = await http
+          .post(
+            Uri.parse(url),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'name': name,
+              'phone_number': phoneNumber,
+              'location': location,
+              'scheme_name': widget.name,
+            }),
+          )
+          .timeout(const Duration(seconds: 10)); // Timeout after 10s
+
+      print('Response status: ${response.statusCode}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        setState(() {
+          _requestSent = true;
+        });
+      } else {
+        throw Exception('API Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (mounted) {
+        final errorMsg = e.toString().length > 100
+            ? '${e.toString().substring(0, 100)}...'
+            : e.toString();
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Failed: $errorMsg')));
+      }
+      setState(() {
+        _requestError = e.toString();
+        _requestSent = false;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSendingRequest = false;
+        });
+      }
     }
   }
 
@@ -449,6 +555,70 @@ class _SchemeDetailPageState extends State<SchemeDetailPage> {
                           ],
 
                           // Other sections can be added here as needed
+
+                          // Contact Paralegal Button
+                          const SectionSpacer(height: 20),
+                          Center(
+                            child: Column(
+                              children: [
+                                ElevatedButton.icon(
+                                  onPressed: (_isSendingRequest || _requestSent)
+                                      ? null
+                                      : _contactParalegal,
+                                  icon: _isSendingRequest
+                                      ? Container(
+                                          width: 20,
+                                          height: 20,
+                                          padding: const EdgeInsets.all(2),
+                                          child:
+                                              const CircularProgressIndicator(
+                                                  color: Colors.white,
+                                                  strokeWidth: 2))
+                                      : (_requestSent
+                                          ? const Icon(Icons.check,
+                                              color: Colors.white)
+                                          : const Icon(Icons.support_agent,
+                                              color: Colors.white)),
+                                  label: Text(
+                                    _requestSent
+                                        ? lang.translate('requestSent')
+                                        : lang.translate('contactParalegal'),
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: _requestSent
+                                        ? Colors.green
+                                        : const Color(0xFF800000),
+                                    disabledBackgroundColor: _requestSent
+                                        ? Colors.green.withOpacity(0.8)
+                                        : Colors.grey,
+                                    disabledForegroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 24, vertical: 14),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(30)),
+                                    elevation: 4,
+                                  ),
+                                ),
+                                if (_requestSent)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 12.0),
+                                    child: Text(
+                                      '(${lang.translate('requestSent')})',
+                                      style: GoogleFonts.openSans(
+                                          color: Colors.green[700],
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+
                           const SectionSpacer(height: 32),
                         ],
                       ),

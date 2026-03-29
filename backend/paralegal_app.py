@@ -303,26 +303,80 @@ def toggle_paralegal_status(paralegal_id):
         }), 500
 
 # ==================== CASE MANAGEMENT ====================
-@app.route('/api/cases', methods=['POST'])
-def assign_case():
-    """Assign a user to a paralegal"""
+
+@app.route('/api/user/request-help', methods=['POST'])
+def request_paralegal_help():
+    """User initiates a request for paralegal help"""
     try:
         data = request.json
-        paralegal_id = data.get('paralegal_id')
-        user_phone_number = data.get('user_phone_number')
+        user_id = data.get('user_id') # Optional, if we have it
+        scheme_name = data.get('scheme_name')
+        name = data.get('name')
+        phone_number = data.get('phone_number')
+        location = data.get('location') # Place
         
+        if not scheme_name or not name or not phone_number:
+            return jsonify({
+                'success': False,
+                'error': 'Name, phone number, and scheme name are required'
+            }), 400
+            
+        # Create a new case with status 'open' and paralegal_id NULL
         case_data = {
-            'paralegal_id': paralegal_id,
-            'user_phone_number': user_phone_number,
-            'status': 'open'
+            'user_name': name,
+            'user_phone_number': phone_number,
+            'location': location,
+            'scheme_name': scheme_name,
+            'status': 'open',
+            'paralegal_id': None, # explicitly explicit
+            'assigned_at': datetime.now().isoformat(),
+            # 'priority': 'medium' # removed as column not in schema by default
         }
+        
+        # If we have a user_id, link it? currently paralegal_cases might not link user_id directly
+        # but relies on phone number. We'll just insert the data.
         
         response = supabase.table('paralegal_cases').insert(case_data).execute()
         
         return jsonify({
             'success': True,
-            'message': 'Case assigned successfully',
+            'message': 'Request sent for paralegal',
             'data': response.data
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/cases/<case_id>/reject', methods=['POST'])
+def reject_case_assignment(case_id):
+    """Paralegal rejects a specific case (hides it from their view)"""
+    try:
+        data = request.json
+        paralegal_id = data.get('paralegal_id')
+        reason = data.get('reason', '')
+        
+        if not paralegal_id:
+            return jsonify({'success': False, 'error': 'Paralegal ID required'}), 400
+            
+        # Insert into case_rejections
+        rejection_data = {
+            'case_id': case_id,
+            'paralegal_id': paralegal_id,
+            'rejection_reason': reason,
+            'rejected_at': datetime.now().isoformat()
+        }
+        
+        try:
+            supabase.table('case_rejections').insert(rejection_data).execute()
+        except Exception as insert_error:
+            # duplicate key error is fine, just ignore
+            pass
+            
+        return jsonify({
+            'success': True,
+            'message': 'Case rejected'
         })
     except Exception as e:
         return jsonify({
@@ -346,42 +400,50 @@ def get_case(case_id):
             'error': str(e)
         }), 500
 
-@app.route('/api/users', methods=['GET'])
-def get_users():
-    """Get all users from profile_details for assignment"""
-    try:
-        response = supabase.table('profile_details').select('phone_number, name, age, gender').order('created_at', desc=True).execute()
-        
-        return jsonify({
-            'success': True,
-            'data': response.data
-        })
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+# [REMOVED] get_users endpoint (was for assignment dropdown)
 
 # ==================== CASE STATUS MANAGEMENT ====================
 @app.route('/api/cases', methods=['GET'])
 def get_all_cases():
-    """Get all assigned cases (for admin dashboard)"""
+    """Get all assigned cases (for admin dashboard) OR available cases (for paralegal)"""
     try:
         status = request.args.get('status', None)
         paralegal_id = request.args.get('paralegal_id', None)
+        unassigned = request.args.get('unassigned', 'false').lower() == 'true'
         
-        query = supabase.table('paralegal_cases').select('*, profile:profile_details!paralegal_cases_user_phone_number_fkey(*)').order('assigned_at', desc=True)
+        query = supabase.table('paralegal_cases').select('*').order('assigned_at', desc=True)
+        # Note: removed profile join for simplicity as we store user details directly now
+        # query = supabase.table('paralegal_cases').select('*, profile:profile_details!paralegal_cases_user_phone_number_fkey(*)').order('assigned_at', desc=True)
         
         if status:
             query = query.eq('status', status)
-        if paralegal_id:
+            
+        if unassigned:
+            # Fetch cases where paralegal_id is NULL
+            query = query.is_('paralegal_id', 'null')
+            
+            # If a paralegal_id is provided, we must exclude cases they rejected.
+            # Supabase-py doesn't support sophisticated subqueries in one go easily via the JS-like builder without stored procs or Views.
+            # Best approach: Fetch all unassigned, then filter in Python (not efficient for scale, effective for MVP).
+            
+        elif paralegal_id:
             query = query.eq('paralegal_id', paralegal_id)
         
         response = query.execute()
+        cases = response.data
         
+        # Post-processing for unassigned cases (exclude rejections)
+        if unassigned and paralegal_id:
+            # Fetch rejections for this paralegal
+            rejections_res = supabase.table('case_rejections').select('case_id').eq('paralegal_id', paralegal_id).execute()
+            rejected_ids = {r['case_id'] for r in rejections_res.data} if rejections_res.data else set()
+            
+            # Filter
+            cases = [c for c in cases if c['id'] not in rejected_ids]
+
         return jsonify({
             'success': True,
-            'data': response.data
+            'data': cases
         })
     except Exception as e:
         return jsonify({
@@ -413,8 +475,12 @@ def update_case(case_id):
                 'error': 'Case not found'
             }), 404
         
-        # Only allow paralegal to update their own cases
-        if paralegal_id and case_response.data.get('paralegal_id') != paralegal_id:
+        existing_paralegal_id = case_response.data.get('paralegal_id')
+        print(f"DEBUG: Update Case {case_id} | Requesting Paralegal: {paralegal_id} | Existing Paralegal: {existing_paralegal_id}")
+
+        # Only allow paralegal to update their own cases OR claim unassigned cases
+        if existing_paralegal_id and existing_paralegal_id != paralegal_id:
+            print(f"DEBUG: Unauthorized access attempt. Existing: {existing_paralegal_id}, Requesting: {paralegal_id}")
             return jsonify({
                 'success': False,
                 'error': 'Unauthorized: Case does not belong to this paralegal'
@@ -424,6 +490,12 @@ def update_case(case_id):
             'status': new_status,
             'updated_at': datetime.now().isoformat()
         }
+        
+        # If claiming an unassigned case, set the paralegal_id
+        if not existing_paralegal_id:
+            update_data['paralegal_id'] = paralegal_id
+            # Also update assigned_at if picking up for first time
+            update_data['assigned_at'] = datetime.now().isoformat()
         
         if notes:
             update_data['notes'] = notes
@@ -441,94 +513,12 @@ def update_case(case_id):
             'error': str(e)
         }), 500
 
-@app.route('/api/cases/<case_id>/reassign', methods=['POST'])
-def reassign_case(case_id):
-    """Reassign case to different paralegal (admin only)"""
-    try:
-        data = request.json
-        new_paralegal_id = data.get('paralegal_id')
-        admin_email = data.get('admin_email')
-        
-        if not new_paralegal_id:
-            return jsonify({
-                'success': False,
-                'error': 'New paralegal ID is required'
-            }), 400
-        
-        # Reset case to open status when reassigning
-        update_data = {
-            'paralegal_id': new_paralegal_id,
-            'status': 'open',
-            'updated_at': datetime.now().isoformat(),
-            'notes': f'Reassigned by {admin_email}'
-        }
-        
-        response = supabase.table('paralegal_cases').update(update_data).eq('id', case_id).execute()
-        
-        return jsonify({
-            'success': True,
-            'message': 'Case reassigned successfully',
-            'data': response.data
-        })
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+# [REMOVED] reassign_case endpoint
 
-@app.route('/api/cases-summary', methods=['GET'])
-def get_cases_summary():
-    """Get case statistics by paralegal and status"""
-    try:
-        # Get all cases with paralegal details
-        cases_response = supabase.table('paralegal_cases').select('id, paralegal_id, status').execute()
-        
-        # Get all paralegals
-        paralegals_response = supabase.table('paralegals').select('id, name, email').execute()
-        
-        # Build summary
-        summary = {
-            'total_cases': len(cases_response.data) if cases_response.data else 0,
-            'by_status': {
-                'open': 0,
-                'in_progress': 0,
-                'completed': 0
-            },
-            'by_paralegal': {}
-        }
-        
-        # Count by status
-        for case in (cases_response.data or []):
-            status = case.get('status', 'open')
-            summary['by_status'][status] = summary['by_status'].get(status, 0) + 1
-            
-            # Count by paralegal
-            paralegal_id = case.get('paralegal_id')
-            if paralegal_id not in summary['by_paralegal']:
-                # Find paralegal name
-                paralegal = next((p for p in (paralegals_response.data or []) if p['id'] == paralegal_id), None)
-                summary['by_paralegal'][paralegal_id] = {
-                    'name': paralegal['name'] if paralegal else 'Unknown',
-                    'email': paralegal['email'] if paralegal else 'Unknown',
-                    'total': 0,
-                    'open': 0,
-                    'in_progress': 0,
-                    'completed': 0
-                }
-            
-            summary['by_paralegal'][paralegal_id]['total'] += 1
-            status_key = case.get('status', 'open')
-            summary['by_paralegal'][paralegal_id][status_key] = summary['by_paralegal'][paralegal_id].get(status_key, 0) + 1
-        
-        return jsonify({
-            'success': True,
-            'data': summary
-        })
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+
+# [REMOVED] get_cases_summary endpoint
+
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    # Run heavily accessible for mobile testing
+    app.run(debug=True, host='0.0.0.0', port=5001)
