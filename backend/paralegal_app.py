@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_mail import Mail, Message
 from supabase import create_client, Client
 import bcrypt
 import os
@@ -13,11 +14,66 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
+# Configure Flask-Mail
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True').lower() == 'true'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME', 'admincommunityvoice@gmail.com')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD', '')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER', 'admincommunityvoice@gmail.com')
+
+mail = Mail(app)
+
 # Initialize Supabase
 SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://wzpfhmngcfwrbgzcdymv.supabase.co')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6cGZobW5nY2Z3cmJnemNkeW12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyNjA5NjgsImV4cCI6MjA4NTgzNjk2OH0.x_ivRdyK1HPT43vJq8B0p0D2jcZXO0dunnipMAPcP7E')
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+def send_paralegal_credentials_email(paralegal_email, paralegal_name, temp_password):
+    """Send email with temporary password to paralegal"""
+    try:
+        subject = "Your Community Voice Account - Login Credentials"
+        html_body = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                    <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">Welcome to Community Voice</h2>
+
+                    <p>Hi <strong>{paralegal_name}</strong>,</p>
+
+                    <p>Your account has been approved by the admin. You can now login to the Community Voice paralegal dashboard using your email and the temporary password below.</p>
+
+                    <div style="background-color: #ecf0f1; padding: 15px; margin: 20px 0; border-left: 4px solid #3498db; border-radius: 3px;">
+                        <p style="margin: 5px 0;"><strong>Email:</strong> {paralegal_email}</p>
+                        <p style="margin: 5px 0;"><strong>Temporary Password:</strong> <code style="background: #fff; padding: 5px 10px; border-radius: 3px; font-family: monospace; font-weight: bold;">{temp_password}</code></p>
+                    </div>
+
+                    <p style="background-color: #fff3cd; padding: 12px; border-radius: 3px; border-left: 4px solid #ffc107;">
+                        <strong>Important:</strong> You will be required to change your password on your first login for security purposes.
+                    </p>
+
+                    <p>If you did not request this account or have any questions, please contact the admin immediately.</p>
+
+                    <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+                    <p style="color: #7f8c8d; font-size: 12px;">This is an automated message. Please do not reply to this email.</p>
+                </div>
+            </body>
+        </html>
+        """
+
+        msg = Message(
+            subject=subject,
+            recipients=[paralegal_email],
+            html=html_body
+        )
+
+        mail.send(msg)
+        print(f"Email sent successfully to {paralegal_email}")
+        return True
+    except Exception as e:
+        print(f"Error sending email to {paralegal_email}: {str(e)}")
+        return False
 
 def generate_password(length=12):
     """Generate a secure random password"""
@@ -221,15 +277,20 @@ def approve_paralegal_request(request_id):
             'reviewed_at': datetime.now().isoformat(),
             'reviewed_by': admin_email
         }).eq('id', request_id).execute()
-        
-        # TODO: Send email with credentials
-        # For now, return the temp password to admin
-        
+
+        # Send email with credentials to paralegal
+        email_sent = send_paralegal_credentials_email(
+            request_data['email'],
+            request_data['name'],
+            temp_password
+        )
+
         return jsonify({
             'success': True,
             'message': 'Paralegal approved successfully',
             'email': request_data['email'],
-            'temporary_password': temp_password
+            'temporary_password': temp_password,
+            'email_sent': email_sent
         })
     except Exception as e:
         return jsonify({
