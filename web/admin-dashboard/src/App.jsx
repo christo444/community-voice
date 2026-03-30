@@ -234,29 +234,24 @@ function App() {
           </button>
         </div>
 
-        {/* URL Extraction Section */}
-        <div className="url-divider">
-          <span>OR</span>
-        </div>
-        <div className="url-section">
-          <h4>Extract from Website URL</h4>
-          <div className="url-form">
-            <input
-              type="text"
-              value={schemeUrl}
-              onChange={(e) => setSchemeUrl(e.target.value)}
-              placeholder="https://www.myscheme.gov.in/schemes/..."
-              className="url-input"
-              disabled={isUploading || isExtracting}
-            />
-            <button
-              onClick={handleExtractUrl}
-              disabled={!schemeUrl.trim() || isUploading || isExtracting}
-              className="btn btn-secondary"
-            >
-              {isExtracting ? 'Extracting...' : 'Extract from URL'}
-            </button>
-          </div>
+        <div style={{ textAlign: 'center', margin: '15px 0', color: '#888', fontWeight: 'bold' }}>— OR —</div>
+
+        <div className="upload-form">
+          <input
+            type="text"
+            placeholder="Paste government scheme URL here..."
+            value={schemeUrl}
+            onChange={(e) => setSchemeUrl(e.target.value)}
+            className="file-input"
+            disabled={isUploading || isExtracting}
+          />
+          <button
+            onClick={handleExtractUrl}
+            disabled={!schemeUrl || isUploading || isExtracting}
+            className="btn btn-secondary"
+          >
+            {isExtracting ? 'Extracting...' : 'Extract URL'}
+          </button>
         </div>
 
         {message.text && (
