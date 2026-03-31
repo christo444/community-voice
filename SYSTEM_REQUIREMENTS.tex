@@ -1,0 +1,381 @@
+\section{SYSTEM REQUIREMENTS}
+
+\subsection{Functional Requirements}
+
+The system supports multiple functionalities including authentication, scheme processing, administrative control, and case management.
+
+\subsubsection{Authentication \& Profile (FR1--FR10)}
+\begin{itemize}
+    \item \textbf{FR1: User Registration} -- Enables new users to create accounts using phone number and PIN.
+    \item \textbf{FR2: User Login} -- Allows secure login using phone number and PIN.
+    \item \textbf{FR3: Auto-login} -- Maintains session for seamless re-entry.
+    \item \textbf{FR4: Logout} -- Clears session and exits securely.
+    \item \textbf{FR5: PIN Reset} -- Supports recovery of forgotten PIN.
+    \item \textbf{FR6: Verification} -- Uses DOB for identity confirmation.
+    \item \textbf{FR7: Aadhaar OCR} -- Extracts identity data using OCR scanning.
+    \item \textbf{FR8: Data Merge} -- Combines front and back Aadhaar data.
+    \item \textbf{FR9: Profile Editing} -- Allows correction before final submission.
+    \item \textbf{FR10: Data Storage} -- Saves profile using database upsert.
+\end{itemize}
+
+\subsubsection{Interview \& Scheme (FR11--FR19)}
+\begin{itemize}
+    \item \textbf{FR11: Interview Capture} -- Collects eligibility-related user data.
+    \item \textbf{FR12: Speech Input} -- Enables voice-based responses.
+    \item \textbf{FR13: Scheme Matching} -- Retrieves relevant schemes.
+    \item \textbf{FR14: Scheme Listing} -- Displays schemes in card format.
+    \item \textbf{FR15: Scheme Details} -- Shows complete scheme information.
+    \item \textbf{FR16: Summarization} -- Simplifies complex descriptions.
+    \item \textbf{FR17: Text-to-Speech} -- Converts text into audio.
+    \item \textbf{FR18: Language Toggle} -- Supports English and Malayalam.
+    \item \textbf{FR19: Translation} -- Provides real-time multilingual content.
+\end{itemize}
+
+\subsubsection{Admin \& Scheme Management (FR20--FR26)}
+\begin{itemize}
+    \item \textbf{FR20: Admin Login} -- Secures dashboard access.
+    \item \textbf{FR21: Password Update} -- Allows credential changes.
+    \item \textbf{FR22: Admin Control} -- Manages admin accounts.
+    \item \textbf{FR23: PDF Upload} -- Ingests schemes from PDFs.
+    \item \textbf{FR24: URL Extraction} -- Extracts schemes from links.
+    \item \textbf{FR25: Dashboard View} -- Displays all schemes.
+    \item \textbf{FR26: Delete Scheme} -- Removes invalid entries.
+\end{itemize}
+
+\subsubsection{Paralegal \& Case Management (FR27--FR36)}
+\begin{itemize}
+    \item \textbf{FR27: Application Submission} -- Allows paralegal applications.
+    \item \textbf{FR28: Application Review} -- Admin views requests.
+    \item \textbf{FR29: Approval} -- Approves and assigns credentials.
+    \item \textbf{FR30: Rejection} -- Rejects with optional reason.
+    \item \textbf{FR31: Password Reset} -- Enforces first login change.
+    \item \textbf{FR32: Manage Paralegals} -- Controls activation status.
+    \item \textbf{FR33: Case Assignment} -- Assigns users to paralegals.
+    \item \textbf{FR34: Case Tracking} -- Tracks case progress.
+    \item \textbf{FR35: Case Analytics} -- Supports reassignment and insights.
+    \item \textbf{FR36: Access Control} -- Restricts routes securely.
+\end{itemize}
+
+---
+
+\subsection{Non-Functional Requirements}
+
+\begin{itemize}
+    \item \textbf{NFR1: Usability} -- Designed for low-literacy users with simple UI.
+    \item \textbf{NFR2: Accessibility} -- Supports multilingual and voice features.
+    \item \textbf{NFR3: Privacy} -- Minimizes sensitive data exposure.
+    \item \textbf{NFR4: Availability} -- Ensures reliable system uptime.
+    \item \textbf{NFR5: Performance} -- Optimized database queries.
+    \item \textbf{NFR6: Scalability} -- Modular architecture design.
+    \item \textbf{NFR7: Interoperability} -- REST APIs for integration.
+    \item \textbf{NFR8: Maintainability} -- Clean and modular codebase.
+    \item \textbf{NFR9: Security} -- Uses password hashing.
+    \item \textbf{NFR10: Session Persistence} -- Maintains user sessions.
+    \item \textbf{NFR11: Data Integrity} -- Enforces database constraints.
+    \item \textbf{NFR12: Offline Support} -- Partial offline capability.
+\end{itemize}
+
+---
+
+\subsection{Software Requirements}
+
+\subsubsection{Backend Services}
+\begin{itemize}
+    \item \textbf{Operating System}: Linux (Ubuntu 20.04 LTS or later) for production servers; macOS or Windows with WSL2 for development.
+    \item \textbf{Python}: Version 3.8 or higher for Flask applications and dependency compatibility.
+    \item \textbf{Database Server}: PostgreSQL 13.0 or higher (managed via Supabase).
+    \item \textbf{Web Server}: Gunicorn 20.0+ for WSGI application serving with multiple worker processes.
+    \item \textbf{API Gateway}: Nginx 1.20+ for reverse proxy, SSL termination, and load balancing (optional).
+    \item \textbf{Task Queue}: Celery (optional) for asynchronous email sending and AI API calls.
+    \item \textbf{Message Broker}: Redis 6.0+ (optional, for caching and Celery backend).
+\end{itemize}
+
+\subsubsection{Mobile Application}
+\begin{itemize}
+    \item \textbf{Android}: Minimum API level 21 (Android 5.0); Target API level 33 or higher recommended.
+    \item \textbf{iOS}: Minimum iOS 11.0; iOS 13.0 or higher recommended for optimal performance.
+    \item \textbf{Flutter SDK}: Version 3.0 or higher.
+    \item \textbf{Dart}: Version 2.17 or higher (included with Flutter).
+    \item \textbf{Development Tools}: Android Studio 2021.2+ or Xcode 13.0+ for compilation and testing.
+\end{itemize}
+
+\subsubsection{Web Applications}
+\begin{itemize}
+    \item \textbf{Node.js}: Version 16.0 or higher for build tools and runtime.
+    \item \textbf{npm}: Version 7.0+ or Yarn 1.22+ for dependency management.
+    \item \textbf{Web Browsers}: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+.
+    \item \textbf{Build Tool}: Vite 3.0 or higher for optimized frontend builds.
+\end{itemize}
+
+\subsubsection{Cloud \& Infrastructure}
+\begin{itemize}
+    \item \textbf{Cloud Provider}: Supabase (PostgreSQL hosting) or self-managed PostgreSQL on AWS/GCP/Azure.
+    \item \textbf{Container Runtime}: Docker 20.10+ and Docker Compose 2.0+ for containerization and local development.
+    \item \textbf{Container Orchestration}: Kubernetes 1.21+ (optional, for production scaling).
+    \item \textbf{SSL/TLS}: Let's Encrypt certificates or commercial SSL/TLS certificates for HTTPS.
+\end{itemize}
+
+\subsubsection{External Services (Cloud APIs)}
+\begin{itemize}
+    \item \textbf{Google Gemini API}: Access to Gemini 2.5 Flash model with vision capabilities enabled.
+    \item \textbf{Google Cloud Speech-to-Text}: API quotas for speech recognition (thousands of recordings monthly).
+    \item \textbf{Google Cloud Text-to-Speech}: API quotas for voice synthesis (unlimited for practical purposes).
+    \item \textbf{Google ML Kit}: ML Kit library for on-device OCR (no API quota required).
+    \item \textbf{Gmail SMTP}: Valid Gmail account or G Suite account with app-specific password.
+    \item \textbf{OCR Space API}: Free tier (25k/month) or paid plan for backup PDF processing.
+\end{itemize}
+
+\subsubsection{Development \& Testing Tools}
+\begin{itemize}
+    \item \textbf{Version Control}: Git 2.30+ for source code management.
+    \item \textbf{Repository Hosting}: GitHub, GitLab, or Bitbucket for code collaboration.
+    \item \textbf{CI/CD}: GitHub Actions, GitLab CI, or Jenkins for automated testing and deployment.
+    \item \textbf{API Testing}: Postman 9.0+ for API endpoint testing and documentation.
+    \item \textbf{Code Quality}: SonarQube for code analysis; CodeCov for coverage tracking.
+    \item \textbf{Monitoring}: Sentry for error tracking; DataDog or New Relic for performance monitoring.
+\end{itemize}
+
+---
+
+\subsection{Hardware Requirements}
+
+\subsubsection{Backend Server (Production)}
+\begin{itemize}
+    \item \textbf{Processor}: Minimum 2 vCPU cores (4+ cores recommended for production).
+    \item \textbf{Memory (RAM)}: Minimum 4 GB (8 GB recommended for concurrent user load).
+    \item \textbf{Storage}: Minimum 50 GB SSD storage (100 GB+ for growth with backups).
+    \item \textbf{Network}: Gigabit Ethernet for server connectivity.
+    \item \textbf{Server Type}: Cloud instances (AWS EC2, GCP Compute Engine, Azure VMs) or on-premises servers.
+\end{itemize}
+
+\subsubsection{Database Server}
+\begin{itemize}
+    \item \textbf{Processor}: Minimum 2 vCPU cores (4+ cores recommended).
+    \item \textbf{Memory (RAM)}: Minimum 8 GB (16 GB+ recommended for large datasets).
+    \item \textbf{Storage}: Minimum 100 GB SSD (can grow with usage; plan for 500GB+ within 2 years).
+    \item \textbf{IOPS}: 1000+ IOPS for acceptable query performance.
+    \item \textbf{Backup Storage}: Equivalent to database size for daily snapshots (managed by Supabase).
+\end{itemize}
+
+\subsubsection{Mobile Devices (Target)}
+\begin{itemize}
+    \item \textbf{Android Devices}: Minimum 2 GB RAM; 1.5 GB storage for app installation.
+    \begin{enumerate}
+        \item Samsung Galaxy A series and above
+        \item Xiaomi Redmi series and above
+        \item OnePlus, Motorola mid-range devices
+        \item Used/refurbished phones with Android 5.0+
+    \end{enumerate}
+    \item \textbf{iOS Devices}: Minimum 2 GB RAM; 1.5 GB storage.
+    \begin{enumerate}
+        \item iPhone 6S and above
+        \item iPad (5th generation or later)
+    \end{enumerate}
+    \item \textbf{Camera}: Rear and front cameras (for Aadhaar scanning).
+    \item \textbf{Microphone}: Built-in microphone for voice input.
+    \item \textbf{Speaker}: Audio output capability for text-to-speech.
+\end{itemize}
+
+\subsubsection{Admin/Paralegal Workstations}
+\begin{itemize}
+    \item \textbf{Processor}: Intel i5/AMD Ryzen 5 or equivalent.
+    \item \textbf{Memory (RAM)}: Minimum 4 GB (8 GB recommended).
+    \item \textbf{Storage}: 256 GB SSD for operating system and applications.
+    \item \textbf{Network}: Stable broadband connection (5+ Mbps recommended).
+    \item \textbf{Display}: Minimum 1920x1080 resolution for dashboard usability.
+    \item \textbf{Input Devices}: Mouse/trackpad and keyboard for efficient case management.
+\end{itemize}
+
+---
+
+\subsection{Network \& Connectivity Requirements}
+
+\subsubsection{Server-to-Server Communication}
+\begin{itemize}
+    \item \textbf{Bandwidth}: Minimum 10 Mbps for stable API communication.
+    \item \textbf{Latency}: Acceptable latency $\leq$ 100ms for user-facing APIs.
+    \item \textbf{Reliability}: 99.5\% uptime SLA minimum; 99.9\% target for production.
+    \item \textbf{Protocol}: HTTPS (TLS 1.2+) for all API communications.
+    \item \textbf{DNS}: Reliable DNS resolution with failover capabilities.
+\end{itemize}
+
+\subsubsection{Client-to-Server Communication}
+\begin{itemize}
+    \item \textbf{Mobile Connectivity}: Support for 4G LTE minimum; 5G compatible (future-proofing).
+    \item \textbf{WiFi}: IEEE 802.11n (WiFi 5) or better; backwards compatible with 802.11g.
+    \item \textbf{Bandwidth}: Minimum 2 Mbps for mobile app operations; 5+ Mbps for optimal experience.
+    \item \textbf{Jitter Tolerance}: Maximum 50ms jitter for real-time voice features.
+    \item \textbf{Offline Capability}: Partial offline support for viewing cached schemes and profiles.
+\end{itemize}
+
+\subsubsection{Geographic Distribution}
+\begin{itemize}
+    \item \textbf{Multi-Region Deployment}: Primary server in India (AWS Asia-South); secondary in adjacent regions for disaster recovery.
+    \item \textbf{CDN}: CloudFlare or AWS CloudFront for static asset distribution (optional but recommended).
+    \item \textbf{Data Residency}: All user data stored in India-based data centers (compliance with data localization laws).
+\end{itemize}
+
+---
+
+\subsection{Operational Requirements}
+
+\subsubsection{Deployment Environment}
+\begin{itemize}
+    \item \textbf{Staging Environment}: Pre-production environment mirroring production setup for testing updates.
+    \item \textbf{Development Environment}: Local machine or shared development server for feature development.
+    \item \textbf{Testing Environment}: Separate database for QA and UAT with realistic data volumes.
+    \item \textbf{Production Environment}: Isolated, secured environment with restricted access and audit logging.
+\end{itemize}
+
+\subsubsection{Backup \& Recovery}
+\begin{itemize}
+    \item \textbf{Database Backups}: Daily automated backups with 30-day retention (managed by Supabase).
+    \item \textbf{Backup Frequency}: Real-time continuous replication; point-in-time recovery to any timestamp in last 7 days.
+    \item \textbf{File Backups}: Daily backups of uploaded PDF schemes and user documents.
+    \item \textbf{Recovery Time Objective (RTO)}: Maximum 1 hour to restore full system functionality.
+    \item \textbf{Recovery Point Objective (RPO)}: Maximum 1 day of data loss acceptable.
+    \item \textbf{Backup Testing}: Weekly test restores to validate backup integrity.
+\end{itemize}
+
+\subsubsection{Monitoring \& Alerting}
+\begin{itemize}
+    \item \textbf{System Monitoring}: CPU, memory, disk usage alerts when thresholds exceeded.
+    \item \textbf{API Monitoring}: Response time tracking; alerts for $>$ 5 second responses or error rates $>$ 1\%.
+    \item \textbf{Database Monitoring}: Query performance tracking; alerts for slow queries ($>$ 2 seconds).
+    \item \textbf{Error Tracking}: Real-time notification of application exceptions and crashes.
+    \item \textbf{Log Aggregation}: Centralized logging of all system events for audit trails.
+    \item \textbf{Alerting Channels}: Email, SMS, and Slack notifications for critical issues.
+\end{itemize}
+
+\subsubsection{Maintenance Windows}
+\begin{itemize}
+    \item \textbf{Planned Downtime}: Sunday 2 AM--4 AM IST for system updates and maintenance.
+    \item \textbf{Maintenance Duration}: Maximum 2 hours; advance notification to users.
+    \item \textbf{Emergency Maintenance}: Zero-downtime updates using blue-green deployment strategy (recommended).
+\end{itemize}
+
+---
+
+\subsection{Compliance \& Regulatory Requirements}
+
+\subsubsection{Data Protection}
+\begin{itemize}
+    \item \textbf{Data Privacy Act}: Compliance with India's draft Digital Personal Data Protection Act.
+    \item \textbf{RBI Guidelines}: Adherence to Reserve Bank of India guidelines for financial data security.
+    \item \textbf{GDPR (Optional)}: If serving EU users, full GDPR compliance including:
+    \begin{enumerate}
+        \item Right to be forgotten (data deletion on request)
+        \item Right to data portability
+        \item Data breach notifications within 72 hours
+    \end{enumerate}
+    \item \textbf{Aadhaar Protection}: Compliance with UIDAI guidelines for Aadhaar data handling:
+    \begin{enumerate}
+        \item No permanent storage of Aadhaar numbers
+        \item Tokenization of Aadhaar references
+        \item Encryption of Aadhaar-derived personal data
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Security Standards}
+\begin{itemize}
+    \item \textbf{OWASP Top 10}: Application protection against OWASP Top 10 vulnerabilities.
+    \item \textbf{Data Encryption}: TLS 1.2+ for data in transit; AES-256 for data at rest.
+    \item \textbf{Password Standards}: Minimum 8 characters; enforcement of uppercase, lowercase, digits, and special characters.
+    \item \textbf{Authentication Factor}: Multi-factor authentication (optional) for admin accounts.
+    \item \textbf{Penetration Testing}: Annual security assessments by third-party firms.
+\end{itemize}
+
+\subsubsection{Government Compliance}
+\begin{itemize}
+    \item \textbf{Government Scheme Integration}: Compliance with state/central government APIs and data sharing protocols.
+    \item \textbf{Audit Requirements}: Maintain audit logs for minimum 2 years; available for government audits.
+    \item \textbf{Reporting}: Annual compliance reports to relevant regulatory bodies if required.
+\end{itemize}
+
+---
+
+\subsection{System Constraints}
+
+\subsubsection{Technical Constraints}
+\begin{itemize}
+    \item \textbf{Language}: Development restricted to Python (backend), Dart (mobile), and JavaScript (web) for consistency.
+    \item \textbf{Database}: PostgreSQL only; no NoSQL databases for consistency and ACID compliance.
+    \item \textbf{API Rate Limiting}: 
+    \begin{enumerate}
+        \item Public endpoints: 100 requests/minute per IP
+        \item Authenticated endpoints: 1000 requests/minute per user
+        \item File upload: 10 uploads/hour per user
+    \end{enumerate}
+    \item \textbf{File Size Limits}:
+    \begin{enumerate}
+        \item PDF schemes: Maximum 50 MB per file
+        \item User documents: Maximum 20 MB per file
+        \item Total storage per user: 500 MB
+    \end{enumerate}
+    \item \textbf{Concurrent Users}: System designed for 1000 concurrent users; load testing required for higher volumes.
+\end{itemize}
+
+\subsubsection{Performance Constraints}
+\begin{itemize}
+    \item \textbf{API Response Time}: Maximum 5 seconds for 95\% of requests; 10 seconds for complex operations.
+    \item \textbf{Mobile App Launch Time}: Cold start $<$ 3 seconds; warm start $<$ 1 second.
+    \item \textbf{Database Query Time}: 95\% of queries complete within 500ms; 99\% within 2 seconds.
+    \item \textbf{OCR Processing}: On-device OCR within 3 seconds; server-side OCR within 10 seconds.
+    \item \textbf{Scheme Matching}: AI matching completes within 15 seconds for average profile.
+\end{itemize}
+
+\subsubsection{Storage Constraints}
+\begin{itemize}
+    \item \textbf{Database Growth}: Estimated 50 MB/month for first 1 year; scaling up as user base grows.
+    \item \textbf{File Storage}: PDF schemes occupy $\sim$ 5-10 GB; user documents add variable storage.
+    \item \textbf{Backup Storage}: Requires 1.5x database size for daily backups.
+    \item \textbf{Archive Policy}: User documents archived/deleted after 2 years; schemes retained indefinitely.
+\end{itemize}
+
+\subsubsection{Scalability Constraints}
+\begin{itemize}
+    \item \textbf{Vertical Scaling Limits}: Single database server limited to $\sim$ 10,000 concurrent users; horizontal scaling required beyond.
+    \item \textbf{API Server Scaling}: Stateless design enables horizontal auto-scaling with load balancer.
+    \item \textbf{Mobile App Updates}: Over-the-air updates from app stores; minimum 24 hours for global rollout.
+    \item \textbf{Cost Scaling}: Cloud infrastructure costs increase linearly with usage; budget planning required.
+\end{itemize}
+
+---
+
+\subsection{Assumptions \& Dependencies}
+
+\subsubsection{External Dependencies}
+\begin{itemize}
+    \item \textbf{Google APIs}: Continuous availability of Gemini, ML Kit, and TTS/STT APIs; service interruptions could impact functionality.
+    \item \textbf{Supabase Availability}: 99.99\% SLA assumed; verified against Supabase status page.
+    \item \textbf{Gmail Availability}: Email notifications dependent on Gmail SMTP availability.
+    \item \textbf{Internet Connectivity}: Users require stable internet for real-time features; offline support is partial.
+    \item \textbf{Third-Party APIs}: OCR Space, translation services, etc. may have rate limits or deprecation risks.
+\end{itemize}
+
+\subsubsection{Operational Assumptions}
+\begin{itemize}
+    \item \textbf{Admin Availability}: At least one Super Admin available for critical issues.
+    \item \textbf{Paralegal Availability}: Minimum 5-10 paralegals available for case management at launch.
+    \item \textbf{Scheme Updates}: Government schemes updated manually or via API quarterly; no automatic crawling assumed.
+    \item \textbf{User Support}: Basic user support available during business hours (9 AM--6 PM IST).
+    \item \textbf{Data Accuracy}: Users assume responsibility for accuracy of self-reported data.
+\end{itemize}
+
+\subsubsection{User Assumptions}
+\begin{itemize}
+    \item \textbf{Device Ownership}: Users own or have access to a smartphone with camera and microphone.
+    \item \textbf{Language Proficiency}: Users can understand at least one supported language.
+    \item \textbf{Aadhaar Possession}: Users have valid Aadhaar card for identity verification.
+    \item \textbf{Basic Literacy}: Users have basic ability to navigate mobile app menus.
+    \item \textbf{Informed Consent}: Users understand and accept data collection policies.
+\end{itemize}
+
+\subsubsection{Project Assumptions}
+\begin{itemize}
+    \item \textbf{Funding}: Adequate budget available for cloud infrastructure, API quotas, and team expansion.
+    \item \textbf{Timeline}: 6 months target for full production rollout across 5 states; scaling to national level in 12 months.
+    \item \textbf{Team Size}: Minimum 10 developers (5 backend, 3 mobile, 2 frontend) required for timely delivery.
+    \item \textbf{Government Cooperation}: Government agencies will provide scheme data and necessary permissions for integration.
+    \item \textbf{Regulatory Environment}: No major regulatory changes in data protection laws during project lifecycle.
+\end{itemize}

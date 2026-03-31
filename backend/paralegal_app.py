@@ -574,11 +574,6 @@ def update_case(case_id):
             'error': str(e)
         }), 500
 
-# [REMOVED] reassign_case endpoint
-
-
-# [REMOVED] get_cases_summary endpoint
-
 
 if __name__ == '__main__':
     # Run heavily accessible for mobile testing

@@ -13,6 +13,7 @@ function ParalegalTab() {
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [tempPassword, setTempPassword] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
 
   useEffect(() => {
     fetchApplications();
@@ -51,10 +52,11 @@ function ParalegalTab() {
 
       if (response.data.success) {
         setTempPassword(response.data.temporary_password);
+        setEmailSent(response.data.email_sent);
         setShowApprovalModal(true);
-        setMessage({ 
-          text: `Approved successfully! Use this password: ${response.data.temporary_password}`, 
-          type: 'success' 
+        setMessage({
+          text: `Approved successfully! ${response.data.email_sent ? '✓ Email sent to paralegal.' : '⚠ Email delivery status unknown.'} Use this password: ${response.data.temporary_password}`,
+          type: 'success'
         });
         fetchApplications();
         fetchParalegals();
@@ -230,6 +232,12 @@ function ParalegalTab() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3>Paralegal Approved!</h3>
             <p><strong>Email:</strong> {selectedRequest?.email}</p>
+            {emailSent && (
+              <p style={{ color: '#27ae60', fontWeight: 'bold' }}>✓ Email with credentials sent successfully</p>
+            )}
+            {!emailSent && (
+              <p style={{ color: '#e74c3c', fontWeight: 'bold' }}>⚠ Email delivery status unknown - share password manually</p>
+            )}
             <p><strong>Temporary Password:</strong></p>
             <div className="password-box">{tempPassword}</div>
             <p className="note">Please share this password with the paralegal. They should change it upon first login.</p>

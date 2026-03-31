@@ -1,0 +1,358 @@
+\section{TECHNOLOGY STACK}
+
+\subsection{Backend Technologies}
+
+\subsubsection{Framework \& Server}
+\begin{itemize}
+    \item \textbf{Flask 3.0.0}: Lightweight, modular web framework enabling rapid API development with minimal overhead. Chosen for flexibility in building three separate applications (main, admin, paralegal).
+    \item \textbf{Flask-CORS 4.0.0}: Cross-Origin Resource Sharing middleware enabling secure communication between web frontends and backend APIs across different domains.
+    \item \textbf{Flask-Mail 0.9.1}: Email integration module for sending credential emails, notifications, and system alerts via Gmail SMTP backend.
+    \item \textbf{Gunicorn}: Production-grade WSGI HTTP server managing multiple worker processes for concurrent request handling and load distribution.
+\end{itemize}
+
+\subsubsection{Database \& ORM}
+\begin{itemize}
+    \item \textbf{Supabase 2.11.0}: PostgreSQL management ORM providing object-relational mapping, real-time subscriptions, and built-in Row-Level Security (RLS) policies for database-level access control.
+    \item \textbf{PostgreSQL}: Enterprise-grade relational database with JSONB support for flexible schema design, full-text search capabilities, and built-in encryption.
+    \item \textbf{python-dotenv 1.0.0}: Environment configuration management ensuring API keys, database credentials, and sensitive settings stored separately from code.
+\end{itemize}
+
+\subsubsection{Security}
+\begin{itemize}
+    \item \textbf{bcrypt 4.1.2}: Password hashing library using adaptive cost factors (salt rounds: 12), preventing rainbow table attacks and ensuring passwords remain secure even if database is compromised.
+    \item \textbf{cryptography}: Advanced encryption standard (AES) for encrypting sensitive user data (PII, Aadhaar-related information) at rest.
+\end{itemize}
+
+\subsubsection{PDF Processing}
+\begin{itemize}
+    \item \textbf{PyPDF2 3.0.1}: Python library for reading, extracting, and manipulating PDF documents; enables initial text extraction from scheme PDFs.
+    \item \textbf{pdfplumber 0.10.3}: Advanced PDF analysis library providing layout-aware text extraction with table recognition and coordinate mapping for accurate data parsing.
+\end{itemize}
+
+\subsubsection{Development Tools}
+\begin{itemize}
+    \item \textbf{pytest}: Unit testing framework for comprehensive backend test coverage and continuous integration.
+    \item \textbf{black}: Code formatter ensuring consistent Python code style across the backend codebase.
+    \item \textbf{flake8}: Linter checking code quality and adherence to PEP 8 standards.
+\end{itemize}
+
+---
+
+\subsection{Mobile Technologies}
+
+\subsubsection{Framework \& Language}
+\begin{itemize}
+    \item \textbf{Flutter}: Google's cross-platform framework enabling single codebase development for iOS and Android, reducing development time and maintenance overhead.
+    \item \textbf{Dart}: Flutter's programming language providing type safety, JIT/AOT compilation, and excellent performance on mobile devices.
+\end{itemize}
+
+\subsubsection{State Management}
+\begin{itemize}
+    \item \textbf{Provider 6.1.5}: Simple, performant state management solution using ChangeNotifier pattern; enables reactive updates across UI components without excessive boilerplate.
+\end{itemize}
+
+\subsubsection{Local Storage}
+\begin{itemize}
+    \item \textbf{SharedPreferences 2.2.0}: Flutter key-value storage for persistent local data (user credentials, language preferences, session tokens) with automatic encryption.
+\end{itemize}
+
+\subsubsection{Camera \& Imaging}
+\begin{itemize}
+    \item \textbf{camera 11.3}: Native camera plugin providing hardware-level access to device camera, essential for Aadhaar card capture.
+    \item \textbf{image\_picker 1.2.1}: Gallery and camera image selection plugin with built-in compression and format conversion.
+    \item \textbf{google\_mlkit\_text\_recognition 15.0}: On-device OCR using Google ML Kit, extracting text from Aadhaar images without server-side processing (privacy-preserving).
+\end{itemize}
+
+\subsubsection{Voice \& Audio}
+\begin{itemize}
+    \item \textbf{speech\_to\_text 7.0.0}: Speech recognition plugin supporting multiple Indian languages with confidence scoring and real-time transcription for voice-based form input.
+    \item \textbf{flutter\_tts 4.2.0}: Text-to-speech plugin converting text to natural-sounding audio in multiple languages, supporting adjustable speech rate and pitch settings.
+\end{itemize}
+
+\subsubsection{Backend Integration}
+\begin{itemize}
+    \item \textbf{supabase\_flutter 2.8.0}: Official Supabase client library for Dart providing authentication, database access, real-time subscriptions, and file storage integration.
+\end{itemize}
+
+\subsubsection{Localization \& Translation}
+\begin{itemize}
+    \item \textbf{translator 1.0.0}: Multi-backend translation library enabling dynamic content translation between 8+ Indian languages without server-side dependency.
+\end{itemize}
+
+\subsubsection{UI Components}
+\begin{itemize}
+    \item \textbf{google\_fonts 6.2.0}: Google Fonts integration providing consistent, modern typography across app with support for Indian language rendering.
+    \item \textbf{flutter\_spinkit}: Loading indicators and animations for improved UX during API calls and data processing.
+\end{itemize}
+
+---
+
+\subsection{Web Technologies}
+
+\subsubsection{Framework \& Build Tools}
+\begin{itemize}
+    \item \textbf{React 18}: Modern JavaScript library providing component-based UI development, virtual DOM for efficient rendering, and strong ecosystem support.
+    \item \textbf{Vite}: Next-generation frontend build tool offering lightning-fast development server with hot module replacement (HMR) and highly optimized production builds.
+\end{itemize}
+
+\subsubsection{Routing}
+\begin{itemize}
+    \item \textbf{React Router 6}: Client-side routing library enabling single-page application navigation with protected routes, nested routing, and dynamic route parameters.
+\end{itemize}
+
+\subsubsection{HTTP Communication}
+\begin{itemize}
+    \item \textbf{Axios}: Promise-based HTTP client providing simplified API request handling, automatic JSON serialization, request/response interceptors for authentication and error handling.
+\end{itemize}
+
+\subsubsection{Backend Integration}
+\begin{itemize}
+    \item \textbf{supabase-js}: Official JavaScript client library for Supabase enabling real-time database subscriptions, authentication state management, and file storage operations.
+\end{itemize}
+
+\subsubsection{Styling \& UI}
+\begin{itemize}
+    \item \textbf{CSS3}: Modern CSS with Flexbox and Grid layouts, CSS custom properties for theming, media queries for responsive design.
+    \item \textbf{Styled Components}: Optional CSS-in-JS solution for component-scoped styling and dynamic theming capabilities.
+\end{itemize}
+
+\subsubsection{Development Tools}
+\begin{itemize}
+    \item \textbf{ESLint}: JavaScript linter enforcing code quality standards and catching common errors.
+    \item \textbf{Prettier}: Code formatter ensuring consistent code style across all web components.
+    \item \textbf{Jest}: Testing library for unit and integration tests with excellent React component testing support.
+    \item \textbf{React Testing Library}: User-centric testing approach simulating real user interactions rather than implementation details.
+\end{itemize}
+
+---
+
+\subsection{Database \& Cloud Infrastructure}
+
+\subsubsection{Database Management}
+\begin{itemize}
+    \item \textbf{Supabase (PostgreSQL)}: Cloud-hosted PostgreSQL database providing:
+    \begin{enumerate}
+        \item Automatic daily backups with 30-day retention
+        \item Point-in-time recovery capability
+        \item Row-Level Security (RLS) for data-level access control
+        \item Real-time subscriptions for live data updates
+        \item Built-in authentication system
+        \item AutoMigrations for schema versioning
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Storage}
+\begin{itemize}
+    \item \textbf{Supabase Storage}: Cloud file storage for uploaded PDF schemes with:
+    \begin{enumerate}
+        \item Automatic encryption at rest
+        \item CDN integration for fast global delivery
+        \item Access control via RLS policies
+        \item Signed URL generation for secure file access
+    \end{enumerate}
+\end{itemize}
+
+---
+
+\subsection{Artificial Intelligence \& Machine Learning}
+
+\subsubsection{Large Language Models}
+\begin{itemize}
+    \item \textbf{Google Gemini 2.5 Flash API 1.63.0}: Advanced multimodal LLM providing:
+    \begin{enumerate}
+        \item Vision capabilities for PDF and image analysis
+        \item Natural language understanding for scheme eligibility matching
+        \item Structured output generation for consistent data extraction
+        \item Fast inference with optimized token usage
+        \item Multi-language support for Indian languages
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Computer Vision}
+\begin{itemize}
+    \item \textbf{Google ML Kit Text Recognition}: On-device OCR engine providing:
+    \begin{enumerate}
+        \item Real-time text recognition from camera feed
+        \item No internet connectivity required
+        \item Privacy-preserving processing (data never leaves device)
+        \item Support for multiple scripts (Devanagari, Latin, etc.)
+        \item Fast inference suitable for mobile devices
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Natural Language Processing}
+\begin{itemize}
+    \item \textbf{Google Cloud Speech-to-Text API}: Speech recognition service providing:
+    \begin{enumerate}
+        \item Real-time and batch speech recognition
+        \item Support for 100+ languages including Indian languages
+        \item Automatic language detection
+        \item Confidence scoring for accuracy assessment
+        \item Enhanced for Indian English accent recognition
+    \end{enumerate}
+    \item \textbf{Google Cloud Text-to-Speech API}: Voice synthesis providing:
+    \begin{enumerate}
+        \item Natural-sounding voices in multiple languages
+        \item SSML support for pronunciation control
+        \item Audio format flexibility (MP3, WAV, OGG)
+        \item Adjustable speech rate, pitch, and volume
+    \end{enumerate}
+\end{itemize}
+
+---
+
+\subsection{External Integrations \& Services}
+
+\subsubsection{Document Processing}
+\begin{itemize}
+    \item \textbf{OCR Space API}: Free optical character recognition service providing:
+    \begin{enumerate}
+        \item 25,000 free API calls monthly
+        \item Fallback OCR service for PDF text extraction
+        \item Support for multiple document formats
+        \item Suitable for development and testing environments
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Email Delivery}
+\begin{itemize}
+    \item \textbf{Gmail SMTP Server}: Email delivery infrastructure for:
+    \begin{enumerate}
+        \item Sending paralegal credentials and passwords
+        \item Case status notifications and updates
+        \item System alerts and admin notifications
+        \item Configured via Flask-Mail with TLS encryption
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Content Delivery}
+\begin{itemize}
+    \item \textbf{Google Fonts CDN}: High-performance font delivery supporting:
+    \begin{enumerate}
+        \item 1000+ fonts with Indian language scripts
+        \item Automatic browser optimization for font formats
+        \item Zero-latency global distribution
+        \item No additional configuration required
+    \end{enumerate}
+\end{itemize}
+
+---
+
+\subsection{Development \& Deployment Infrastructure}
+
+\subsubsection{Version Control}
+\begin{itemize}
+    \item \textbf{Git}: Distributed version control system ensuring code collaboration and rollback capabilities.
+    \item \textbf{GitHub}: Repository hosting with branch protection, pull request reviews, and GitHub Actions for CI/CD.
+\end{itemize}
+
+\subsubsection{Containerization}
+\begin{itemize}
+    \item \textbf{Docker}: Container platform packaging backend services with all dependencies for consistent development-to-production parity.
+    \item \textbf{Docker Compose}: Multi-container orchestration for local development environment setup.
+\end{itemize}
+
+\subsubsection{Orchestration \& Deployment}
+\begin{itemize}
+    \item \textbf{Kubernetes (Planned)}: Container orchestration for production deployment with auto-scaling, load balancing, and service discovery.
+\end{itemize}
+
+\subsubsection{Monitoring \& Logging}
+\begin{itemize}
+    \item \textbf{Sentry}: Error tracking and performance monitoring providing real-time alerts and crash reporting.
+    \item \textbf{Firebase Analytics}: User behavior tracking and analytics for mobile app performance insights.
+    \item \textbf{ELK Stack (Planned)}: Elasticsearch, Logstash, Kibana for centralized log management and analysis.
+\end{itemize}
+
+\subsubsection{Performance}
+\begin{itemize}
+    \item \textbf{Redis (Planned)}: In-memory cache reducing database queries and improving API response times through scheme data caching.
+    \item \textbf{CDN (CloudFlare)}: Content Delivery Network for static asset distribution and DDoS protection.
+\end{itemize}
+
+---
+
+\subsection{Technology Stack Summary Table}
+
+\begin{table}[H]
+\centering
+\caption{Complete Technology Stack Overview}
+\begin{tabularx}{\textwidth}{|l|l|X|}
+\hline
+\textbf{Layer} & \textbf{Technology} & \textbf{Version/Purpose} \\
+\hline
+\textbf{Backend} & Flask & 3.0.0 - Web Framework \\
+\hline
+\textbf{Backend} & Supabase & 2.11.0 - Database ORM \\
+\hline
+\textbf{Backend} & bcrypt & 4.1.2 - Password Security \\
+\hline
+\textbf{Backend} & PyPDF2 & 3.0.1 - PDF Processing \\
+\hline
+\textbf{Backend} & Gunicorn & WSGI HTTP Server \\
+\hline
+\textbf{Mobile} & Flutter & Cross-platform Framework \\
+\hline
+\textbf{Mobile} & Dart & Programming Language \\
+\hline
+\textbf{Mobile} & Provider & 6.1.5 - State Management \\
+\hline
+\textbf{Mobile} & Camera & 11.3 - Hardware Access \\
+\hline
+\textbf{Mobile} & speech\_to\_text & 7.0.0 - Voice Input \\
+\hline
+\textbf{Mobile} & flutter\_tts & 4.2.0 - Voice Output \\
+\hline
+\textbf{Web} & React & 18 - UI Framework \\
+\hline
+\textbf{Web} & Vite & Build Tool \\
+\hline
+\textbf{Web} & React Router & 6 - Client Routing \\
+\hline
+\textbf{Web} & Axios & HTTP Client \\
+\hline
+\textbf{Web} & CSS3 & Styling \& Layout \\
+\hline
+\textbf{Database} & PostgreSQL & Relational Database \\
+\hline
+\textbf{Database} & Supabase Storage & Cloud File Storage \\
+\hline
+\textbf{Database} & JSONB & Semi-structured Data \\
+\hline
+\textbf{Database} & Row-Level Security & Access Control \\
+\hline
+\textbf{AI/ML} & Google Gemini & 2.5 Flash - LLM \\
+\hline
+\textbf{AI/ML} & Google ML Kit & OCR - Text Recognition \\
+\hline
+\textbf{AI/ML} & Speech-to-Text & Voice Input API \\
+\hline
+\textbf{AI/ML} & Text-to-Speech & Voice Output API \\
+\hline
+\textbf{DevOps} & Docker & Containerization \\
+\hline
+\textbf{DevOps} & Git/GitHub & Version Control \\
+\hline
+\textbf{DevOps} & Sentry & Error Tracking \\
+\hline
+\end{tabularx}
+\end{table}
+
+---
+
+\subsection{Technology Selection Rationale}
+
+\subsubsection{Backend}
+Flask was chosen for its lightweight nature and ability to create three separate applications without monolithic overhead. Supabase PostgreSQL provides enterprise-grade database capabilities with built-in security and real-time features. bcrypt ensures passwords are secure even if the database is compromised.
+
+\subsubsection{Mobile}
+Flutter enables single-codebase development for iOS and Android, critical for rapid deployment across platforms. On-device ML Kit OCR preserves user privacy by processing Aadhaar data locally. Voice plugins in multiple Indian languages ensure accessibility for non-literate users.
+
+\subsubsection{Web}
+React's component architecture and ecosystem maturity make it ideal for building responsive dashboards. Vite's fast build times accelerate development iteration cycles. React Router enables complex navigation patterns required by role-based dashboards.
+
+\subsubsection{AI/ML}
+Google Gemini's multimodal capabilities enable both PDF vision-based extraction and complex eligibility matching using natural language understanding. ML Kit OCR eliminates infrastructure costs and privacy concerns by processing locally.
+
+\subsubsection{Cloud Infrastructure}
+Supabase eliminates DevOps complexity while providing production-grade PostgreSQL, real-time capabilities, and built-in security. Supabase Storage integrates seamlessly with the database for file management.
