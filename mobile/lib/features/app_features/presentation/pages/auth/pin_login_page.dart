@@ -11,7 +11,7 @@ import 'reset_pin_dob_page.dart';
 
 class PinLoginPage extends StatefulWidget {
   final String phoneNumber;
-  
+
   const PinLoginPage({super.key, required this.phoneNumber});
 
   @override
@@ -78,7 +78,7 @@ class _PinLoginPageState extends State<PinLoginPage> {
   @override
   Widget build(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -102,29 +102,29 @@ class _PinLoginPageState extends State<PinLoginPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 24),
-              
+
               // Title
-              const Text(
-                'Welcome Back!',
-                style: TextStyle(
+              Text(
+                lang.translate('welcomeBack'),
+                style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF800000),
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               Text(
-                'Enter PIN for: ${widget.phoneNumber}',
+                '${lang.translate('enterPinFor')}${widget.phoneNumber}',
                 style: const TextStyle(
                   fontSize: 14,
                   color: Colors.grey,
                 ),
               ),
-              
+
               const SizedBox(height: 48),
-              
+
               // PIN input
               TextField(
                 controller: _pinController,
@@ -149,13 +149,14 @@ class _PinLoginPageState extends State<PinLoginPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF800000), width: 2),
+                    borderSide:
+                        const BorderSide(color: Color(0xFF800000), width: 2),
                   ),
                   counterText: '',
                 ),
                 onSubmitted: (_) => _handleLogin(),
               ),
-              
+
               const SizedBox(height: 32),
 
               Align(
@@ -170,9 +171,9 @@ class _PinLoginPageState extends State<PinLoginPage> {
                       ),
                     );
                   },
-                  child: const Text(
-                    'Forgot PIN?',
-                    style: TextStyle(color: Color(0xFF800000)),
+                  child: Text(
+                    lang.translate('forgotPin'),
+                    style: const TextStyle(color: Color(0xFF800000)),
                   ),
                 ),
               ),
@@ -195,7 +196,8 @@ class _PinLoginPageState extends State<PinLoginPage> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : Text(

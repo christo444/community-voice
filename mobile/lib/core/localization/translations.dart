@@ -25,7 +25,14 @@ class Translations {
       'enterYourPin': 'Enter Your PIN',
       'loginWithPin': 'Login with PIN',
       'invalidPin': 'Invalid PIN',
+      'welcomeBack': 'Welcome Back!',
+      'enterPinFor': 'Enter PIN for: ',
+      'forgotPin': 'Forgot PIN?',
+      'remainLoggedInDesc':
+          'You will remain logged in until you manually logout',
       'aadhaarVerification': 'Aadhaar Verification',
+      'verifyIdentityDesc':
+          'Please verify your identity with Aadhaar to access government schemes',
       'ocr': 'OCR',
       'gallery': 'Gallery',
       'camera': 'Camera',
@@ -102,7 +109,14 @@ class Translations {
       'enterYourPin': 'നിങ്ങളുടെ PIN നൽകുക',
       'loginWithPin': 'PIN ഉപയോഗിച്ച് ലോഗിൻ ചെയ്യുക',
       'invalidPin': 'അസാധുവായ PIN',
+      'welcomeBack': 'വീണ്ടും സ്വാഗതം!',
+      'enterPinFor': 'PIN നൽകുക: ',
+      'forgotPin': 'PIN മറന്നോ?',
+      'remainLoggedInDesc':
+          'നിങ്ങൾ സ്വയം ലോഗ് ഔട്ട് ചെയ്യുന്നതുവരെ ലോഗിൻ ചെയ്തു തുടരും',
       'aadhaarVerification': 'ആധാര പരിശോധന',
+      'verifyIdentityDesc':
+          'സർക്കാർ പദ്ധതികൾ ആക്സസ് ചെയ്യാൻ ദയവായി ആധാർ ഉപയോഗിച്ച് നിങ്ങളുടെ ഐഡന്റിറ്റി പരിശോധിക്കുക',
       'ocr': 'OCR',
       'contactParalegal': 'സഹായത്തിന് പാരാലീഗലിനെ ബന്ധപ്പെടുക',
       'requestSent': 'പാരാലീഗലിനുള്ള അഭ്യർത്ഥന അയച്ചു',

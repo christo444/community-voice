@@ -187,9 +187,9 @@ class _WelcomePageState extends State<WelcomePage> {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'You will remain logged in until you manually logout',
-                          style: TextStyle(
+                        Text(
+                          lang.translate('remainLoggedInDesc'),
+                          style: const TextStyle(
                             fontSize: 14,
                             color: Colors.black54,
                           ),
@@ -247,7 +247,7 @@ class _WelcomePageState extends State<WelcomePage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(lang.translate('logout')),
-          content: const Text('Are you sure you want to logout?'),
+          content: Text(lang.translate('logoutConfirmMessage')),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
