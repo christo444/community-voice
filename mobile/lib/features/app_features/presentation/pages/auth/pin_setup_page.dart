@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import '../../../../../domain/repository/auth_repository.dart';
 import '../../../../../core/localization/language_provider.dart';
 import '../../../../../core/widgets/language_toggle_button.dart';
@@ -10,7 +11,7 @@ import 'welcome_page.dart';
 
 class PinSetupPage extends StatefulWidget {
   final String phoneNumber;
-  
+
   const PinSetupPage({super.key, required this.phoneNumber});
 
   @override
@@ -21,12 +22,26 @@ class _PinSetupPageState extends State<PinSetupPage> {
   final TextEditingController _pinController = TextEditingController();
   final TextEditingController _confirmPinController = TextEditingController();
   final AuthRepository _authRepository = AuthRepository();
+  final FlutterTts flutterTts = FlutterTts();
   bool _isLoading = false;
+
+  void _speakText(String text, String languageCode) async {
+    if (languageCode == 'ml') {
+      await flutterTts.setLanguage("ml-IN");
+    } else {
+      await flutterTts.setLanguage("en-US");
+    }
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setVolume(1.0);
+    await flutterTts.setPitch(1.0);
+    await flutterTts.speak(text);
+  }
 
   @override
   void dispose() {
     _pinController.dispose();
     _confirmPinController.dispose();
+    flutterTts.stop();
     super.dispose();
   }
 
@@ -84,7 +99,7 @@ class _PinSetupPageState extends State<PinSetupPage> {
   @override
   Widget build(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -94,8 +109,13 @@ class _PinSetupPageState extends State<PinSetupPage> {
           icon: const Icon(Icons.arrow_back, color: Color(0xFF800000)),
           onPressed: () => Navigator.pop(context),
         ),
-        actions: const [
-          Padding(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.volume_up, color: Color(0xFF800000)),
+            onPressed: () =>
+                _speakText(lang.translate('pinSetup'), lang.languageCode),
+          ),
+          const Padding(
             padding: EdgeInsets.all(8.0),
             child: LanguageToggleButton(),
           ),
@@ -108,7 +128,7 @@ class _PinSetupPageState extends State<PinSetupPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 24),
-              
+
               // Title
               Text(
                 lang.translate('pinSetup'),
@@ -118,9 +138,9 @@ class _PinSetupPageState extends State<PinSetupPage> {
                   color: Color(0xFF800000),
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               Text(
                 'For phone number: ${widget.phoneNumber}',
                 style: const TextStyle(
@@ -128,9 +148,9 @@ class _PinSetupPageState extends State<PinSetupPage> {
                   color: Colors.grey,
                 ),
               ),
-              
+
               const SizedBox(height: 48),
-              
+
               // PIN input
               TextField(
                 controller: _pinController,
@@ -154,14 +174,15 @@ class _PinSetupPageState extends State<PinSetupPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF800000), width: 2),
+                    borderSide:
+                        const BorderSide(color: Color(0xFF800000), width: 2),
                   ),
                   counterText: '',
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Confirm PIN input
               TextField(
                 controller: _confirmPinController,
@@ -175,7 +196,8 @@ class _PinSetupPageState extends State<PinSetupPage> {
                 decoration: InputDecoration(
                   labelText: lang.translate('confirmPin'),
                   labelStyle: const TextStyle(color: Color(0xFF800000)),
-                  prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF800000)),
+                  prefixIcon:
+                      const Icon(Icons.lock_outline, color: Color(0xFF800000)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -185,15 +207,16 @@ class _PinSetupPageState extends State<PinSetupPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF800000), width: 2),
+                    borderSide:
+                        const BorderSide(color: Color(0xFF800000), width: 2),
                   ),
                   counterText: '',
                 ),
                 onSubmitted: (_) => _handleSetupPin(),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Create PIN button
               ElevatedButton(
                 onPressed: _isLoading ? null : _handleSetupPin,
@@ -212,7 +235,8 @@ class _PinSetupPageState extends State<PinSetupPage> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : Text(
