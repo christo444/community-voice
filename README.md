@@ -655,32 +655,6 @@ VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_KEY=your_supabase_key
 ```
 
----
-
-## 📞 Support & Community
-
-- 💬 **Issues**: Report bugs via [GitHub Issues](https://github.com/christo444/community-voice/issues)
-- 💡 **Discussions**: Join our [community discussions](https://github.com/christo444/community-voice/discussions)
-- 📧 **Contact**: admin@communityvoice.com
-- 🌐 **Website**: [communityvoice.org](https://communityvoice.org) *(coming soon)*
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** — see [LICENSE](./LICENSE) file for details.
-
-Community Voice is built with ❤️ for marginalized communities in India.
-
----
-
-## 🎯 Vision
-
-**By 2025:** Empower 1M+ users across India with access to 500+ government schemes
-**By 2027:** Establish 1000+ trained paralegals in underserved regions
-**By 2030:** Become the definitive voice-first legal aid platform for Asia
-
-Together, we're building a more inclusive, accessible India. 🇮🇳
 
 ---
 
